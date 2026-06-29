@@ -13,7 +13,7 @@
 ## 1. 프로젝트 준비
 
 ```bash
-git clone https://github.com/kim-kwanho/christmas_blessing.git my-event-photobooth
+git clone https://github.com/kim-kwanho/event-photobooth.git my-event-photobooth
 cd my-event-photobooth
 npm install
 cp .env.example .env

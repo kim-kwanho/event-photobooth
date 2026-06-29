@@ -1,7 +1,7 @@
 {
-  "name": "포토부스",
+  "name": "Event Photobooth",
   "short_name": "포토부스",
-  "description": "나만의 인생네컷을 만들어보세요",
+  "description": "행사용 인생네컷 포토부스 키오스크",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#000000",

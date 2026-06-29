@@ -1,140 +1,99 @@
-# 크리스마스 인생네컷 앱
+# Event Photobooth
 
-크리스마스 테마의 인생네컷(4컷 사진)을 만들 수 있는 웹 애플리케이션입니다.
+행사마다 `public/config/event.json`과 테마 프레임만 바꿔 배포하는 **인생네컷 포토부스 키오스크** 템플릿입니다.
 
-## 🚀 시작하기
+태블릿·키오스크에서 4컷 촬영 → 프레임 합성 → QR 공유·갤러리까지 한 번에 운영할 수 있습니다.
 
-### 필수 요구사항
+## 주요 기능
 
-* Node.js 18.x 이상
-* npm 또는 pnpm
+- **행사 설정 분리** — `event.json`으로 이름, 브랜딩, 기능 on/off, 카메라·출력 크기 제어
+- **프레임 테마** — `public/themes/<테마>/frames.json` (Hope, Passport, Summer Sky 등)
+- **촬영 플로우** — 프레임 먼저 선택(`frameFirst`) 또는 촬영 후 선택
+- **편집** — 사진 드래그, 필터, 슬롯별 위치 조정
+- **저장·공유** — Supabase Storage 업로드, QR 코드, 로컬 갤러리(IndexedDB)
+- **키오스크 모드** — 유휴 화면, 전체화면
+- **Admin** — PIN 보호, 프레임 디자이너, Supabase 테마 저장
 
-### 설치 및 실행
-
-1. **의존성 설치**
+## 빠른 시작
 
 ```bash
+git clone https://github.com/kim-kwanho/event-photobooth.git
+cd event-photobooth
 npm install
-# 또는
-pnpm install
-```
+cp .env.example .env
+# .env에 Supabase URL·anon key·ADMIN PIN 입력
 
-2. **개발 서버 실행**
-
-**옵션 1: 프론트엔드와 백엔드 동시 실행 (권장)**
-```bash
 npm run dev:all
-# 또는
-pnpm dev:all
 ```
 
-**옵션 2: 개별 실행**
-```bash
-# 터미널 1: 프론트엔드 개발 서버
-npm run dev
+- 앱: http://localhost:8000/app
+- Admin: http://localhost:8000/admin
 
-# 터미널 2: 백엔드 API 서버
-npm run dev:server
+자세한 배포 가이드는 [docs/SETUP.md](docs/SETUP.md)를 참고하세요.
+
+## 행사 설정 예시
+
+`public/config/event.json`:
+
+```json
+{
+  "event": {
+    "id": "my-event-2026",
+    "name": "인생네컷",
+    "tagline": "우리 행사 한 줄 소개"
+  },
+  "theme": {
+    "id": "peace-attic-summer",
+    "framesPath": "/themes/peace-attic-summer/frames.json",
+    "defaultFrameId": 1
+  },
+  "features": {
+    "frameSelect": true,
+    "photoDrag": true,
+    "gallery": true,
+    "qrShare": true,
+    "admin": true,
+    "kioskMode": true,
+    "filters": true
+  }
+}
 ```
 
-3. **브라우저에서 접속**
-
-- 프론트엔드: `http://localhost:8000` (또는 터미널에 표시된 주소)
-- 백엔드 API: `http://localhost:3001/api`
-
-**참고**: QR 코드 기능을 사용하려면 백엔드 서버가 실행되어 있어야 합니다.
-
-## 📁 프로젝트 구조
+## 프로젝트 구조
 
 ```
-├── server.js           # Express 백엔드 서버
-├── uploads/            # 서버에 저장된 결과물 (자동 생성)
-├── src/
-│   ├── components/     # 재사용 가능한 컴포넌트
-│   │   ├── common/     # 공통 컴포넌트 (Header, SideMenu)
-│   │   ├── CameraScreen.jsx        # 카메라 촬영 화면
-│   │   ├── FrameSelectScreen.jsx  # 프레임 선택 화면
-│   │   ├── PhotoSelectScreen.jsx  # 사진 배치 화면
-│   │   └── ResultScreen.jsx        # 결과 화면
-│   ├── views/          # 페이지별 뷰 컴포넌트
-│   │   ├── MainApp.jsx     # 메인 앱
-│   │   └── StartScreen.jsx # 시작 화면
-│   ├── pages/          # 페이지 컴포넌트
-│   │   ├── admin/      # 관리자 페이지
-│   │   └── ResultViewPage.jsx  # QR 코드로 접근하는 결과물 페이지
-│   └── lib/            # 유틸리티 및 설정
-│       ├── api.js      # 서버 API 호출 함수
-│       ├── database.js # IndexedDB 로컬 저장소
-│       └── frames.js   # 프레임 설정
-│   └── admin/          # 관리자 페이지
-├── lib/                # 유틸리티 및 설정
-│   ├── database.js     # IndexedDB 관리
-│   ├── frames.js       # 프레임 정의
-│   └── styles/         # 공통 스타일
-├── hooks/              # 커스텀 훅
-├── assets/              # 정적 자산
-│   └── images/         # 이미지 파일
-├── App.jsx              # 라우터 설정
-└── main.jsx             # 앱 진입점
+public/
+  config/event.json          # 행사별 설정 (배포 시 주로 수정)
+  themes/                    # 프레임 테마 JSON
+src/
+  config/                    # 설정 로더·Context
+  components/                # 촬영·프레임·결과 UI
+  lib/canvasFrame.js         # 프레임·합성 Canvas 렌더러
+  pages/admin/               # Admin·Frame Designer
+supabase/storage-policies.sql
+docs/SETUP.md
 ```
 
-## 🔧 개발 명령어
+## 스크립트
 
-```bash
-# 프론트엔드와 백엔드 동시 실행 (권장)
-npm run dev:all
+| 명령 | 설명 |
+|------|------|
+| `npm run dev:all` | Vite + API 서버 동시 실행 (권장) |
+| `npm run dev` | 프론트엔드만 |
+| `npm run dev:server` | Express API만 |
+| `npm run build` | 프로덕션 빌드 |
+| `npm start` | 빌드 결과 + API 서버 |
 
-# 프론트엔드 개발 서버만 실행
-npm run dev
+## 기술 스택
 
-# 백엔드 API 서버만 실행
-npm run dev:server
+React 18 · Vite · React Router · Express · Supabase Storage · Canvas API · IndexedDB
 
-# 프로덕션 빌드
-npm run build
+## 주의사항
 
-# 프로덕션 서버 실행 (빌드 후)
-npm start
+- 카메라는 **HTTPS** 또는 **localhost**에서만 동작합니다.
+- `.env`는 커밋하지 마세요. `.env.example`을 참고하세요.
+- QR 공유를 쓰려면 API 서버(`server.js`) 또는 동등한 업로드 엔드포인트가 필요합니다.
 
-# 프로덕션 미리보기
-npm run preview
+## 라이선스
 
-# 코드 린팅
-npm run lint
-```
-
-## ✨ 주요 기능
-
-* **카메라 촬영**: 4장의 사진을 연속으로 촬영
-* **프레임 선택**: 다양한 크리스마스 테마 프레임 선택
-* **사진 배치**: 촬영한 사진을 프레임에 맞춰 배치 및 위치 조정
-* **인생네컷 생성**: 프레임과 사진을 합성하여 인생네컷 생성
-* **저장 및 다운로드**: 생성된 인생네컷을 저장하고 다운로드
-* **QR 코드 생성**: 결과물에 대한 고유 QR 코드 생성 (다른 기기에서도 접근 가능)
-* **갤러리**: IndexedDB를 사용한 로컬 저장소에 저장된 인생네컷 관리
-
-## 🎨 기술 스택
-
-* **React 18** - UI 라이브러리
-* **Vite** - 빌드 도구
-* **React Router** - 라우팅
-* **Express** - 백엔드 API 서버
-* **IndexedDB** - 로컬 데이터 저장
-* **Canvas API** - 이미지 합성
-* **QRCode** - QR 코드 생성
-
-## 📱 모바일 지원
-
-* 반응형 디자인으로 모바일과 데스크톱 모두 지원
-* 카메라 기능은 HTTPS 또는 localhost에서만 작동합니다
-* PWA 지원으로 홈 화면에 추가 가능
-
-## 🔒 주의사항
-
-* **카메라 권한**: 브라우저에서 카메라 접근 권한이 필요합니다
-* **HTTPS 요구**: Safari/iOS에서는 HTTPS 또는 localhost에서만 카메라 접근이 가능합니다
-* **브라우저 호환성**: Chrome, Edge, Firefox, Safari 최신 버전 권장
-
-## 📝 라이선스
-
-이 프로젝트는 MIT 라이선스 하에 배포됩니다.
+MIT
