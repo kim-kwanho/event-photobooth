@@ -1,8 +1,11 @@
 import { useState, useEffect } from 'react'
+import { useConfig } from '../../config/ConfigContext'
 import { getAllPhotosFromServer, deletePhotoFromServer, printPhoto } from '../../lib/api'
 import './AdminPage.css'
 
 function AdminPage() {
+  const config = useConfig()
+  const printEnabled = config.features?.print ?? false
   const [photos, setPhotos] = useState([])
   const [loading, setLoading] = useState(true)
   const [printQuantities, setPrintQuantities] = useState({}) // { photoId: quantity }
@@ -142,7 +145,7 @@ function AdminPage() {
 
   
   return (
-    <div className="admin-page">
+    <div className="admin-page admin-page--nested">
       <div className="admin-header">
         <h1>저장된 인생네컷 관리</h1>
         <p className="admin-description">
@@ -182,23 +185,25 @@ function AdminPage() {
                   </p>
                 </div>
                 <div className="photo-actions">
-                  <div className="print-controls">
-                    <label>프린트 수량:</label>
-                    <input
-                      type="number"
-                      min="1"
-                      max="100"
-                      value={printQuantities[photo.id] || 1}
-                      onChange={(e) => handleQuantityChange(photo.id, e.target.value)}
-                      className="quantity-input"
-                    />
-                    <button
-                      className="btn-print"
-                      onClick={() => handlePrint(photo)}
-                    >
-                      🖨️ 프린트
-                    </button>
-                  </div>
+                  {printEnabled && (
+                    <div className="print-controls">
+                      <label>프린트 수량:</label>
+                      <input
+                        type="number"
+                        min="1"
+                        max="100"
+                        value={printQuantities[photo.id] || 1}
+                        onChange={(e) => handleQuantityChange(photo.id, e.target.value)}
+                        className="quantity-input"
+                      />
+                      <button
+                        className="btn-print"
+                        onClick={() => handlePrint(photo)}
+                      >
+                        🖨️ 프린트
+                      </button>
+                    </div>
+                  )}
                   <button
                     className="btn-delete"
                     onClick={() => handleDelete(photo)}

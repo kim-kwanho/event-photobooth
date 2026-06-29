@@ -1,0 +1,61 @@
+{
+  "frames": [
+    {
+      "id": 1,
+      "name": "Hope",
+      "layout": {
+        "slots": [
+          { "x": 0, "y": 0, "width": 0.5, "height": 0.5 },
+          { "x": 0.5, "y": 0, "width": 0.5, "height": 0.5 },
+          { "x": 0, "y": 0.5, "width": 0.5, "height": 0.5 },
+          { "x": 0.5, "y": 0.5, "width": 0.5, "height": 0.5 }
+        ],
+        "frameColor": "#001F3F",
+        "frameWidth": 18,
+        "slotColor": "#F5F5F0",
+        "bottomText": "Hope",
+        "title": "",
+        "textColor": "#FFFFFF",
+        "fontFamily": "Inter, sans-serif",
+        "logoStyle": true
+      }
+    },
+    {
+      "id": 2,
+      "name": "Merry Christmas",
+      "layout": {
+        "slots": [
+          { "x": 0, "y": 0, "width": 0.5, "height": 0.5 },
+          { "x": 0.5, "y": 0, "width": 0.5, "height": 0.5 },
+          { "x": 0, "y": 0.5, "width": 0.5, "height": 0.5 },
+          { "x": 0.5, "y": 0.5, "width": 0.5, "height": 0.5 }
+        ],
+        "frameColor": "#B22222",
+        "frameWidth": 20,
+        "slotColor": "#FFFFFF",
+        "bottomText": "MERRY\nCHRISTMAS",
+        "title": "🎄",
+        "textColor": "#FFD700",
+        "fontFamily": "Playfair Display, serif"
+      }
+    },
+    {
+      "id": 3,
+      "name": "Pyeong-an",
+      "layout": {
+        "slots": [
+          { "x": 0, "y": 0, "width": 0.5, "height": 0.5 },
+          { "x": 0.5, "y": 0, "width": 0.5, "height": 0.5 },
+          { "x": 0, "y": 0.5, "width": 0.5, "height": 0.5 },
+          { "x": 0.5, "y": 0.5, "width": 0.5, "height": 0.5 }
+        ],
+        "frameColor": "#6B46C1",
+        "frameWidth": 18,
+        "slotColor": "#F5F5F0",
+        "bottomText": "PEACE ATTIC",
+        "textColor": "#FFD700",
+        "fontFamily": "Playfair Display, serif"
+      }
+    }
+  ]
+}

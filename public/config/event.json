@@ -1,0 +1,53 @@
+{
+  "event": {
+    "id": "peace-attic-summer-2025",
+    "name": "인생네컷",
+    "tagline": "허브대학부 평안다락방 · 여름 아웃리치",
+    "locale": "ko"
+  },
+  "branding": {
+    "startBackground": "",
+    "primaryColor": "#0284C7",
+    "accentColor": "#FBBF24",
+    "fontFamily": "Inter, sans-serif"
+  },
+  "routes": {
+    "landing": "/",
+    "app": "/app",
+    "admin": "/admin"
+  },
+  "flow": {
+    "frameFirst": true
+  },
+  "features": {
+    "frameSelect": true,
+    "photoDrag": true,
+    "gallery": true,
+    "qrShare": true,
+    "admin": true,
+    "print": false,
+    "kioskMode": true,
+    "filters": true
+  },
+  "camera": {
+    "photoCount": 4,
+    "countdownSeconds": 6,
+    "quality": 0.9
+  },
+  "output": {
+    "width": 1200,
+    "height": 1600
+  },
+  "storage": {
+    "dbNamePrefix": "photobooth"
+  },
+  "theme": {
+    "id": "peace-attic-summer",
+    "framesPath": "/themes/peace-attic-summer/frames.json",
+    "defaultFrameId": 1
+  },
+  "kiosk": {
+    "idleSeconds": 60,
+    "fullscreen": true
+  }
+}

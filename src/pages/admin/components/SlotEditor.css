@@ -1,0 +1,79 @@
+.slot-editor {
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+    user-select: none;
+    touch-action: none;
+}
+
+.slot-editor-canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border-radius: 8px;
+}
+
+.slot-editor-handle {
+    position: absolute;
+    border: 2px dashed rgba(107, 70, 193, 0.55);
+    background: rgba(107, 70, 193, 0.08);
+    cursor: grab;
+    box-sizing: border-box;
+    z-index: 2;
+}
+
+.slot-editor-handle.active {
+    border-color: #6b46c1;
+    border-style: solid;
+    background: rgba(107, 70, 193, 0.15);
+    z-index: 3;
+}
+
+.slot-editor-handle:active {
+    cursor: grabbing;
+}
+
+.slot-editor-label {
+    position: absolute;
+    top: 4px;
+    left: 6px;
+    font-size: 11px;
+    font-weight: 800;
+    color: #6b46c1;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 2px 6px;
+    border-radius: 4px;
+    pointer-events: none;
+}
+
+.slot-editor-resize {
+    position: absolute;
+    right: -4px;
+    bottom: -4px;
+    width: 14px;
+    height: 14px;
+    border: 2px solid #fff;
+    background: #6b46c1;
+    border-radius: 3px;
+    cursor: nwse-resize;
+    padding: 0;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+}
+
+.slot-editor-reset {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    z-index: 5;
+    padding: 4px 10px;
+    font-size: 11px;
+    font-weight: 600;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.95);
+    cursor: pointer;
+}
+
+.slot-editor-reset:hover {
+    background: #fff;
+}

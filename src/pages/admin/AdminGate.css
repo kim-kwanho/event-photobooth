@@ -1,0 +1,61 @@
+.admin-gate-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.admin-gate-card {
+    width: 100%;
+    max-width: 360px;
+    background: #fff;
+    border-radius: 20px;
+    padding: 32px 24px;
+    text-align: center;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+.admin-gate-card h1 {
+    margin: 0 0 8px;
+    font-size: 24px;
+    color: #333;
+}
+
+.admin-gate-card p {
+    margin: 0 0 24px;
+    color: #666;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.admin-gate-card form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.admin-gate-card input {
+    padding: 14px 16px;
+    border: 2px solid #e0e0e0;
+    border-radius: 12px;
+    font-size: 18px;
+    text-align: center;
+    letter-spacing: 4px;
+}
+
+.admin-gate-card input:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+.admin-gate-error {
+    margin: 0;
+    color: #dc3545;
+    font-size: 13px;
+}
+
+.admin-gate-card .btn {
+    width: 100%;
+}

@@ -1,0 +1,22 @@
+{
+  "frames": [
+    {
+      "id": 1,
+      "name": "Classic",
+      "layout": {
+        "slots": [
+          { "x": 0, "y": 0, "width": 0.5, "height": 0.5 },
+          { "x": 0.5, "y": 0, "width": 0.5, "height": 0.5 },
+          { "x": 0, "y": 0.5, "width": 0.5, "height": 0.5 },
+          { "x": 0.5, "y": 0.5, "width": 0.5, "height": 0.5 }
+        ],
+        "frameColor": "#333333",
+        "frameWidth": 16,
+        "slotColor": "#FFFFFF",
+        "bottomText": "PHOTO BOOTH",
+        "textColor": "#FFFFFF",
+        "fontFamily": "Inter, sans-serif"
+      }
+    }
+  ]
+}

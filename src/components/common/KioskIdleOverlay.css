@@ -1,0 +1,41 @@
+.kiosk-idle-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 20000;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding: 24px;
+    pointer-events: none;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.45), transparent 60%);
+}
+
+.kiosk-idle-card {
+    width: 100%;
+    max-width: 420px;
+    padding: 20px 24px;
+    border-radius: 16px;
+    background: rgba(20, 20, 30, 0.92);
+    color: #fff;
+    text-align: center;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35);
+}
+
+.kiosk-idle-title {
+    margin: 0 0 6px;
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.kiosk-idle-count {
+    margin: 0 0 8px;
+    font-size: 28px;
+    font-weight: 800;
+    color: #ffd166;
+}
+
+.kiosk-idle-hint {
+    margin: 0;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.75);
+}

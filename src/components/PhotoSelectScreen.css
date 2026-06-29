@@ -1,65 +1,75 @@
-.photo-select-container {
-    width: 100%;
-    max-width: 800px;
-    margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
-    align-items: center;
-    overflow-y: auto;
-    scroll-behavior: smooth;
-    -webkit-overflow-scrolling: touch;
+/* BoothShell 카드 안 필터 */
+.photo-select-booth .filter-selector-label {
+    color: #374151;
 }
 
-.photo-select-container h2 {
+.photo-select-booth .filter-option {
+    background: #f3f4f6;
+    color: #374151;
+    border-color: #e5e7eb;
+}
+
+.photo-select-booth .filter-option.active {
+    background: #6b46c1;
+    color: #fff;
+    border-color: #6b46c1;
+}
+
+.photo-select-booth {
+    width: 100%;
+    padding: 12px 16px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    box-sizing: border-box;
+}
+
+.photo-select-hint {
+    color: #6b7280;
+    font-size: 13px;
     text-align: center;
-    color: white;
-    margin-bottom: 20px;
-    font-size: 22px;
-    font-weight: 600;
+    margin: 0;
+    line-height: 1.4;
+}
+
+.photo-select-body {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    align-items: center;
 }
 
 .frame-preview-background {
     position: relative;
     width: 100%;
-    max-width: 600px;
-    margin: 0 auto 30px;
-    background: #f8f9fa;
-    border-radius: 15px;
-    padding: 20px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    max-width: 340px;
+    margin: 0 auto;
+    background: #f0f1f4;
+    border-radius: 12px;
+    padding: 12px;
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.06);
     aspect-ratio: 3/4;
-    min-height: 400px;
-}
-
-/* 태블릿에서 사진과 버튼 사이 간격 줄이기 */
-@media (min-width: 769px) and (max-width: 1024px) {
-    .frame-preview-background {
-        margin-bottom: 15px;
-    }
-    
-    .photo-select-controls {
-        padding-top: 10px;
-        padding-bottom: 15px;
-    }
+    min-height: 0;
 }
 
 .frame-overlay {
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    top: 12px;
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+    width: calc(100% - 24px);
+    height: calc(100% - 24px);
     pointer-events: none;
-    z-index: 4; /* 사진 위에 십자가 선 표시 */
+    z-index: 4;
 }
 
 .photo-slots-container {
     position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    top: 12px;
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
     pointer-events: none;
     overflow: visible;
     z-index: 3;
@@ -74,22 +84,23 @@
     background: transparent;
     border-radius: 0;
     overflow: hidden;
-    box-shadow: none;
-    border: none;
-    transition: all 0.2s;
+    transition: outline 0.15s;
 }
 
-.photo-slot:hover {
-    border-color: rgba(102, 126, 234, 0.8);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-    transform: scale(1.02);
+.photo-slot--draggable {
+    cursor: grab;
+    touch-action: none;
+}
+
+.photo-slot--draggable:active {
+    cursor: grabbing;
+    outline: 2px solid rgba(107, 70, 193, 0.5);
 }
 
 .photo-slot-label {
     display: block;
     width: 100%;
     height: 100%;
-    cursor: pointer;
     position: relative;
 }
 
@@ -100,236 +111,128 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    background: #f5f5f5;
-    color: #999;
+    background: #e8eaef;
+    color: #9ca3af;
 }
 
 .slot-number {
-    font-size: 48px;
-    font-weight: bold;
-    color: #667eea;
-    margin-bottom: 10px;
+    font-size: 32px;
+    font-weight: 800;
+    color: #6b46c1;
+    margin-bottom: 4px;
 }
 
 .slot-text {
-    font-size: 16px;
+    font-size: 13px;
 }
 
 .slot-canvas {
     width: 100%;
     height: 100%;
     display: block;
-    cursor: move;
-    touch-action: none;
     position: absolute;
     top: 0;
     left: 0;
+    touch-action: none;
 }
 
 .slot-remove {
     position: absolute;
-    top: 10px;
-    right: 10px;
-    background: rgba(255, 0, 0, 0.8);
+    top: 6px;
+    right: 6px;
+    background: rgba(220, 38, 38, 0.9);
     color: white;
     border: none;
     border-radius: 50%;
-    width: 30px;
-    height: 30px;
+    width: 26px;
+    height: 26px;
     cursor: pointer;
-    font-size: 18px;
+    font-size: 14px;
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 10;
 }
 
-.slot-remove:hover {
-    background: rgba(255, 0, 0, 1);
+.photo-select-sidebar {
+    width: 100%;
+    max-width: 340px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 }
 
 .photo-select-controls {
     display: flex;
     flex-direction: column;
-    align-items: center;
-    gap: 15px;
-    margin-top: auto;
-    padding-top: 20px;
-    padding-bottom: 20px;
-    flex-shrink: 0;
-    min-height: 150px;
+    gap: 10px;
 }
 
-/* iPad 최적화 */
-@media (min-width: 769px) and (max-width: 1024px) {
-    .photo-select-container {
-        max-height: none !important;
-        height: auto !important;
-        min-height: 100vh;
-        overflow-y: visible !important;
-        padding-bottom: 150px;
+.photo-select-booth .booth-btn-secondary {
+    background: #f3f4f6;
+    color: #374151;
+    border: 1px solid #e5e7eb;
+}
+
+.photo-select-booth .booth-btn-primary {
+    width: 100%;
+}
+
+/* iPad 세로 */
+@media (min-width: 768px) and (max-width: 1024px) {
+    .photo-select-booth {
+        padding: 16px 20px 20px;
     }
-    
+
     .frame-preview-background {
-        max-width: 500px;
-        min-height: 350px;
-        margin-bottom: 15px;
+        max-width: 380px;
     }
-    
-    .photo-select-controls {
-        gap: 12px;
-        padding-top: 10px;
-        padding-bottom: 100px;
-        margin-bottom: 50px;
+}
+
+/* iPad 가로 — 미리보기와 컨트롤 나란히 */
+@media (min-width: 768px) and (max-height: 820px) and (orientation: landscape) {
+    .photo-select-booth {
+        padding: 10px 16px 12px;
+        gap: 8px;
+    }
+
+    .photo-select-body {
+        flex-direction: row;
+        align-items: flex-start;
+        justify-content: center;
+        gap: 20px;
+    }
+
+    .frame-preview-background {
+        max-width: min(42vh, 320px);
         flex-shrink: 0;
-    }
-    
-    .photo-select-container h2 {
-        font-size: 20px;
-        margin-bottom: 15px;
-    }
-}
-
-.photo-select-hint {
-    color: rgba(255, 255, 255, 0.9);
-    font-size: 14px;
-    text-align: center;
-    margin: 0;
-}
-
-.slot-edit {
-    position: absolute;
-    bottom: 10px;
-    right: 10px;
-    background: rgba(102, 126, 234, 0.9);
-    color: white;
-    border: none;
-    border-radius: 50%;
-    width: 35px;
-    height: 35px;
-    cursor: pointer;
-    font-size: 18px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 10;
-    transition: background 0.3s;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-}
-
-.slot-edit:hover {
-    background: rgba(102, 126, 234, 1);
-    transform: scale(1.1);
-}
-
-/* 반응형 - 태블릿 */
-@media (max-width: 1024px) and (min-width: 769px) {
-    .frame-preview-background {
-        max-width: 500px;
-        padding: 18px;
-        margin-bottom: 15px;
-    }
-    
-    .photo-select-container h2 {
-        font-size: 21px;
-        margin-bottom: 15px;
-    }
-    
-    .photo-select-controls {
-        padding-top: 10px;
-        padding-bottom: 15px;
-    }
-}
-
-/* 반응형 - 모바일 태블릿 */
-@media (max-width: 768px) and (min-width: 481px) {
-    .frame-preview-background {
-        max-width: 100%;
-        padding: 15px;
-        min-height: 350px;
-    }
-    
-    .photo-select-container h2 {
-        font-size: 20px;
-        margin-bottom: 15px;
-    }
-    
-    .slot-number {
-        font-size: 40px;
-    }
-}
-
-/* 반응형 - 모바일 */
-@media (max-width: 480px) {
-    .frame-preview-background {
-        max-width: 100%;
-        padding: 12px;
-        min-height: 300px;
-    }
-    
-    .photo-slot {
-        min-height: 0;
-    }
-    
-    .slot-number {
-        font-size: 32px;
-    }
-    
-    .slot-text {
-        font-size: 13px;
-    }
-    
-    .photo-select-container {
         padding: 10px;
     }
-    
-    .photo-select-container h2 {
-        font-size: 18px;
-        margin-bottom: 15px;
-    }
-    
-    .photo-select-controls {
-        gap: 12px;
-        padding-top: 15px;
-    }
-    
-    .slot-remove {
-        width: 25px;
-        height: 25px;
-        font-size: 16px;
-    }
-}
 
-/* 작은 모바일 */
-@media (max-width: 375px) {
-    .frame-preview-background {
-        padding: 10px;
-        min-height: 280px;
+    .photo-select-sidebar {
+        max-width: 240px;
+        flex: 1;
+        justify-content: center;
+        min-height: min(42vh, 320px);
     }
-    
-    .slot-number {
-        font-size: 28px;
-    }
-    
-    .slot-text {
+
+    .photo-select-hint {
         font-size: 12px;
     }
-    
-    .photo-select-container h2 {
-        font-size: 16px;
-    }
 }
 
-/* 가로 모드 최적화 */
-@media (max-height: 600px) and (orientation: landscape) {
+/* 모바일 */
+@media (max-width: 480px) {
+    .photo-select-booth {
+        padding: 10px 12px 14px;
+    }
+
     .frame-preview-background {
-        max-width: 400px;
-        min-height: 250px;
+        max-width: 100%;
+        padding: 10px;
     }
-    
-    .photo-select-container h2 {
-        font-size: 18px;
-        margin-bottom: 10px;
+
+    .slot-number {
+        font-size: 24px;
     }
 }
-

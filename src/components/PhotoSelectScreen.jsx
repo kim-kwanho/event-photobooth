@@ -1,21 +1,48 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
+import {
+    computeSlotRect,
+    getMoveLimits,
+    clampMove,
+    drawFrameOverlay,
+} from '../lib/canvasFrame'
+import { getFilterCss } from '../lib/imageFilters'
+import FilterSelector from './common/FilterSelector'
 import './PhotoSelectScreen.css'
 
 function PhotoSelectScreen({
     frame,
     selectedPhotos,
     photoTransforms,
+    photoFilter = 'none',
+    onPhotoFilterChange,
+    filtersEnabled = true,
     onPhotoSelect,
     onPhotoRemove,
     onPhotoTransformChange,
     onBack,
     onCompose,
-    allowPhotoChange = true
+    allowPhotoChange = true,
+    photoDrag = false,
+    showFrameBack = true,
+    kioskMode = false,
 }) {
     const frameCanvasRef = useRef(null)
     const slotCanvasRefs = useRef([null, null, null, null])
+    const dragRef = useRef(null)
     const [isComposing, setIsComposing] = useState(false)
     const [slotPositions, setSlotPositions] = useState([null, null, null, null])
+
+    const redrawFrameOverlay = useCallback(() => {
+        const canvas = frameCanvasRef.current
+        if (!canvas || !frame) return
+
+        const ctx = canvas.getContext('2d')
+        const width = canvas.width
+        const height = canvas.height
+        if (!width || !height) return
+
+        drawFrameOverlay(ctx, frame, width, height, { scaleFrom200: false })
+    }, [frame])
 
     const drawFrameBackground = useCallback(() => {
         const canvas = frameCanvasRef.current
@@ -30,267 +57,54 @@ function PhotoSelectScreen({
 
         canvas.width = width
         canvas.height = height
-
-        // 배경 제거 (투명하게 - 사진이 보이도록)
-        // ctx.fillStyle = '#ffffff'
-        // ctx.fillRect(0, 0, width, height)
-
-        // 프레임 내부 영역 계산 (슬롯이 배치될 영역)
-        const frameBorderWidth = frame.layout.frameWidth || 15
-        const bottomHeight = height * 0.08
-        const frameInnerX = frameBorderWidth
-        const frameInnerY = frameBorderWidth
-        const frameInnerWidth = width - (frameBorderWidth * 2)
-        const frameInnerHeight = height - frameBorderWidth - bottomHeight
-
-        // 슬롯 배경색 제거 (사진이 슬롯을 완전히 채우도록)
-
-        // 십자가 선 그리기 (슬롯들 사이의 간격)
-        if (frame.layout.frameColor) {
-            ctx.strokeStyle = frame.layout.frameColor
-            ctx.lineWidth = 10
-            
-            // 가로선 (중앙)
-            const centerY = frameInnerY + (frameInnerHeight / 2)
-            ctx.beginPath()
-            ctx.moveTo(frameInnerX, centerY)
-            ctx.lineTo(frameInnerX + frameInnerWidth, centerY)
-            ctx.stroke()
-            
-            // 세로선 (중앙)
-            const centerX = frameInnerX + (frameInnerWidth / 2)
-            ctx.beginPath()
-            ctx.moveTo(centerX, frameInnerY)
-            ctx.lineTo(centerX, frameInnerY + frameInnerHeight)
-            ctx.stroke()
-        }
-
-        // 프레임 테두리 먼저 그리기
-        if (frame.layout.frameColor) {
-            ctx.strokeStyle = frame.layout.frameColor
-            ctx.lineWidth = frame.layout.frameWidth || 15
-            ctx.strokeRect(
-                frameBorderWidth / 2,
-                frameBorderWidth / 2,
-                width - frameBorderWidth,
-                height - frameBorderWidth
-            )
-        }
-
-        // 하단 영역 배경
-        const bottomY = height - bottomHeight
-        ctx.fillStyle = frame.layout.frameColor || '#333'
-        // 프레임 테두리 안쪽부터 하단 영역 채우기
-        ctx.fillRect(frameBorderWidth, bottomY, width - (frameBorderWidth * 2), bottomHeight)
-
-        // 하단 텍스트 또는 이미지
-        if (frame.layout.bottomImage) {
-            // 하단 이미지 (로고)
-            const logoImg = new Image()
-            logoImg.crossOrigin = 'anonymous'
-            logoImg.onload = () => {
-                // 이미지 비율 유지하면서 하단 영역에 맞춤
-                const imgAspect = logoImg.width / logoImg.height
-                const bottomAspect = width / bottomHeight
-                
-                let drawWidth, drawHeight
-                if (imgAspect > bottomAspect) {
-                    // 이미지가 더 넓음 - 너비에 맞춤
-                    drawWidth = width * 0.9 // 여백 5%씩
-                    drawHeight = drawWidth / imgAspect
-                } else {
-                    // 이미지가 더 높음 - 높이에 맞춤
-                    drawHeight = bottomHeight * 0.8 // 여백 10%씩
-                    drawWidth = drawHeight * imgAspect
-                }
-                
-                const drawX = (width - drawWidth) / 2
-                const drawY = bottomY + (bottomHeight - drawHeight) / 2
-                
-                ctx.drawImage(logoImg, drawX, drawY, drawWidth, drawHeight)
-            }
-            logoImg.src = frame.layout.bottomImage
-        } else if (frame.layout.bottomText) {
-            // 하단 텍스트
-            ctx.fillStyle = frame.layout.textColor || '#ffffff'
-            
-            // 1번 프레임 로고 스타일
-            if (frame.layout.logoStyle) {
-                const lines = frame.layout.bottomText.split('\n')
-                const centerX = width / 2
-                // 텍스트를 아래로 내려서 다 보이게
-                const centerY = bottomY + bottomHeight * 0.55
-                
-                // "Hope" 텍스트 (큰 크기)
-                const hopeFontSize = 16
-                const fontFamily = frame.layout.fontFamily || 'Inter, sans-serif'
-                ctx.font = `bold ${hopeFontSize}px ${fontFamily}`
-                ctx.textAlign = 'center'
-                ctx.textBaseline = 'middle'
-                
-                // "Hope" 텍스트 크기 측정
-                const hopeMetrics = ctx.measureText(lines[0])
-                const hopeWidth = hopeMetrics.width
-                const hopeHeight = hopeFontSize
-                
-                // 타원형 테두리 그리기
-                ctx.strokeStyle = ctx.fillStyle
-                ctx.lineWidth = 2
-                const ellipseWidth = hopeWidth * 1.3
-                const ellipseHeight = hopeHeight * 1.8
-                ctx.beginPath()
-                ctx.ellipse(centerX, centerY, ellipseWidth / 2, ellipseHeight / 2, 0, 0, 2 * Math.PI)
-                ctx.stroke()
-                
-                // 별 모양 장식 (왼쪽 상단, 오른쪽 하단)
-                const starSize = 4
-                const drawStar = (x, y, size) => {
-                    ctx.beginPath()
-                    for (let i = 0; i < 5; i++) {
-                        const angle = (i * 4 * Math.PI) / 5 - Math.PI / 2
-                        const px = x + size * Math.cos(angle)
-                        const py = y + size * Math.sin(angle)
-                        if (i === 0) ctx.moveTo(px, py)
-                        else ctx.lineTo(px, py)
-                    }
-                    ctx.closePath()
-                    ctx.fill()
-                }
-                drawStar(centerX - ellipseWidth / 2 - starSize * 2, centerY - hopeHeight * 0.4, starSize)
-                drawStar(centerX + ellipseWidth / 2 + starSize * 2, centerY + hopeHeight * 0.4, starSize)
-                
-                // "Hope" 텍스트 그리기
-                ctx.fillText(lines[0], centerX, centerY)
-                
-                // "Builders" 텍스트 (작은 크기)
-                if (lines[1]) {
-                    const buildersFontSize = 10
-                    ctx.font = `bold ${buildersFontSize}px ${fontFamily}`
-                    ctx.fillText(lines[1], centerX, centerY + hopeHeight * 0.3)
-                }
-            } else {
-                // 일반 텍스트 렌더링
-                // 3번 프레임은 세리프 폰트 사용 (크기 조정)
-                const fontSize = frame.layout.fontFamily ? 14 : 20
-                const fontFamily = frame.layout.fontFamily || 'Inter, "Noto Sans KR", sans-serif'
-                ctx.font = `bold ${fontSize}px ${fontFamily}`
-            ctx.textAlign = 'center'
-                ctx.textBaseline = 'middle'
-                
-                // 여러 줄 텍스트 지원
-                const lines = frame.layout.bottomText.split('\n')
-                const lineHeight = fontSize * 1.3
-                const totalHeight = lines.length * lineHeight
-                const startY = bottomY + (bottomHeight - totalHeight) / 2 + lineHeight / 2
-                
-                lines.forEach((line, index) => {
-                    ctx.fillText(line, width / 2, startY + index * lineHeight)
-                })
-            }
-        }
+        ctx.clearRect(0, 0, width, height)
+        drawFrameOverlay(ctx, frame, width, height, { scaleFrom200: false })
     }, [frame])
 
     const calculateSlotPositions = useCallback(() => {
         if (!frameCanvasRef.current || !frame) return
-        
-        const positions = frame.layout.slots.map((slot) => {
-            const frameRect = frameCanvasRef.current.getBoundingClientRect()
-            const frameWidth = frameRect.width
-            const frameHeight = frameRect.height
-            
-            if (frameWidth === 0 || frameHeight === 0) return null
-            
-            const frameBorderWidth = frame.layout.frameWidth || 15
-            const bottomHeight = frameHeight * 0.08
-            const frameInnerX = frameBorderWidth
-            const frameInnerY = frameBorderWidth
-            const frameInnerWidth = frameWidth - (frameBorderWidth * 2)
-            const frameInnerHeight = frameHeight - frameBorderWidth - bottomHeight
-            
-            // 슬롯 영역 계산 (네컷처럼 프레임 내부 영역을 완전히 채우도록)
-            let x = frameInnerX + (slot.x * frameInnerWidth)
-            let y = frameInnerY + (slot.y * frameInnerHeight)
-            let width = slot.width * frameInnerWidth
-            let height = slot.height * frameInnerHeight
-            
-            // 하단 슬롯(3, 4번째)의 경우 높이를 정확히 계산하여 frameInnerHeight까지 완전히 채우기
-            if (slot.y + slot.height >= 1.0) {
-                const frameBottom = frameInnerY + frameInnerHeight
-                height = frameBottom - y
-            }
-            
-            // 우측 슬롯(2, 4번째)의 경우 너비를 정확히 계산하여 frameInnerWidth까지 완전히 채우기
-            if (slot.x + slot.width >= 1.0) {
-                const frameRight = frameInnerX + frameInnerWidth
-                width = frameRight - x
-            }
-            
-            // 첫 번째 슬롯(좌상)이 정확히 frameInnerX, frameInnerY에서 시작하도록
-            if (slot.x === 0 && slot.y === 0) {
-                x = frameInnerX
-                y = frameInnerY
-            }
-            
-            // 정수로 변환 (반올림 오차 최소화)
-            x = Math.floor(x)
-            y = Math.floor(y)
-            width = Math.ceil(width)
-            height = Math.ceil(height)
-            
-            // 마지막 슬롯이 프레임 경계까지 정확히 채우도록 (하단 슬롯이 잘리지 않도록)
-            if (slot.x + slot.width >= 1.0) {
-                width = (frameInnerX + frameInnerWidth) - x
-            }
-            if (slot.y + slot.height >= 1.0) {
-                const frameBottom = frameInnerY + frameInnerHeight
-                height = frameBottom - y
-                // 높이가 음수가 되지 않도록 보장
-                if (height < 0) height = 0
-            }
-            
-            // 슬롯이 프레임 경계를 넘지 않도록 보장
-            if (x + width > frameInnerX + frameInnerWidth) {
-                width = (frameInnerX + frameInnerWidth) - x
-            }
-            if (y + height > frameInnerY + frameInnerHeight) {
-                height = (frameInnerY + frameInnerHeight) - y
-            }
-            
-            return { x, y, width, height }
-        }).filter(p => p !== null)
-        
+
+        const frameRect = frameCanvasRef.current.getBoundingClientRect()
+        const frameWidth = frameRect.width
+        const frameHeight = frameRect.height
+        if (frameWidth === 0 || frameHeight === 0) return
+
+        const positions = frame.layout.slots
+            .map((_, index) => computeSlotRect(frame, index, frameWidth, frameHeight))
+            .filter((p) => p !== null)
+
         if (positions.length > 0) {
             setSlotPositions(positions)
         }
     }, [frame])
 
-    // ResultScreen과 동일한 이동 범위 계산 함수
-    const getMoveLimits = useCallback((img, slotWidth, slotHeight) => {
-        const imgAspect = img.width / img.height
-        const slotAspect = slotWidth / slotHeight
-
-        let drawWidth, drawHeight
-
-        if (imgAspect > slotAspect) {
-            drawHeight = slotHeight
-            drawWidth = slotHeight * imgAspect
-        } else {
-            drawWidth = slotWidth
-            drawHeight = slotWidth / imgAspect
+    const handleSlotPointerDown = (index, event) => {
+        if (!photoDrag || !selectedPhotos[index]) return
+        event.preventDefault()
+        event.currentTarget.setPointerCapture(event.pointerId)
+        dragRef.current = {
+            index,
+            startX: event.clientX,
+            startY: event.clientY,
+            base: { ...(photoTransforms[index] || { x: 0, y: 0 }) },
         }
+    }
 
-        const minMoveX = slotWidth - drawWidth
-        const maxMoveX = 0
-        const minMoveY = slotHeight - drawHeight
-        const maxMoveY = 0
+    const handleSlotPointerMove = (index, event) => {
+        if (!photoDrag || !dragRef.current || dragRef.current.index !== index) return
+        const dx = event.clientX - dragRef.current.startX
+        const dy = event.clientY - dragRef.current.startY
+        onPhotoTransformChange(index, {
+            x: dragRef.current.base.x + dx,
+            y: dragRef.current.base.y + dy,
+        })
+    }
 
-        return { minMoveX, maxMoveX, minMoveY, maxMoveY }
-    }, [])
-
-    // ResultScreen과 동일한 이동 값 제한 함수
-    const clampMove = useCallback((value, min, max) => {
-        return Math.max(min, Math.min(max, value))
-    }, [])
+    const handleSlotPointerUp = (index) => {
+        if (dragRef.current?.index === index) {
+            dragRef.current = null
+        }
+    }
 
     const drawPhotoInSlot = useCallback((index, photoSrc) => {
         const canvas = slotCanvasRefs.current[index]
@@ -426,52 +240,19 @@ function PhotoSelectScreen({
             const drawX = -1
             // 하단 슬롯의 경우 y 위치를 약간 위로 조정하여 슬롯을 완전히 채우기
             const drawY = isBottomSlot ? -1 : -1
+            ctx.filter = getFilterCss(photoFilter)
             ctx.drawImage(
                 img,
                 sourceX, sourceY, sourceWidth, sourceHeight,
                 drawX, drawY, drawWidth, drawHeight
             )
+            ctx.filter = 'none'
             ctx.restore()
 
             // 사진을 그린 후 십자가 선 다시 그리기 (사진 위에 표시)
             if (frameCanvasRef.current && frame) {
                 setTimeout(() => {
-                    const frameCanvas = frameCanvasRef.current
-                    if (!frameCanvas) return
-                    
-                    const frameCtx = frameCanvas.getContext('2d')
-                    if (!frameCtx) return
-                    
-                    const frameRect = frameCanvas.getBoundingClientRect()
-                    const frameWidth = frameRect.width
-                    const frameHeight = frameRect.height
-                    
-                    if (frameWidth === 0 || frameHeight === 0) return
-                    
-                    const frameBorderWidth = frame.layout.frameWidth || 15
-                    const bottomHeight = frameHeight * 0.08
-                    const frameInnerX = frameBorderWidth
-                    const frameInnerY = frameBorderWidth
-                    const frameInnerWidth = frameWidth - (frameBorderWidth * 2)
-                    const frameInnerHeight = frameHeight - frameBorderWidth - bottomHeight
-                    
-                    // 십자가 선 다시 그리기
-                    frameCtx.strokeStyle = frame.layout.frameColor || '#808080'
-                    frameCtx.lineWidth = 10
-                    
-                    // 가로선 (중앙)
-                    const centerY = frameInnerY + (frameInnerHeight / 2)
-                    frameCtx.beginPath()
-                    frameCtx.moveTo(frameInnerX, centerY)
-                    frameCtx.lineTo(frameInnerX + frameInnerWidth, centerY)
-                    frameCtx.stroke()
-                    
-                    // 세로선 (중앙)
-                    const centerX = frameInnerX + (frameInnerWidth / 2)
-                    frameCtx.beginPath()
-                    frameCtx.moveTo(centerX, frameInnerY)
-                    frameCtx.lineTo(centerX, frameInnerY + frameInnerHeight)
-                    frameCtx.stroke()
+                    redrawFrameOverlay()
                 }, 50)
             }
         }
@@ -498,7 +279,7 @@ function PhotoSelectScreen({
         } else {
             console.warn('사진 소스가 없습니다:', index)
         }
-    }, [frame, photoTransforms, getMoveLimits, clampMove])
+    }, [frame, photoTransforms, photoFilter, redrawFrameOverlay])
 
     useEffect(() => {
         if (!frame) return
@@ -563,7 +344,7 @@ function PhotoSelectScreen({
         return () => {
             clearTimeout(timer)
         }
-    }, [selectedPhotos, photoTransforms, frame, drawPhotoInSlot])
+    }, [selectedPhotos, photoTransforms, photoFilter, frame, drawPhotoInSlot])
 
     // 모든 사진이 로드된 후 십자가 선 다시 그리기
     useEffect(() => {
@@ -575,48 +356,13 @@ function PhotoSelectScreen({
         
         // 사진 로딩을 기다린 후 십자가 선 다시 그리기
         const timer = setTimeout(() => {
-            const frameCanvas = frameCanvasRef.current
-            if (!frameCanvas) return
-            
-            const frameCtx = frameCanvas.getContext('2d')
-            if (!frameCtx) return
-            
-            const frameRect = frameCanvas.getBoundingClientRect()
-            const frameWidth = frameRect.width
-            const frameHeight = frameRect.height
-            
-            if (frameWidth === 0 || frameHeight === 0) return
-            
-            const frameBorderWidth = frame.layout.frameWidth || 15
-            const bottomHeight = frameHeight * 0.08
-            const frameInnerX = frameBorderWidth
-            const frameInnerY = frameBorderWidth
-            const frameInnerWidth = frameWidth - (frameBorderWidth * 2)
-            const frameInnerHeight = frameHeight - frameBorderWidth - bottomHeight
-            
-            // 십자가 선 다시 그리기
-            frameCtx.strokeStyle = frame.layout.frameColor || '#808080'
-            frameCtx.lineWidth = 10
-            
-            // 가로선 (중앙)
-            const centerY = frameInnerY + (frameInnerHeight / 2)
-            frameCtx.beginPath()
-            frameCtx.moveTo(frameInnerX, centerY)
-            frameCtx.lineTo(frameInnerX + frameInnerWidth, centerY)
-            frameCtx.stroke()
-            
-            // 세로선 (중앙)
-            const centerX = frameInnerX + (frameInnerWidth / 2)
-            frameCtx.beginPath()
-            frameCtx.moveTo(centerX, frameInnerY)
-            frameCtx.lineTo(centerX, frameInnerY + frameInnerHeight)
-            frameCtx.stroke()
+            redrawFrameOverlay()
         }, 1000)
         
         return () => {
             clearTimeout(timer)
         }
-    }, [selectedPhotos, frame])
+    }, [selectedPhotos, frame, redrawFrameOverlay])
 
     const handleFileSelect = (index, event) => {
         const file = event.target.files[0]
@@ -648,14 +394,16 @@ function PhotoSelectScreen({
     }
 
     return (
-        <div className="screen active">
-            <div className="photo-select-container">
-                <h2>프레임에 맞춰 사진을 확인하세요</h2>
-                <p className="photo-select-hint">
-                    {allowPhotoChange 
-                        ? '각 슬롯을 클릭하여 사진을 추가하세요' 
-                        : '사진 위치를 조정할 수 있습니다'}
-                </p>
+        <div className="photo-select-booth">
+            <p className="photo-select-hint">
+                {photoDrag && !allowPhotoChange
+                    ? '사진을 드래그하여 위치를 조정하세요'
+                    : allowPhotoChange
+                      ? '각 슬롯을 클릭하여 사진을 추가하세요'
+                      : '필터와 위치를 확인하세요'}
+            </p>
+
+            <div className="photo-select-body">
                 <div className="frame-preview-background">
                     <canvas
                         ref={frameCanvasRef}
@@ -666,11 +414,15 @@ function PhotoSelectScreen({
                         {[0, 1, 2, 3].map((index) => {
                             const slotStyle = getSlotStyle(index)
                             return (
-                                <div 
-                                    key={index} 
-                                    className="photo-slot" 
+                                <div
+                                    key={index}
+                                    className={`photo-slot${photoDrag && selectedPhotos[index] ? ' photo-slot--draggable' : ''}`}
                                     data-index={index}
                                     style={slotStyle}
+                                    onPointerDown={(e) => handleSlotPointerDown(index, e)}
+                                    onPointerMove={(e) => handleSlotPointerMove(index, e)}
+                                    onPointerUp={() => handleSlotPointerUp(index)}
+                                    onPointerCancel={() => handleSlotPointerUp(index)}
                                 >
                                     {allowPhotoChange && (
                                         <input
@@ -682,7 +434,7 @@ function PhotoSelectScreen({
                                             onChange={(e) => handleFileSelect(index, e)}
                                         />
                                     )}
-                                    <label 
+                                    <label
                                         htmlFor={allowPhotoChange ? `photoInput${index}` : undefined}
                                         className="photo-slot-label"
                                         style={{ cursor: allowPhotoChange ? 'pointer' : 'default' }}
@@ -703,6 +455,7 @@ function PhotoSelectScreen({
                                     </label>
                                     {selectedPhotos[index] && allowPhotoChange && (
                                         <button
+                                            type="button"
                                             className="slot-remove"
                                             onClick={(e) => {
                                                 e.stopPropagation()
@@ -717,21 +470,32 @@ function PhotoSelectScreen({
                         })}
                     </div>
                 </div>
-                <div className="photo-select-controls">
-                    <button className="btn btn-secondary" onClick={onBack}>
-                        프레임 다시 선택
-                    </button>
-                    <button
-                        className="btn btn-primary"
-                        disabled={!allPhotosSelected || isComposing}
-                        onClick={() => {
-                            setIsComposing(true)
-                            onCompose()
-                        }}
-                    >
-                        {isComposing ? '처리 중...' : '인생네컷 만들기'}
-                    </button>
-                </div>
+
+                <aside className="photo-select-sidebar">
+                    {filtersEnabled && onPhotoFilterChange && (
+                        <FilterSelector
+                            value={photoFilter}
+                            onChange={onPhotoFilterChange}
+                            kioskMode={kioskMode}
+                        />
+                    )}
+                    <div className="photo-select-controls">
+                        <button type="button" className="booth-btn booth-btn-secondary photo-select-back" onClick={onBack}>
+                            {showFrameBack ? '프레임 다시 선택' : '다시 촬영'}
+                        </button>
+                        <button
+                            type="button"
+                            className="booth-btn booth-btn-primary"
+                            disabled={!allPhotosSelected || isComposing}
+                            onClick={() => {
+                                setIsComposing(true)
+                                onCompose()
+                            }}
+                        >
+                            {isComposing ? '처리 중...' : '인생네컷 만들기'}
+                        </button>
+                    </div>
+                </aside>
             </div>
         </div>
     )

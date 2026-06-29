@@ -1,29 +1,35 @@
 import { useState } from 'react'
+import GalleryPhotoModal from './GalleryPhotoModal'
 import './SideMenu.css'
 
-function SideMenu({ isOpen, onClose, savedPhotos }) {
-    const handleImageClick = (photo) => {
-        // 이미지 보기 팝업 표시 (추후 구현)
-        console.log('이미지 클릭:', photo)
+function SideMenu({ isOpen, onClose, savedPhotos, onDeletePhoto }) {
+    const [selectedPhoto, setSelectedPhoto] = useState(null)
+
+    const handleClose = () => {
+        setSelectedPhoto(null)
+        onClose()
     }
 
     return (
         <>
-            {isOpen && <div className="side-menu-overlay" onClick={onClose} />}
+            {isOpen && <div className="side-menu-overlay" onClick={handleClose} />}
             <div className={`side-menu ${isOpen ? 'active' : ''}`}>
                 <div className="side-menu-header">
                     <h2>저장된 인생네컷</h2>
-                    <button className="close-btn" onClick={onClose}>✕</button>
+                    <button className="close-btn" onClick={handleClose}>✕</button>
                 </div>
                 <div className="gallery">
                     {savedPhotos.length === 0 ? (
-                        <p className="empty-message">저장된 사진이 없습니다.</p>
+                        <p className="empty-message">
+                            저장된 사진이 없습니다.<br />
+                            촬영 후 자동으로 여기에 표시됩니다.
+                        </p>
                     ) : (
-                        savedPhotos.slice().reverse().map((photo) => (
-                            <div 
-                                key={photo.id} 
+                        savedPhotos.map((photo) => (
+                            <div
+                                key={photo.id}
                                 className="gallery-item"
-                                onClick={() => handleImageClick(photo)}
+                                onClick={() => setSelectedPhoto(photo)}
                             >
                                 <img src={photo.data} alt="저장된 인생네컷" />
                             </div>
@@ -31,9 +37,16 @@ function SideMenu({ isOpen, onClose, savedPhotos }) {
                     )}
                 </div>
             </div>
+
+            {selectedPhoto && (
+                <GalleryPhotoModal
+                    photo={selectedPhoto}
+                    onClose={() => setSelectedPhoto(null)}
+                    onDelete={onDeletePhoto}
+                />
+            )}
         </>
     )
 }
 
 export default SideMenu
-

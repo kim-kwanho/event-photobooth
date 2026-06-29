@@ -1,25 +1,26 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { getPhotoFromServer } from '../lib/api'
+import SaveImageModal from '../components/common/SaveImageModal'
+import { saveImage, getSaveButtonLabel, createSaveFilename } from '../lib/saveImage'
 import './ResultViewPage.css'
 
 function ResultViewPage() {
-    const { id: hash } = useParams() // URL의 :id 파라미터가 실제로는 hash값임
+    const { id: hash } = useParams()
     const [photoData, setPhotoData] = useState(null)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState(null)
+    const [saveModalOpen, setSaveModalOpen] = useState(false)
 
     useEffect(() => {
         const loadPhoto = async () => {
             try {
                 setLoading(true)
-                
-                // 서버에서 조회 시도 (해시 기반)
                 const result = await getPhotoFromServer(hash)
                 setPhotoData({
                     id: result.id,
                     data: result.data,
-                    timestamp: result.timestamp
+                    timestamp: result.timestamp,
                 })
             } catch (err) {
                 console.error('사진 로드 실패:', err)
@@ -34,14 +35,21 @@ function ResultViewPage() {
         }
     }, [hash])
 
-    const handleDownload = () => {
+    const handleDownload = async () => {
         if (!photoData) return
 
-        const downloadFilename = `인생네컷_${photoData.id}.png`
-        const link = document.createElement('a')
-        link.download = downloadFilename
-        link.href = photoData.data
-        link.click()
+        const filename = createSaveFilename(`인생네컷_${photoData.id}`)
+
+        try {
+            const result = await saveImage({ dataUrl: photoData.data, filename })
+
+            if (result === 'manual') {
+                setSaveModalOpen(true)
+            }
+        } catch (err) {
+            console.error('저장 실패:', err)
+            setSaveModalOpen(true)
+        }
     }
 
     if (loading) {
@@ -75,13 +83,19 @@ function ResultViewPage() {
                 </div>
                 <div className="result-view-controls">
                     <button className="btn btn-primary" onClick={handleDownload}>
-                        📥 다운로드
+                        {getSaveButtonLabel()}
                     </button>
                 </div>
             </div>
+
+            <SaveImageModal
+                isOpen={saveModalOpen}
+                onClose={() => setSaveModalOpen(false)}
+                imageSrc={photoData.data}
+                filename={createSaveFilename(`인생네컷_${photoData.id}`)}
+            />
         </div>
     )
 }
 
 export default ResultViewPage
-

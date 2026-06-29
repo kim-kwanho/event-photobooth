@@ -1,4 +1,7 @@
-// 인생네컷 프레임 데이터
+/**
+ * 레거시 폴백 프레임 데이터
+ * 운영 시에는 public/themes/ 하위 frames.json 을 사용합니다.
+ */
 export const frames = [
     {
         id: 1,

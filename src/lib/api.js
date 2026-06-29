@@ -1,4 +1,5 @@
-import { supabase } from './supabase'
+import { assertSupabase } from './supabase'
+import { getPrintApiUrl } from '../config/appUrl'
 
 // Base64 데이터를 Blob으로 변환하는 헬퍼 함수
 const base64ToBlob = (base64) => {
@@ -46,15 +47,9 @@ const compressImage = (base64Data, maxWidth = 2000, maxHeight = 2000, quality = 
     })
 }
 
-// 고유 해시 생성 (간단한 버전)
-const createHash = (id) => {
-    // Web Crypto API 사용 (브라우저 내장)
-    // 여기서는 간단하게 id 자체를 해시처럼 사용하거나 랜덤 문자열 사용
-    return id.replace(/[^a-zA-Z0-9]/g, '').slice(0, 15)
-}
-
 // 결과물 저장 (Supabase Storage 사용)
 export async function savePhotoToServer(photoData) {
+    const supabase = assertSupabase()
     try {
         const { id, imageData, timestamp } = photoData
         
@@ -129,6 +124,7 @@ export async function savePhotoToServer(photoData) {
 
 // 결과물 조회
 export async function getPhotoFromServer(hash) {
+    const supabase = assertSupabase()
     try {
         // 1. 메타데이터 다운로드
         const { data: metaData, error: metaError } = await supabase.storage
@@ -196,6 +192,7 @@ export async function getPhotoFromServer(hash) {
 
 // 모든 결과물 목록 조회 (관리자용) - Storage 스캔 방식
 export async function getAllPhotosFromServer() {
+    const supabase = assertSupabase()
     try {
         // 1. Storage 'photos' 버킷의 루트 목록 조회 (폴더명 = hash)
         const { data: list, error } = await supabase.storage
@@ -264,7 +261,7 @@ export async function getAllPhotosFromServer() {
 // 프린트 요청
 export async function printPhoto(imageUrl, quantity = 1, printerName = null) {
     try {
-        const response = await fetch('http://localhost:3001/api/print', {
+        const response = await fetch(getPrintApiUrl(), {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -290,6 +287,7 @@ export async function printPhoto(imageUrl, quantity = 1, printerName = null) {
 
 // 결과물 삭제 (Supabase Storage에서 폴더 전체 삭제)
 export async function deletePhotoFromServer(hash) {
+    const supabase = assertSupabase()
     try {
         // 1. 폴더 내 모든 파일 목록 조회
         const { data: files, error: listError } = await supabase.storage

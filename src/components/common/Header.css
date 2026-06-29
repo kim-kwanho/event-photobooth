@@ -18,9 +18,31 @@
     margin-right: 15px;
 }
 
+.menu-btn--placeholder {
+    visibility: hidden;
+    pointer-events: none;
+}
+
 .header h1 {
     font-size: 20px;
     font-weight: 600;
     color: #333;
+    flex: 1;
+}
+
+.header--kiosk h1 {
+    font-size: 22px;
+}
+
+.fullscreen-btn {
+    background: rgba(102, 126, 234, 0.12);
+    border: none;
+    border-radius: 10px;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 8px 12px;
+    color: #667eea;
+    min-width: 44px;
+    min-height: 44px;
 }
 

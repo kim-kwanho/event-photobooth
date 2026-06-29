@@ -42,7 +42,16 @@ const getUserMedia = async (constraints) => {
     throw new Error('getUserMedia is not supported in this browser')
 }
 
-function CameraScreen({ onCaptureComplete }) {
+function CameraScreen({
+    onCaptureComplete,
+    photoCount = 4,
+    countdownSeconds = 6,
+    captureQuality = 0.9,
+    kioskMode = false,
+    autoStart = false,
+    onBack,
+    selectedFrame = null,
+}) {
     const [countdown, setCountdown] = useState(null)
     const [capturedPhotos, setCapturedPhotos] = useState([])
     const [isCapturing, setIsCapturing] = useState(false)
@@ -57,6 +66,13 @@ function CameraScreen({ onCaptureComplete }) {
     useEffect(() => {
         setIsMobile(isMobileDevice())
     }, [])
+
+    // 키오스크: 진입 시 카메라 자동 시작
+    useEffect(() => {
+        if (!autoStart || cameraStatus !== 'idle') return
+        initCamera()
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [autoStart])
 
     // 카메라 정리
     useEffect(() => {
@@ -285,27 +301,21 @@ function CameraScreen({ onCaptureComplete }) {
         const ctx = canvas.getContext('2d')
         ctx.drawImage(video, 0, 0, videoWidth, videoHeight)
 
-        return canvas.toDataURL('image/jpeg', 0.9)
+        return canvas.toDataURL('image/jpeg', captureQuality)
     }
 
-    // 단일 촬영 함수 (6초 타이머 포함)
-    const captureSinglePhoto = (photoIndex) => {
+    const captureSinglePhoto = () => {
         return new Promise((resolve) => {
-            setCountdown(6)
+            setCountdown(countdownSeconds)
             
             const countdownInterval = setInterval(() => {
                 setCountdown((prev) => {
                     if (prev <= 1) {
                         clearInterval(countdownInterval)
-                        // 자동 촬영 실행
                         setTimeout(() => {
                             const photoData = captureScreen()
-                            if (photoData) {
-                                resolve(photoData)
-                            } else {
-                                resolve(null)
-                            }
-                        }, 200) // 촬영 전 약간의 딜레이
+                            resolve(photoData || null)
+                        }, 200)
                         return null
                     }
                     return prev - 1
@@ -314,9 +324,9 @@ function CameraScreen({ onCaptureComplete }) {
         })
     }
 
-    // 연속 촬영 시작 (4장 자동 촬영)
+    // 연속 촬영 시작
     const startCapture = async () => {
-        if (isCapturing || capturedPhotos.length >= 4) return
+        if (isCapturing || capturedPhotos.length >= photoCount) return
 
         // 카메라가 활성화되지 않은 경우
         if (!streamRef.current || cameraStatus !== 'active') {
@@ -334,9 +344,8 @@ function CameraScreen({ onCaptureComplete }) {
         const newPhotos = [...capturedPhotos]
 
         try {
-            // 4장 연속 촬영
-            for (let i = 0; i < 4; i++) {
-                const photoData = await captureSinglePhoto(i + 1)
+            for (let i = 0; i < photoCount; i++) {
+                const photoData = await captureSinglePhoto()
                 
                 if (photoData) {
                     newPhotos.push(photoData)
@@ -346,8 +355,7 @@ function CameraScreen({ onCaptureComplete }) {
                     break
                 }
 
-                // 마지막 사진이 아니면 다음 촬영 전 잠시 대기
-                if (i < 3) {
+                if (i < photoCount - 1) {
                     setCountdown(null)
                     await new Promise(resolve => setTimeout(resolve, 500))
                 }
@@ -356,8 +364,7 @@ function CameraScreen({ onCaptureComplete }) {
             setIsCapturing(false)
             setCountdown(null)
 
-            // 4장 모두 촬영 완료
-            if (newPhotos.length === 4) {
+            if (newPhotos.length === photoCount) {
                 setTimeout(() => {
                     onCaptureComplete(newPhotos)
                 }, 500)
@@ -382,18 +389,27 @@ function CameraScreen({ onCaptureComplete }) {
         }
     }
 
-    const remainingPhotos = 4 - capturedPhotos.length
+    const remainingPhotos = photoCount - capturedPhotos.length
+    const showStartCamera = !autoStart && (cameraStatus === 'idle' || cameraStatus === 'error')
 
     return (
-        <div className="camera-screen">
+        <div className={`camera-screen${kioskMode ? ' camera-screen--kiosk' : ''}`}>
             <div className="camera-container">
                 <div className="camera-header">
-                    <h2>사진 촬영</h2>
+                    {onBack && (
+                        <button type="button" className="camera-back-btn" onClick={onBack}>
+                            ← 프레임
+                        </button>
+                    )}
+                    <h2>{kioskMode ? '촬영 준비' : '사진 촬영'}</h2>
                     <p className="camera-subtitle">
                         {capturedPhotos.length > 0 
-                            ? `${capturedPhotos.length}/4장 촬영 완료` 
-                            : '4장의 사진을 촬영해주세요'}
+                            ? `${capturedPhotos.length}/${photoCount}장 촬영 완료` 
+                            : `${photoCount}장 · ${countdownSeconds}초 카운트다운`}
                     </p>
+                    {selectedFrame && (
+                        <p className="camera-frame-badge">프레임: {selectedFrame.name}</p>
+                    )}
                 </div>
 
                 <div className="camera-preview-wrapper">
@@ -442,15 +458,14 @@ function CameraScreen({ onCaptureComplete }) {
                     {capturedPhotos.length > 0 && (
                         <div className="captured-indicator">
                             <div className="captured-badge">
-                                {capturedPhotos.length}/4
+                                {capturedPhotos.length}/{photoCount}
                             </div>
                         </div>
                     )}
                 </div>
 
                 <div className="camera-controls">
-                    {/* 모바일이거나 카메라가 시작되지 않은 경우 카메라 시작 버튼 표시 */}
-                    {(cameraStatus === 'idle' || cameraStatus === 'error') && (
+                    {showStartCamera && (
                         <button
                             className="btn btn-primary btn-start-camera"
                             onClick={initCamera}
@@ -471,18 +486,22 @@ function CameraScreen({ onCaptureComplete }) {
                     )}
                     
                     <button
-                        className="btn btn-primary btn-capture"
+                        className={`btn btn-primary btn-capture${kioskMode ? ' btn-capture--hero' : ''}`}
                         onClick={startCapture}
-                        disabled={isCapturing || capturedPhotos.length >= 4 || cameraStatus !== 'active'}
+                        disabled={isCapturing || capturedPhotos.length >= photoCount || cameraStatus !== 'active'}
                     >
                         {isCapturing 
                             ? `촬영 중... ${countdown || ''}초` 
-                            : capturedPhotos.length >= 4
+                            : capturedPhotos.length >= photoCount
                             ? '촬영 완료'
                             : cameraStatus !== 'active'
                             ? cameraStatus === 'requesting'
                             ? '카메라 준비 중...'
+                            : autoStart
+                            ? '카메라 연결 중...'
                             : '카메라를 먼저 시작하세요'
+                            : kioskMode
+                            ? '터치하여 촬영 시작'
                             : '촬영 시작'
                         }
                     </button>

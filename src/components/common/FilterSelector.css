@@ -1,0 +1,63 @@
+.filter-selector {
+    margin: 16px 0;
+}
+
+.filter-selector-label {
+    margin: 0 0 10px;
+    font-size: 14px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.9);
+    text-align: center;
+}
+
+.filter-selector-options {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+}
+
+.filter-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    min-width: 72px;
+    padding: 10px 12px;
+    border: 2px solid rgba(255, 255, 255, 0.35);
+    border-radius: 14px;
+    background: rgba(255, 255, 255, 0.12);
+    color: #fff;
+    cursor: pointer;
+    transition: transform 0.15s, border-color 0.15s, background 0.15s;
+}
+
+.filter-option.active {
+    border-color: #fff;
+    background: rgba(255, 255, 255, 0.28);
+    transform: scale(1.04);
+}
+
+.filter-option-emoji {
+    font-size: 22px;
+    line-height: 1;
+}
+
+.filter-option-name {
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.filter-selector--kiosk .filter-option {
+    min-width: 88px;
+    min-height: 88px;
+    padding: 14px 16px;
+}
+
+.filter-selector--kiosk .filter-option-emoji {
+    font-size: 28px;
+}
+
+.filter-selector--kiosk .filter-option-name {
+    font-size: 14px;
+}

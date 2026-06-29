@@ -1,0 +1,138 @@
+{
+  "frames": [
+    {
+      "id": 1,
+      "name": "Hope",
+      "layout": {
+        "slots": [
+          { "x": 0, "y": 0, "width": 0.5, "height": 0.5 },
+          { "x": 0.5, "y": 0, "width": 0.5, "height": 0.5 },
+          { "x": 0, "y": 0.5, "width": 0.5, "height": 0.5 },
+          { "x": 0.5, "y": 0.5, "width": 0.5, "height": 0.5 }
+        ],
+        "frameColor": "#0F2847",
+        "frameWidth": 20,
+        "slotColor": "#FFFBF5",
+        "bottomText": "Hope",
+        "textColor": "#FFFFFF",
+        "fontFamily": "Inter, sans-serif",
+        "logoStyle": true,
+        "accentColor": "#D4A853",
+        "crossLineColor": "#2A4A6F",
+        "crossLineWidth": 7
+      }
+    },
+    {
+      "id": 2,
+      "name": "Summer Sky",
+      "layout": {
+        "slots": [
+          { "x": 0, "y": 0, "width": 0.5, "height": 0.5 },
+          { "x": 0.5, "y": 0, "width": 0.5, "height": 0.5 },
+          { "x": 0, "y": 0.5, "width": 0.5, "height": 0.5 },
+          { "x": 0.5, "y": 0.5, "width": 0.5, "height": 0.5 }
+        ],
+        "frameColor": "#0369A1",
+        "frameWidth": 20,
+        "slotColor": "#F0F9FF",
+        "bottomGradient": ["#38BDF8", "#0284C7"],
+        "bottomPattern": "waves",
+        "patternColor": "rgba(255,255,255,0.5)",
+        "crossLineColor": "#7DD3FC",
+        "crossLineWidth": 7
+      }
+    },
+    {
+      "id": 3,
+      "name": "Passport",
+      "layout": {
+        "slots": [
+          { "x": 0, "y": 0, "width": 0.5, "height": 0.5 },
+          { "x": 0.5, "y": 0, "width": 0.5, "height": 0.5 },
+          { "x": 0, "y": 0.5, "width": 0.5, "height": 0.5 },
+          { "x": 0.5, "y": 0.5, "width": 0.5, "height": 0.5 }
+        ],
+        "frameColor": "#9A3412",
+        "frameWidth": 20,
+        "slotColor": "#FFFDF8",
+        "bottomStyle": "passport",
+        "bottomColor": "#F5EDE0",
+        "bottomPattern": "paper",
+        "patternColor": "rgba(120,80,50,0.1)",
+        "stampText": "ENTRY\nKOR",
+        "stampDate": "2025",
+        "passportSeal": "PASSPORT",
+        "passportMrz": [
+          "P<KOR<<<<<<<<<<<<<<<<<<<<<<<<<<<<",
+          "A0<<<<20250629<<<<<<<<<<<<<<<<<<<"
+        ],
+        "textColor": "#7C2D12",
+        "accentColor": "#C45C4A",
+        "fontFamily": "Georgia, \"Noto Serif KR\", serif",
+        "crossLineColor": "#E7D5C4",
+        "crossLineWidth": 7
+      }
+    },
+    {
+      "id": 4,
+      "name": "Sunset",
+      "layout": {
+        "slots": [
+          { "x": 0, "y": 0, "width": 0.5, "height": 0.5 },
+          { "x": 0.5, "y": 0, "width": 0.5, "height": 0.5 },
+          { "x": 0, "y": 0.5, "width": 0.5, "height": 0.5 },
+          { "x": 0.5, "y": 0.5, "width": 0.5, "height": 0.5 }
+        ],
+        "frameColor": "#EA580C",
+        "frameWidth": 20,
+        "slotColor": "#FFF7ED",
+        "bottomGradient": ["#FB923C", "#DB2777"],
+        "bottomPattern": "stars",
+        "patternColor": "rgba(255,255,255,0.5)",
+        "crossLineColor": "#FDBA74",
+        "crossLineWidth": 7
+      }
+    },
+    {
+      "id": 5,
+      "name": "Retro Film",
+      "layout": {
+        "slots": [
+          { "x": 0, "y": 0, "width": 0.5, "height": 0.5 },
+          { "x": 0.5, "y": 0, "width": 0.5, "height": 0.5 },
+          { "x": 0, "y": 0.5, "width": 0.5, "height": 0.5 },
+          { "x": 0.5, "y": 0.5, "width": 0.5, "height": 0.5 }
+        ],
+        "frameColor": "#57534E",
+        "frameWidth": 20,
+        "slotColor": "#F5F0E6",
+        "bottomColor": "#78716C",
+        "bottomText": "35mm",
+        "textColor": "#FCD34D",
+        "fontFamily": "monospace",
+        "crossLineColor": "#D6D3D1",
+        "crossLineWidth": 7
+      }
+    },
+    {
+      "id": 6,
+      "name": "Ocean",
+      "layout": {
+        "slots": [
+          { "x": 0, "y": 0, "width": 0.5, "height": 0.5 },
+          { "x": 0.5, "y": 0, "width": 0.5, "height": 0.5 },
+          { "x": 0, "y": 0.5, "width": 0.5, "height": 0.5 },
+          { "x": 0.5, "y": 0.5, "width": 0.5, "height": 0.5 }
+        ],
+        "frameColor": "#0F766E",
+        "frameWidth": 20,
+        "slotColor": "#F0FDFA",
+        "bottomGradient": ["#2DD4BF", "#0D9488"],
+        "bottomPattern": "waves",
+        "patternColor": "rgba(255,255,255,0.45)",
+        "crossLineColor": "#5EEAD4",
+        "crossLineWidth": 7
+      }
+    }
+  ]
+}

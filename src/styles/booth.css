@@ -1,0 +1,251 @@
+:root {
+    --booth-touch-min: 48px;
+    --booth-stage-max-w: 520px;
+    --booth-stage-ratio: 3 / 4;
+    --booth-radius: 20px;
+    --booth-shadow: 0 12px 40px rgba(0, 0, 0, 0.28);
+    --booth-accent: var(--app-primary, #6b46c1);
+    --booth-surface: rgba(255, 255, 255, 0.96);
+    --booth-text-on-dark: #ffffff;
+}
+
+.booth-shell {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    min-height: 100dvh;
+}
+
+.booth-shell--kiosk {
+    background: #0a0a12;
+}
+
+.booth-shell--kiosk .booth-stage-outer {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 16px 24px;
+}
+
+.booth-stage {
+    width: min(100%, var(--booth-stage-max-w));
+    margin: 0 auto;
+}
+
+.booth-stage-inner {
+    background: var(--booth-surface);
+    border-radius: var(--booth-radius);
+    box-shadow: var(--booth-shadow);
+    overflow: hidden;
+}
+
+.booth-progress {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 16px 8px;
+    flex-shrink: 0;
+}
+
+.booth-progress-step {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: rgba(255, 255, 255, 0.55);
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.booth-shell:not(.booth-shell--kiosk) .booth-progress-step {
+    color: rgba(255, 255, 255, 0.75);
+}
+
+.booth-progress-step.active {
+    color: var(--booth-text-on-dark);
+}
+
+.booth-progress-dot {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 800;
+    background: rgba(255, 255, 255, 0.15);
+    border: 2px solid transparent;
+}
+
+.booth-progress-step.active .booth-progress-dot {
+    background: var(--booth-accent);
+    border-color: #fff;
+    color: #fff;
+}
+
+.booth-progress-step.done .booth-progress-dot {
+    background: rgba(255, 255, 255, 0.35);
+    color: #fff;
+}
+
+.booth-progress-line {
+    width: 24px;
+    height: 2px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 1px;
+}
+
+.booth-title {
+    text-align: center;
+    color: var(--booth-text-on-dark);
+    font-size: clamp(20px, 4vw, 28px);
+    font-weight: 800;
+    margin: 0 0 6px;
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
+}
+
+.booth-subtitle {
+    text-align: center;
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 14px;
+    margin: 0 0 16px;
+}
+
+.booth-cta-row {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+    max-width: 360px;
+    margin: 0 auto;
+}
+
+.booth-btn {
+    min-height: var(--booth-touch-min);
+    padding: 16px 24px;
+    border: none;
+    border-radius: 999px;
+    font-size: 17px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+    touch-action: manipulation;
+}
+
+.booth-btn-primary {
+    background: linear-gradient(135deg, var(--booth-accent), #8b5cf6);
+    color: #fff;
+    box-shadow: 0 8px 24px rgba(107, 70, 193, 0.45);
+}
+
+.booth-btn-secondary {
+    background: rgba(255, 255, 255, 0.15);
+    color: #fff;
+    border: 2px solid rgba(255, 255, 255, 0.35);
+}
+
+.booth-btn:active {
+    transform: scale(0.98);
+}
+
+/* 기기별 스테이지 크기 */
+@media (min-width: 768px) and (max-width: 1024px) {
+    :root {
+        --booth-stage-max-w: 480px;
+    }
+}
+
+@media (min-width: 1025px) {
+    :root {
+        --booth-stage-max-w: 440px;
+    }
+}
+
+.booth-bare-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.booth-screen-header {
+    padding: 0 16px 8px;
+    flex-shrink: 0;
+}
+
+@media (max-height: 700px) and (orientation: landscape) {
+    .booth-shell--kiosk .booth-stage-outer {
+        padding: 8px 12px 12px;
+    }
+
+    .booth-progress {
+        padding: 8px 12px 4px;
+    }
+}
+
+/* iPad 가로 모드 — 키오스크·태블릿 */
+@media (min-width: 768px) and (max-width: 1366px) and (orientation: landscape) {
+    :root {
+        --booth-stage-max-w: 560px;
+    }
+
+    .booth-shell--kiosk .booth-stage-outer {
+        padding: 8px 20px 16px;
+        align-items: flex-start;
+    }
+
+    .booth-screen-header {
+        padding: 0 20px 4px;
+    }
+
+    .booth-title {
+        font-size: 22px;
+        margin-bottom: 2px;
+    }
+
+    .booth-subtitle {
+        font-size: 13px;
+        margin-bottom: 8px;
+    }
+
+    .booth-progress {
+        padding: 8px 16px 4px;
+    }
+
+    .booth-progress-dot {
+        width: 24px;
+        height: 24px;
+        font-size: 11px;
+    }
+
+    .booth-stage-inner {
+        max-height: calc(100dvh - 120px);
+        overflow-y: auto;
+    }
+}
+
+/* iPad 가로 — 넓은 2열 스테이지 (결과·프레임 선택) */
+@media (min-width: 900px) and (max-height: 820px) and (orientation: landscape) {
+    :root {
+        --booth-stage-max-w: 720px;
+    }
+
+    .booth-stage-inner:has(.result-booth--kiosk),
+    .booth-stage-inner:has(.frame-select-booth) {
+        padding: 0;
+    }
+}
+
+/* 키오스크 가로 — 진행 표시 컴팩트 */
+@media (min-width: 768px) and (orientation: landscape) and (max-height: 600px) {
+    .booth-progress-label {
+        display: none;
+    }
+
+    .booth-progress-line {
+        width: 16px;
+    }
+}

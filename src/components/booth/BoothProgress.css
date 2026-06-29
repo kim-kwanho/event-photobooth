@@ -1,0 +1,15 @@
+.booth-progress-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.booth-progress-label {
+    display: none;
+}
+
+@media (min-width: 480px) {
+    .booth-progress-label {
+        display: inline;
+    }
+}
