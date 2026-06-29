@@ -110,15 +110,28 @@ npm run dev:all
 
 ## 6. Vercel 배포
 
+**프로덕션 도메인:** https://photobooth.vercel.app
+
 1. GitHub에 push
-2. Vercel → **Import Project**
-3. **Environment Variables**에 `.env` 값 등록:
+2. Vercel → **Import Project** (또는 기존 `event-photobooth` 연결)
+3. **Environment Variables**에 등록:
    - `VITE_SUPABASE_URL`
    - `VITE_SUPABASE_ANON_KEY`
    - `VITE_ADMIN_PIN`
+   - `VITE_APP_URL` = `https://photobooth.vercel.app` (QR·공유 링크용)
 4. Deploy
 
-배포 후 QR·공유 링크는 자동으로 배포 도메인을 사용합니다.
+### Vercel 도메인을 `photobooth.vercel.app`으로 변경
+
+1. [Vercel Dashboard](https://vercel.com/dashboard) → 해당 프로젝트
+2. **Settings → General → Project Name** → `photobooth` 로 변경 (가능하면)
+3. **Settings → Domains** → `photobooth.vercel.app` **Add**
+   - 이미 사용 중이면 `photobooth-<팀명>.vercel.app` 등 대안 표시됨
+4. 새 도메인을 **Primary** 로 설정, 예전 `christmas-*.vercel.app` 은 Remove (선택)
+5. **Settings → Environment Variables** → `VITE_APP_URL` = `https://photobooth.vercel.app`
+6. **Deployments** → 최신 배포 **Redeploy**
+
+배포 후 QR·공유 링크는 `VITE_APP_URL` 또는 접속 중인 origin 을 사용합니다.
 
 ---
 
