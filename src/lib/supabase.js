@@ -20,3 +20,7 @@ export function assertSupabase() {
     }
     return supabase
 }
+
+export function isSupabaseConfigured() {
+    return Boolean(supabaseUrl && supabaseAnonKey)
+}

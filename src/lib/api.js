@@ -1,6 +1,9 @@
 import { assertSupabase } from './supabase'
 import { getPrintApiUrl } from '../config/appUrl'
 
+const PHOTOS_BUCKET = 'photos'
+const LIST_PAGE_SIZE = 100
+
 // Base64 데이터를 Blob으로 변환하는 헬퍼 함수
 const base64ToBlob = (base64) => {
     const parts = base64.split(';base64,')
@@ -45,6 +48,53 @@ const compressImage = (base64Data, maxWidth = 2000, maxHeight = 2000, quality = 
         img.onerror = reject
         img.src = base64Data
     })
+}
+
+function getPhotoPublicUrl(supabase, hash, imageName) {
+    const { data } = supabase.storage.from(PHOTOS_BUCKET).getPublicUrl(`${hash}/${imageName}`)
+    return data.publicUrl
+}
+
+async function listPhotoFolderNames(supabase) {
+    const folders = []
+    let offset = 0
+
+    while (true) {
+        const { data, error } = await supabase.storage.from(PHOTOS_BUCKET).list('', {
+            limit: LIST_PAGE_SIZE,
+            offset,
+            sortBy: { column: 'created_at', order: 'desc' },
+        })
+
+        if (error) throw error
+        if (!data?.length) break
+
+        for (const item of data) {
+            if (item.name.startsWith('.')) continue
+            // Supabase Storage: 폴더는 id가 null
+            if (item.id === null) {
+                folders.push(item.name)
+            }
+        }
+
+        if (data.length < LIST_PAGE_SIZE) break
+        offset += LIST_PAGE_SIZE
+    }
+
+    return folders
+}
+
+async function resolveImageFileName(supabase, hash) {
+    const { data: files, error } = await supabase.storage.from(PHOTOS_BUCKET).list(hash, {
+        limit: 20,
+    })
+
+    if (error) throw error
+
+    const names = (files || []).map((file) => file.name)
+    if (names.includes('photo.jpg')) return 'photo.jpg'
+    if (names.includes('photo.png')) return 'photo.png'
+    return null
 }
 
 // 결과물 저장 (Supabase Storage 사용)
@@ -193,69 +243,44 @@ export async function getPhotoFromServer(hash) {
 // 모든 결과물 목록 조회 (관리자용) - Storage 스캔 방식
 export async function getAllPhotosFromServer() {
     const supabase = assertSupabase()
-    try {
-        // 1. Storage 'photos' 버킷의 루트 목록 조회 (폴더명 = hash)
-        const { data: list, error } = await supabase.storage
-            .from('photos')
-            .list()
 
-        if (error) throw error
+    const folderNames = await listPhotoFolderNames(supabase)
 
-        // 2. 각 폴더(해시)에 대해 메타데이터와 이미지 URL 가져오기
-        // 중복 제거: Set을 사용하여 이미 처리한 해시는 건너뜀
-        const processedHashes = new Set()
-        
-        const photosPromises = list
-            .filter(item => !item.name.startsWith('.')) // 숨김 파일/폴더 제외
-            .filter(item => {
-                // 해시(폴더명) 중복 체크
-                if (processedHashes.has(item.name)) return false
-                processedHashes.add(item.name)
-                return true
-            })
-            .map(async (folder) => {
-                try {
-                    const hash = folder.name
-                    
-                    // 2-1. 메타데이터 다운로드
-                    const { data: metaData, error: metaError } = await supabase.storage
-                        .from('photos')
-                        .download(`${hash}/meta.json`)
-                    
-                    let metadata = {}
-                    if (!metaError) {
-                        const metaText = await metaData.text()
-                        metadata = JSON.parse(metaText)
-                    }
+    const photos = await Promise.all(
+        folderNames.map(async (hash) => {
+            try {
+                const imageName = await resolveImageFileName(supabase, hash)
+                if (!imageName) return null
 
-                    // 2-2. 이미지 Public URL (JPEG 또는 PNG)
-                    const { data: publicUrlData } = supabase.storage
-                        .from('photos')
-                        .getPublicUrl(`${hash}/photo.jpg`)
+                let metadata = {}
+                const { data: metaData, error: metaError } = await supabase.storage
+                    .from(PHOTOS_BUCKET)
+                    .download(`${hash}/meta.json`)
 
-                    return {
-                        id: metadata.id || hash,
-                        hash: hash,
-                        data: publicUrlData.publicUrl, 
-                        timestamp: metadata.timestamp || folder.created_at,
-                        createdAt: metadata.createdAt || folder.created_at
-                    }
-                } catch (e) {
-                    console.warn(`폴더 ${folder.name} 처리 실패:`, e)
-                    return null
+                if (!metaError && metaData) {
+                    const metaText = await metaData.text()
+                    metadata = JSON.parse(metaText)
                 }
-            })
 
-        const photos = (await Promise.all(photosPromises))
-            .filter(p => p !== null)
-            // 최신순 정렬
-            .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+                return {
+                    id: metadata.id || hash,
+                    hash,
+                    data: getPhotoPublicUrl(supabase, hash, imageName),
+                    imageUrl: getPhotoPublicUrl(supabase, hash, imageName),
+                    imageName,
+                    timestamp: metadata.timestamp || metadata.createdAt,
+                    createdAt: metadata.createdAt || metadata.timestamp,
+                }
+            } catch (e) {
+                console.warn(`폴더 ${hash} 처리 실패:`, e)
+                return null
+            }
+        })
+    )
 
-        return photos
-    } catch (error) {
-        console.error('목록 조회 실패:', error)
-        return []
-    }
+    return photos
+        .filter((photo) => photo !== null)
+        .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0))
 }
 
 // 프린트 요청

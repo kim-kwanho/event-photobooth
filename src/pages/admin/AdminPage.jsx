@@ -1,134 +1,144 @@
 import { useState, useEffect } from 'react'
 import { useConfig } from '../../config/ConfigContext'
+import { getResultUrl } from '../../config/appUrl'
 import { getAllPhotosFromServer, deletePhotoFromServer, printPhoto } from '../../lib/api'
+import { isSupabaseConfigured } from '../../lib/supabase'
 import './AdminPage.css'
 
 function AdminPage() {
   const config = useConfig()
   const printEnabled = config.features?.print ?? false
   const eventName = config.event.name
+  const supabaseReady = isSupabaseConfigured()
+
   const [photos, setPhotos] = useState([])
   const [loading, setLoading] = useState(true)
-  const [printQuantities, setPrintQuantities] = useState({}) // { photoId: quantity }
+  const [loadError, setLoadError] = useState('')
+  const [printQuantities, setPrintQuantities] = useState({})
   const [errorModal, setErrorModal] = useState({ show: false, message: '' })
+  const [previewPhoto, setPreviewPhoto] = useState(null)
+  const [copiedHash, setCopiedHash] = useState('')
 
-  // 사진 목록 로드
   const loadPhotos = async () => {
+    if (!supabaseReady) {
+      setLoadError('Supabase 환경변수가 설정되지 않았습니다. VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY를 확인하세요.')
+      setPhotos([])
+      setLoading(false)
+      return
+    }
+
     try {
       setLoading(true)
-      
+      setLoadError('')
+
       const loadedPhotos = await getAllPhotosFromServer()
       setPhotos(loadedPhotos || [])
-      
-      // 프린트 수량 초기화
+
       const quantities = {}
-      loadedPhotos?.forEach(photo => {
+      loadedPhotos?.forEach((photo) => {
         quantities[photo.id] = printQuantities[photo.id] || 1
       })
       setPrintQuantities(quantities)
     } catch (error) {
       console.error('사진 목록 로드 실패:', error)
-      // alert('사진 목록을 불러오는데 실패했습니다: ' + error.message)
+      setLoadError(error.message || '사진 목록을 불러오는데 실패했습니다.')
+      setPhotos([])
     } finally {
       setLoading(false)
     }
   }
 
   useEffect(() => {
-    // Admin 페이지에서는 스크롤 가능하도록 body 스타일 변경
     document.body.style.overflowY = 'auto'
     document.documentElement.style.overflowY = 'auto'
-    
-    // 컴포넌트 마운트 시 사진 목록 로드
     loadPhotos()
-    
-    return () => {
-      // 다른 페이지로 이동할 때 원래대로 복구 (필요한 경우)
-      // document.body.style.overflowY = 'hidden'
-      // document.documentElement.style.overflowY = 'hidden'
-    }
+
+    return () => {}
   }, [])
 
-
-  // 프린트 수량 변경
   const handleQuantityChange = (photoId, quantity) => {
     const num = parseInt(quantity) || 1
-    setPrintQuantities(prev => ({
+    setPrintQuantities((prev) => ({
       ...prev,
-      [photoId]: Math.max(1, Math.min(100, num)) // 1~100 사이로 제한
+      [photoId]: Math.max(1, Math.min(100, num)),
     }))
   }
 
-  // 프린트 실행
   const handlePrint = async (photo) => {
     const quantity = printQuantities[photo.id] || 1
-    
+
     if (!confirm(`${eventName}을 ${quantity}장 프린트하시겠습니까?\n\n프린터: Canon SELPHY CP1300`)) {
       return
     }
 
     try {
-      // 이미지 URL (Supabase Public URL)
       const imageUrl = photo.data || photo.imageUrl
-      
+
       if (!imageUrl) {
         alert('이미지 URL을 찾을 수 없습니다.')
         return
       }
 
-      console.log('프린트 요청:', {
-        photoId: photo.id,
-        imageUrl: imageUrl,
-        quantity: quantity
-      })
-
-      // 프린트 API 호출
-      const result = await printPhoto(imageUrl, quantity)
-      
+      await printPhoto(imageUrl, quantity)
       alert(`✅ 프린트 완료!\n\n수량: ${quantity}장\n\n프린터에서 출력을 확인해주세요.`)
-      
     } catch (error) {
       console.error('프린트 실패:', error)
       const errorMessage = error.message || '알 수 없는 오류가 발생했습니다.'
-      
+
       if (errorMessage.includes('ECONNREFUSED') || errorMessage.includes('Failed to fetch')) {
         setErrorModal({
           show: true,
           message: '서버에 연결할 수 없습니다.',
           details: '백엔드 서버가 실행 중인지 확인해주세요.',
-          instruction: '터미널에서 "npm run dev:server" 명령어로 서버를 실행해주세요.'
+          instruction: '터미널에서 "npm run dev:server" 명령어로 서버를 실행해주세요.',
         })
       } else {
         setErrorModal({
           show: true,
           message: '프린트에 실패했습니다.',
           details: `오류: ${errorMessage}`,
-          instruction: '프린터가 연결되어 있고 전원이 켜져 있는지 확인해주세요.'
+          instruction: '프린터가 연결되어 있고 전원이 켜져 있는지 확인해주세요.',
         })
       }
     }
   }
 
-  // 사진 삭제
   const handleDelete = async (photo) => {
     if (!confirm(`이 ${eventName}을 완전히 삭제하시겠습니까?\n\n삭제된 사진은 복구할 수 없습니다.`)) {
       return
     }
 
     try {
-        // Supabase Storage에서 실제로 삭제
-        await deletePhotoFromServer(photo.hash)
-        
-        // 클라이언트 상태에서도 제거
-        setPhotos(prev => prev.filter(p => p.id !== photo.id))
-        alert('✅ 삭제되었습니다.')
+      await deletePhotoFromServer(photo.hash)
+      setPhotos((prev) => prev.filter((p) => p.id !== photo.id))
+      if (previewPhoto?.id === photo.id) {
+        setPreviewPhoto(null)
+      }
+      alert('✅ 삭제되었습니다.')
     } catch (error) {
       console.error('삭제 실패:', error)
       alert('삭제에 실패했습니다: ' + error.message)
     }
   }
 
-  // 날짜 포맷팅
+  const handleCopyLink = async (photo) => {
+    const url = getResultUrl(photo.hash)
+    try {
+      await navigator.clipboard.writeText(url)
+      setCopiedHash(photo.hash)
+      setTimeout(() => setCopiedHash(''), 2000)
+    } catch {
+      prompt('링크를 복사하세요:', url)
+    }
+  }
+
+  const handleImageError = (photo, event) => {
+    if (photo.imageName === 'photo.jpg' && event.currentTarget.dataset.fallback !== '1') {
+      event.currentTarget.dataset.fallback = '1'
+      event.currentTarget.src = photo.data.replace('photo.jpg', 'photo.png')
+    }
+  }
+
   const formatDate = (dateString) => {
     try {
       const date = new Date(dateString)
@@ -137,55 +147,99 @@ function AdminPage() {
         month: '2-digit',
         day: '2-digit',
         hour: '2-digit',
-        minute: '2-digit'
+        minute: '2-digit',
       })
     } catch {
       return dateString || '날짜 정보 없음'
     }
   }
 
-  
   return (
     <div className="admin-page admin-page--nested">
       <div className="admin-header">
-        <h1>저장된 {eventName} 관리</h1>
+        <h1>Supabase 저장 {eventName}</h1>
         <p className="admin-description">
-          저장된 {eventName}을 확인하고 프린트할 수 있습니다.
+          Storage <code>photos</code> 버킷에 업로드된 사진을 확인·삭제할 수 있습니다.
+          {!loading && !loadError && (
+            <span className="admin-photo-count"> · 총 {photos.length}장</span>
+          )}
         </p>
         <button className="btn-refresh" onClick={loadPhotos} disabled={loading}>
-          {loading ? '로딩 중...' : '🔄 새로고침'}
+          {loading ? '불러오는 중...' : '새로고침'}
         </button>
       </div>
 
       <div className="admin-content">
-        {loading && photos.length === 0 ? (
+        {!supabaseReady && (
+          <div className="admin-alert admin-alert--error">
+            <p>Supabase가 연결되지 않았습니다.</p>
+            <p className="admin-alert-detail">
+              Vercel·로컬 환경에 <code>VITE_SUPABASE_URL</code>, <code>VITE_SUPABASE_ANON_KEY</code>를 설정하세요.
+            </p>
+          </div>
+        )}
+
+        {loadError && (
+          <div className="admin-alert admin-alert--error">
+            <p>{loadError}</p>
+            <button type="button" className="admin-alert-retry" onClick={loadPhotos}>
+              다시 시도
+            </button>
+          </div>
+        )}
+
+        {loading && photos.length === 0 && !loadError ? (
           <div className="loading-message">
             <div className="loading-spinner"></div>
-            <p>사진 목록을 불러오는 중...</p>
+            <p>Supabase Storage에서 사진을 불러오는 중...</p>
           </div>
-        ) : photos.length === 0 ? (
+        ) : photos.length === 0 && !loadError ? (
           <div className="empty-message">
-            <p>📷 저장된 사진이 없습니다.</p>
-            <p>{eventName}을 만들고 저장하면 여기에 표시됩니다.</p>
+            <p>저장된 사진이 없습니다.</p>
+            <p>키오스크에서 {eventName}을 만들고 QR 공유하면 Supabase에 저장됩니다.</p>
           </div>
         ) : (
           <div className="photos-grid">
             {photos.map((photo) => (
               <div key={photo.id} className="photo-card">
-                <div className="photo-image">
-                  <img 
-                    src={photo.data} 
+                <button
+                  type="button"
+                  className="photo-image photo-image--clickable"
+                  onClick={() => setPreviewPhoto(photo)}
+                  aria-label={`${eventName} 미리보기`}
+                >
+                  <img
+                    src={photo.data}
                     alt={eventName}
                     loading="lazy"
+                    onError={(e) => handleImageError(photo, e)}
                   />
-                </div>
+                </button>
                 <div className="photo-info">
-                  <h3 className="photo-name">{eventName} #{photo.id}</h3>
-                  <p className="photo-date">
-                    {formatDate(photo.timestamp)}
+                  <h3 className="photo-name" title={photo.id}>
+                    {eventName}
+                  </h3>
+                  <p className="photo-date">{formatDate(photo.timestamp || photo.createdAt)}</p>
+                  <p className="photo-hash" title={photo.hash}>
+                    ID: {photo.hash.slice(0, 8)}…
                   </p>
                 </div>
                 <div className="photo-actions">
+                  <a
+                    className="btn-link"
+                    href={getResultUrl(photo.hash)}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    결과 페이지
+                  </a>
+                  <button
+                    type="button"
+                    className="btn-link btn-link--secondary"
+                    onClick={() => handleCopyLink(photo)}
+                  >
+                    {copiedHash === photo.hash ? '복사됨' : '링크 복사'}
+                  </button>
                   {printEnabled && (
                     <div className="print-controls">
                       <label>프린트 수량:</label>
@@ -197,19 +251,13 @@ function AdminPage() {
                         onChange={(e) => handleQuantityChange(photo.id, e.target.value)}
                         className="quantity-input"
                       />
-                      <button
-                        className="btn-print"
-                        onClick={() => handlePrint(photo)}
-                      >
-                        🖨️ 프린트
+                      <button className="btn-print" onClick={() => handlePrint(photo)}>
+                        프린트
                       </button>
                     </div>
                   )}
-                  <button
-                    className="btn-delete"
-                    onClick={() => handleDelete(photo)}
-                  >
-                    🗑️ 삭제
+                  <button className="btn-delete" onClick={() => handleDelete(photo)}>
+                    삭제
                   </button>
                 </div>
               </div>
@@ -218,7 +266,28 @@ function AdminPage() {
         )}
       </div>
 
-      {/* 에러 모달 */}
+      {previewPhoto && (
+        <div className="admin-preview-overlay" onClick={() => setPreviewPhoto(null)}>
+          <div className="admin-preview-modal" onClick={(e) => e.stopPropagation()}>
+            <button
+              type="button"
+              className="admin-preview-close"
+              onClick={() => setPreviewPhoto(null)}
+              aria-label="닫기"
+            >
+              ×
+            </button>
+            <img src={previewPhoto.data} alt={eventName} />
+            <div className="admin-preview-meta">
+              <p>{formatDate(previewPhoto.timestamp || previewPhoto.createdAt)}</p>
+              <a href={getResultUrl(previewPhoto.hash)} target="_blank" rel="noopener noreferrer">
+                결과 페이지 열기
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
+
       {errorModal.show && (
         <div className="error-modal-overlay" onClick={() => setErrorModal({ show: false, message: '' })}>
           <div className="error-modal" onClick={(e) => e.stopPropagation()}>
@@ -235,7 +304,7 @@ function AdminPage() {
               )}
             </div>
             <div className="error-modal-footer">
-              <button 
+              <button
                 className="error-modal-button"
                 onClick={() => setErrorModal({ show: false, message: '' })}
               >
