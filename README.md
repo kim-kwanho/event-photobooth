@@ -4,8 +4,7 @@
 
 태블릿·노트북·키오스크에서 촬영 → 프레임 합성 → Supabase 업로드·QR 공유·로컬 갤러리까지 운영할 수 있습니다.
 
-> 저장소: [github.com/kim-kwanho/christmas_blessing](https://github.com/kim-kwanho/christmas_blessing)  
-> (권장 이름: `event-photobooth`)
+> 저장소: [github.com/kim-kwanho/event-photobooth](https://github.com/kim-kwanho/event-photobooth)
 
 ---
 
@@ -80,8 +79,8 @@ flowchart LR
 ### 설치·실행
 
 ```bash
-git clone https://github.com/kim-kwanho/christmas_blessing.git
-cd christmas_blessing
+git clone https://github.com/kim-kwanho/event-photobooth.git
+cd event-photobooth
 npm install
 cp .env.example .env
 ```
