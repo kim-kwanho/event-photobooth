@@ -53,7 +53,7 @@ VITE_ADMIN_PIN=행사용비밀번호
   "event": {
     "id": "easter-2026",
     "name": "부활절 네컷",
-    "tagline": "함께하는 부활절 인생네컷!"
+    "tagline": "함께하는 부활절 평안네컷!"
   },
   "branding": {
     "startBackground": "/assets/backgrounds/start.png"

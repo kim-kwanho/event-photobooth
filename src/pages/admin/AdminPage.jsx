@@ -6,6 +6,7 @@ import './AdminPage.css'
 function AdminPage() {
   const config = useConfig()
   const printEnabled = config.features?.print ?? false
+  const eventName = config.event.name
   const [photos, setPhotos] = useState([])
   const [loading, setLoading] = useState(true)
   const [printQuantities, setPrintQuantities] = useState({}) // { photoId: quantity }
@@ -62,7 +63,7 @@ function AdminPage() {
   const handlePrint = async (photo) => {
     const quantity = printQuantities[photo.id] || 1
     
-    if (!confirm(`인생네컷을 ${quantity}장 프린트하시겠습니까?\n\n프린터: Canon SELPHY CP1300`)) {
+    if (!confirm(`${eventName}을 ${quantity}장 프린트하시겠습니까?\n\n프린터: Canon SELPHY CP1300`)) {
       return
     }
 
@@ -110,7 +111,7 @@ function AdminPage() {
 
   // 사진 삭제
   const handleDelete = async (photo) => {
-    if (!confirm('이 인생네컷을 완전히 삭제하시겠습니까?\n\n삭제된 사진은 복구할 수 없습니다.')) {
+    if (!confirm(`이 ${eventName}을 완전히 삭제하시겠습니까?\n\n삭제된 사진은 복구할 수 없습니다.`)) {
       return
     }
 
@@ -147,9 +148,9 @@ function AdminPage() {
   return (
     <div className="admin-page admin-page--nested">
       <div className="admin-header">
-        <h1>저장된 인생네컷 관리</h1>
+        <h1>저장된 {eventName} 관리</h1>
         <p className="admin-description">
-          저장된 인생네컷을 확인하고 프린트할 수 있습니다.
+          저장된 {eventName}을 확인하고 프린트할 수 있습니다.
         </p>
         <button className="btn-refresh" onClick={loadPhotos} disabled={loading}>
           {loading ? '로딩 중...' : '🔄 새로고침'}
@@ -165,7 +166,7 @@ function AdminPage() {
         ) : photos.length === 0 ? (
           <div className="empty-message">
             <p>📷 저장된 사진이 없습니다.</p>
-            <p>인생네컷을 만들고 저장하면 여기에 표시됩니다.</p>
+            <p>{eventName}을 만들고 저장하면 여기에 표시됩니다.</p>
           </div>
         ) : (
           <div className="photos-grid">
@@ -174,12 +175,12 @@ function AdminPage() {
                 <div className="photo-image">
                   <img 
                     src={photo.data} 
-                    alt="인생네컷"
+                    alt={eventName}
                     loading="lazy"
                   />
                 </div>
                 <div className="photo-info">
-                  <h3 className="photo-name">인생네컷 #{photo.id}</h3>
+                  <h3 className="photo-name">{eventName} #{photo.id}</h3>
                   <p className="photo-date">
                     {formatDate(photo.timestamp)}
                   </p>

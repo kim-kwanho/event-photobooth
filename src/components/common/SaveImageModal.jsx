@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useConfig } from '../../config/ConfigContext'
 import {
     tryShareImage,
     dataUrlToBlob,
@@ -9,9 +10,11 @@ import {
 import './SaveImageModal.css'
 
 function SaveImageModal({ isOpen, onClose, imageSrc, filename }) {
+    const config = useConfig()
+    const eventName = config.event.name
     const [sharing, setSharing] = useState(false)
     const instructions = getSaveInstructions()
-    const saveFilename = filename || createSaveFilename()
+    const saveFilename = filename || createSaveFilename(eventName)
 
     if (!isOpen || !imageSrc) return null
 
@@ -19,7 +22,10 @@ function SaveImageModal({ isOpen, onClose, imageSrc, filename }) {
         setSharing(true)
         try {
             const blob = await dataUrlToBlob(imageSrc)
-            const { ok } = await tryShareImage(blob, saveFilename)
+            const { ok } = await tryShareImage(blob, saveFilename, {
+                title: eventName,
+                text: `나만의 ${eventName}`,
+            })
             if (ok) onClose()
         } finally {
             setSharing(false)
@@ -44,7 +50,7 @@ function SaveImageModal({ isOpen, onClose, imageSrc, filename }) {
                 <div className="save-modal-image-wrap">
                     <img
                         src={imageSrc}
-                        alt="저장할 인생네컷"
+                        alt={`저장할 ${eventName}`}
                         className="save-modal-image"
                     />
                 </div>

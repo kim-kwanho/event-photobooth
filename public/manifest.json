@@ -1,7 +1,7 @@
 {
-  "name": "Event Photobooth",
-  "short_name": "포토부스",
-  "description": "행사용 인생네컷 포토부스 키오스크",
+  "name": "평안네컷",
+  "short_name": "평안네컷",
+  "description": "허브대학부 평안다락방 · 평안네컷 포토부스",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#000000",

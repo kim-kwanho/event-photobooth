@@ -1,8 +1,11 @@
 import { useState } from 'react'
+import { useConfig } from '../../config/ConfigContext'
 import GalleryPhotoModal from './GalleryPhotoModal'
 import './SideMenu.css'
 
 function SideMenu({ isOpen, onClose, savedPhotos, onDeletePhoto }) {
+    const config = useConfig()
+    const eventName = config.event.name
     const [selectedPhoto, setSelectedPhoto] = useState(null)
 
     const handleClose = () => {
@@ -15,7 +18,7 @@ function SideMenu({ isOpen, onClose, savedPhotos, onDeletePhoto }) {
             {isOpen && <div className="side-menu-overlay" onClick={handleClose} />}
             <div className={`side-menu ${isOpen ? 'active' : ''}`}>
                 <div className="side-menu-header">
-                    <h2>저장된 인생네컷</h2>
+                    <h2>저장된 {eventName}</h2>
                     <button className="close-btn" onClick={handleClose}>✕</button>
                 </div>
                 <div className="gallery">
@@ -31,7 +34,7 @@ function SideMenu({ isOpen, onClose, savedPhotos, onDeletePhoto }) {
                                 className="gallery-item"
                                 onClick={() => setSelectedPhoto(photo)}
                             >
-                                <img src={photo.data} alt="저장된 인생네컷" />
+                                <img src={photo.data} alt={`저장된 ${eventName}`} />
                             </div>
                         ))
                     )}

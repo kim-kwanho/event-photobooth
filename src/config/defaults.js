@@ -2,7 +2,7 @@
 export const defaultEventConfig = {
     event: {
         id: 'default',
-        name: '인생네컷',
+        name: '평안네컷',
         tagline: '나만의 네 컷을 만들어보세요',
         locale: 'ko',
     },

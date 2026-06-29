@@ -7,6 +7,7 @@ import {
 } from '../lib/canvasFrame'
 import { getFilterCss } from '../lib/imageFilters'
 import FilterSelector from './common/FilterSelector'
+import { useConfig } from '../config/ConfigContext'
 import './PhotoSelectScreen.css'
 
 function PhotoSelectScreen({
@@ -26,6 +27,8 @@ function PhotoSelectScreen({
     showFrameBack = true,
     kioskMode = false,
 }) {
+    const config = useConfig()
+    const eventName = config.event.name
     const frameCanvasRef = useRef(null)
     const slotCanvasRefs = useRef([null, null, null, null])
     const dragRef = useRef(null)
@@ -492,7 +495,7 @@ function PhotoSelectScreen({
                                 onCompose()
                             }}
                         >
-                            {isComposing ? '처리 중...' : '인생네컷 만들기'}
+                            {isComposing ? '처리 중...' : `${eventName} 만들기`}
                         </button>
                     </div>
                 </aside>

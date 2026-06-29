@@ -17,7 +17,7 @@ export function getSaveButtonLabel() {
     return isMobileDevice() ? '📥 저장하기' : '📥 다운로드'
 }
 
-export function createSaveFilename(prefix = '인생네컷') {
+export function createSaveFilename(prefix = '평안네컷') {
     return `${prefix}_${Date.now()}.png`
 }
 
@@ -32,7 +32,7 @@ export async function dataUrlToBlob(dataUrl) {
     return response.blob()
 }
 
-export async function tryShareImage(blob, filename) {
+export async function tryShareImage(blob, filename, { title, text } = {}) {
     if (!navigator.share || !navigator.canShare) {
         return { ok: false, cancelled: false }
     }
@@ -44,8 +44,8 @@ export async function tryShareImage(blob, filename) {
 
     try {
         await navigator.share({
-            title: '인생네컷',
-            text: '나만의 인생네컷',
+            title: title || '평안네컷',
+            text: text || '나만의 평안네컷',
             files: [file],
         })
         return { ok: true, cancelled: false }
@@ -71,16 +71,20 @@ export function downloadBlob(blob, filename) {
  * 이미지 저장 (기기별 최적 경로)
  * @returns {'shared' | 'downloaded' | 'manual'} 처리 방식
  */
-export async function saveImage({ blob, dataUrl, filename }) {
+export async function saveImage({ blob, dataUrl, filename, eventName }) {
     const imageBlob = blob || (dataUrl ? await dataUrlToBlob(dataUrl) : null)
     if (!imageBlob) {
         throw new Error('저장할 이미지가 없습니다.')
     }
 
-    const saveFilename = filename || createSaveFilename()
+    const label = eventName || '평안네컷'
+    const saveFilename = filename || createSaveFilename(label)
 
     if (isMobileDevice()) {
-        const { ok, cancelled } = await tryShareImage(imageBlob, saveFilename)
+        const { ok, cancelled } = await tryShareImage(imageBlob, saveFilename, {
+            title: label,
+            text: `나만의 ${label}`,
+        })
         if (ok) return 'shared'
         if (!cancelled) {
             // 공유 API 미지원 → 수동 저장 모달로 안내

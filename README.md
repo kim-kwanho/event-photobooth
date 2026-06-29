@@ -6,7 +6,7 @@
 [![Vite](https://img.shields.io/badge/Vite-5-646CFF?logo=vite&logoColor=white)](https://vitejs.dev/)
 [![Supabase](https://img.shields.io/badge/Supabase-Storage-3FCF8E?logo=supabase&logoColor=white)](https://supabase.com/)
 
-**행사마다 `event.json`과 프레임 테마만 바꿔 배포하는 인생네컷 포토부스 키오스크**
+**행사마다 `event.json`과 프레임 테마만 바꿔 배포하는 평안네컷 포토부스 키오스크**
 
 [빠른 시작](#빠른-시작) · [행사 설정](#행사-설정-eventjson) · [배포 가이드](docs/SETUP.md)
 
@@ -137,7 +137,7 @@ npm run dev:all
 {
   "event": {
     "id": "peace-attic-summer-2025",
-    "name": "인생네컷",
+    "name": "평안네컷",
     "tagline": "허브대학부 평안다락방 · 여름 아웃리치",
     "locale": "ko"
   },
@@ -312,7 +312,7 @@ public/themes/
 
 | 버킷 | 용도 |
 |------|------|
-| `photos` | 완성 인생네컷 이미지 (QR 공유) |
+| `photos` | 완성 평안네컷 이미지 (QR 공유) |
 | `themes` | Admin 프레임 디자이너 JSON·로고 |
 
 ### RLS 정책

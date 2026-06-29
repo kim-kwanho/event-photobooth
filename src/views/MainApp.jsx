@@ -181,7 +181,7 @@ function MainApp() {
 
             await savePhotoToDB(db, photoData)
             setSavedPhotos([...savedPhotos, photoData])
-            alert('인생네컷이 저장되었습니다! 📸')
+            alert(`${config.event.name}이 저장되었습니다! 📸`)
         } catch (error) {
             console.error('저장 실패:', error)
             alert('저장 중 오류가 발생했습니다: ' + error.message)

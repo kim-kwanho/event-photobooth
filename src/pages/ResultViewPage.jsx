@@ -1,11 +1,14 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
+import { useConfig } from '../config/ConfigContext'
 import { getPhotoFromServer } from '../lib/api'
 import SaveImageModal from '../components/common/SaveImageModal'
 import { saveImage, getSaveButtonLabel, createSaveFilename } from '../lib/saveImage'
 import './ResultViewPage.css'
 
 function ResultViewPage() {
+    const config = useConfig()
+    const eventName = config.event.name
     const { id: hash } = useParams()
     const [photoData, setPhotoData] = useState(null)
     const [loading, setLoading] = useState(true)
@@ -38,10 +41,10 @@ function ResultViewPage() {
     const handleDownload = async () => {
         if (!photoData) return
 
-        const filename = createSaveFilename(`인생네컷_${photoData.id}`)
+        const filename = createSaveFilename(`${eventName}_${photoData.id}`)
 
         try {
-            const result = await saveImage({ dataUrl: photoData.data, filename })
+            const result = await saveImage({ dataUrl: photoData.data, filename, eventName })
 
             if (result === 'manual') {
                 setSaveModalOpen(true)
@@ -57,7 +60,7 @@ function ResultViewPage() {
             <div className="result-view-page">
                 <div className="loading-container">
                     <div className="loading-spinner"></div>
-                    <p>인생네컷을 불러오는 중...</p>
+                    <p>{eventName}을 불러오는 중...</p>
                 </div>
             </div>
         )
@@ -68,7 +71,7 @@ function ResultViewPage() {
             <div className="result-view-page">
                 <div className="error-container">
                     <h2>❌ 오류</h2>
-                    <p>{error || '인생네컷을 찾을 수 없습니다.'}</p>
+                    <p>{error || `${eventName}을 찾을 수 없습니다.`}</p>
                 </div>
             </div>
         )
@@ -77,9 +80,9 @@ function ResultViewPage() {
     return (
         <div className="result-view-page">
             <div className="result-view-container">
-                <h1>인생네컷</h1>
+                <h1>{eventName}</h1>
                 <div className="result-view-image">
-                    <img src={photoData.data} alt="인생네컷" />
+                    <img src={photoData.data} alt={eventName} />
                 </div>
                 <div className="result-view-controls">
                     <button className="btn btn-primary" onClick={handleDownload}>
@@ -92,7 +95,7 @@ function ResultViewPage() {
                 isOpen={saveModalOpen}
                 onClose={() => setSaveModalOpen(false)}
                 imageSrc={photoData.data}
-                filename={createSaveFilename(`인생네컷_${photoData.id}`)}
+                filename={createSaveFilename(`${eventName}_${photoData.id}`)}
             />
         </div>
     )

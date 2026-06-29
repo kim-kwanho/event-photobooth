@@ -213,10 +213,14 @@ function ResultScreen({ frame, selectedPhotos, photoTransforms, photoFilter = 'n
         if (!canvas) return
 
         const imageData = canvas.toDataURL('image/png')
-        const filename = createSaveFilename()
+        const filename = createSaveFilename(config.event.name)
 
         try {
-            const result = await saveImage({ dataUrl: imageData, filename })
+            const result = await saveImage({
+                dataUrl: imageData,
+                filename,
+                eventName: config.event.name,
+            })
 
             if (result === 'manual') {
                 setSaveImageSrc(imageData)

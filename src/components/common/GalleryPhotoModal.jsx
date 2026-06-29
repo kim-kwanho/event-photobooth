@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useConfig } from '../../config/ConfigContext'
 import { saveImage, getSaveButtonLabel } from '../../lib/saveImage'
 import SaveImageModal from './SaveImageModal'
 import './GalleryPhotoModal.css'
@@ -18,6 +19,8 @@ function formatDate(dateString) {
 }
 
 function GalleryPhotoModal({ photo, onClose, onDelete }) {
+    const config = useConfig()
+    const eventName = config.event.name
     const [saveModalOpen, setSaveModalOpen] = useState(false)
     const [deleting, setDeleting] = useState(false)
 
@@ -25,7 +28,7 @@ function GalleryPhotoModal({ photo, onClose, onDelete }) {
 
     const handleSave = async () => {
         try {
-            const result = await saveImage({ dataUrl: photo.data })
+            const result = await saveImage({ dataUrl: photo.data, eventName })
             if (result === 'manual') {
                 setSaveModalOpen(true)
             }
@@ -35,7 +38,7 @@ function GalleryPhotoModal({ photo, onClose, onDelete }) {
     }
 
     const handleDelete = async () => {
-        if (!confirm('이 인생네컷을 갤러리에서 삭제할까요?')) return
+        if (!confirm(`이 ${eventName}을 갤러리에서 삭제할까요?`)) return
 
         setDeleting(true)
         try {
@@ -54,13 +57,13 @@ function GalleryPhotoModal({ photo, onClose, onDelete }) {
                         ✕
                     </button>
 
-                    <h3>저장된 인생네컷</h3>
+                    <h3>저장된 {eventName}</h3>
                     {photo.timestamp && (
                         <p className="gallery-modal-date">{formatDate(photo.timestamp)}</p>
                     )}
 
                     <div className="gallery-modal-image-wrap">
-                        <img src={photo.data} alt="저장된 인생네컷" />
+                        <img src={photo.data} alt={`저장된 ${eventName}`} />
                     </div>
 
                     <div className="gallery-modal-actions">
