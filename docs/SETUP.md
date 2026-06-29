@@ -110,7 +110,7 @@ npm run dev:all
 
 ## 6. Vercel 배포
 
-**프로덕션 도메인:** https://photobooth-kwanho-kims-projects-ab5d8261.vercel.app
+**프로덕션 도메인:** https://event-photobooth-kwanho.vercel.app
 
 1. GitHub에 push
 2. Vercel → **Import Project** (또는 기존 `event-photobooth` 연결)
@@ -118,25 +118,14 @@ npm run dev:all
    - `VITE_SUPABASE_URL`
    - `VITE_SUPABASE_ANON_KEY`
    - `VITE_ADMIN_PIN`
-   - `VITE_APP_URL` = `https://photobooth-kwanho-kims-projects-ab5d8261.vercel.app` (QR·공유 링크용)
+   - `VITE_APP_URL` = `https://event-photobooth-kwanho.vercel.app` (QR·공유 링크용)
 4. Deploy
 
-### Vercel 도메인 안내
+### Vercel 도메인
 
-`photobooth.vercel.app` 은 **전 세계 Vercel 계정 중 하나만** 쓸 수 있는 이름이라, 이미 다른 프로젝트가 사용 중이면 추가가 거절됩니다.
+**프로덕션:** `event-photobooth-kwanho.vercel.app` (Primary)
 
-**지금 쓰는 주소 (자동 발급):**
-`https://photobooth-kwanho-kims-projects-ab5d8261.vercel.app`
-
-**더 짧은 이름을 원하면** Domains에서 아래를 **Add** 해 보세요 (비어 있으면 사용 가능):
-
-| 시도할 도메인 | 비고 |
-|---------------|------|
-| `kwanho-photobooth.vercel.app` | 개인 식별 |
-| `peace-attic.vercel.app` | 평안다락방 행사명 |
-| `event-photobooth-kwanho.vercel.app` | 프로젝트명 조합 |
-
-추가에 성공하면 **Settings → Environment Variables** 의 `VITE_APP_URL` 을 새 주소로 바꾸고 **Redeploy** 하세요.
+`photobooth.vercel.app` 처럼 짧은 이름은 전역에서 하나만 사용 가능해, 이미 선점된 경우 Domains 추가가 거절됩니다.
 
 배포 후 QR·공유 링크는 `VITE_APP_URL` 또는 접속 중인 origin 을 사용합니다.
 

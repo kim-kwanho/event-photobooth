@@ -350,13 +350,11 @@ Supabase에서 프레임을 불러오려면 `event.json`에 추가:
 
 ### Vercel (프론트 + 정적 설정)
 
-**도메인:** https://photobooth-kwanho-kims-projects-ab5d8261.vercel.app
-
-> `photobooth.vercel.app` 은 다른 계정이 이미 사용 중이라 추가할 수 없습니다.
+**도메인:** https://event-photobooth-kwanho.vercel.app
 
 1. GitHub push
 2. Vercel Import → Environment Variables에 `VITE_*` 등록
-3. **`VITE_APP_URL`** = 위 프로덕션 도메인 (QR 링크용)
+3. **`VITE_APP_URL`** = `https://event-photobooth-kwanho.vercel.app` (QR 링크용)
 4. Deploy
 
 도메인·대안 이름은 [docs/SETUP.md](docs/SETUP.md#6-vercel-배포) 참고.
