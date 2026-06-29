@@ -21,7 +21,6 @@ function AdminPage() {
 
   const loadPhotos = async () => {
     if (!supabaseReady) {
-      setLoadError('Supabase 환경변수가 설정되지 않았습니다. VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY를 확인하세요.')
       setPhotos([])
       setLoading(false)
       return
