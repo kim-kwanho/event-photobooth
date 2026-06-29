@@ -1,7 +1,19 @@
 # Event Photobooth
 
-행사마다 **`public/config/event.json`** 과 **프레임 테마 JSON** 만 바꿔 배포하는 인생네컷(4컷) 포토부스 키오스크 템플릿입니다.
+<div align="center">
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![React](https://img.shields.io/badge/React-18-61DAFB?logo=react&logoColor=black)](https://react.dev/)
+[![Vite](https://img.shields.io/badge/Vite-5-646CFF?logo=vite&logoColor=white)](https://vitejs.dev/)
+[![Supabase](https://img.shields.io/badge/Supabase-Storage-3FCF8E?logo=supabase&logoColor=white)](https://supabase.com/)
+
+**행사마다 `event.json`과 프레임 테마만 바꿔 배포하는 인생네컷 포토부스 키오스크**
+
+[빠른 시작](#빠른-시작) · [행사 설정](#행사-설정-eventjson) · [배포 가이드](docs/SETUP.md)
+
+</div>
+
+<br/>
 태블릿·노트북·키오스크에서 촬영 → 프레임 합성 → Supabase 업로드·QR 공유·로컬 갤러리까지 운영할 수 있습니다.
 
 > 저장소: [github.com/kim-kwanho/event-photobooth](https://github.com/kim-kwanho/event-photobooth)
