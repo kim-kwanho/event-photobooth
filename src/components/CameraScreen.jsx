@@ -107,15 +107,26 @@ function CameraScreen({
         console.log('비디오 요소 확인됨:', video)
 
         try {
-            // pica 부스 방식: 항상 가장 간단한 제약 조건 사용
-            // Safari/iOS에서는 { video: true }만 사용하는 것이 가장 안전
-            const constraints = { video: true }
+            // iOS Safari: 전면 카메라 지정 (video: true만 쓰면 비율/방향이 어긋날 수 있음)
+            const constraints = (isMobileDevice() || isSafari())
+                ? { video: { facingMode: 'user' }, audio: false }
+                : { video: true }
             
             console.log('카메라 제약 조건:', constraints)
             console.log('getUserMedia 호출 전...')
             
-            // getUserMedia 호출
-            const stream = await getUserMedia(constraints)
+            let stream
+            try {
+                stream = await getUserMedia(constraints)
+            } catch (firstError) {
+                const usedFacingMode = constraints.video?.facingMode
+                if (usedFacingMode) {
+                    console.warn('전면 카메라 제약 실패, 기본 설정으로 재시도:', firstError)
+                    stream = await getUserMedia({ video: true })
+                } else {
+                    throw firstError
+                }
+            }
             
             if (!stream) {
                 throw new Error('스트림을 가져올 수 없습니다.')
@@ -299,6 +310,9 @@ function CameraScreen({
         canvas.height = videoHeight
 
         const ctx = canvas.getContext('2d')
+        // 미리보기와 동일하게 좌우 반전 (셀피)
+        ctx.translate(videoWidth, 0)
+        ctx.scale(-1, 1)
         ctx.drawImage(video, 0, 0, videoWidth, videoHeight)
 
         return canvas.toDataURL('image/jpeg', captureQuality)
@@ -413,14 +427,18 @@ function CameraScreen({
                 </div>
 
                 <div className="camera-preview-wrapper">
-                    {/* 비디오 요소는 항상 렌더링 (ref 연결을 위해) */}
-                    <video
-                        ref={videoRef}
-                        autoPlay
-                        playsInline
-                        muted
-                        className={`camera-preview ${cameraStatus !== 'active' ? 'hidden' : ''}`}
-                    />
+                    {/* Safari: transform은 video가 아닌 wrapper에 적용해야 object-fit이 유지됨 */}
+                    <div
+                        className={`camera-preview-mirror${cameraStatus !== 'active' ? ' hidden' : ''}`}
+                    >
+                        <video
+                            ref={videoRef}
+                            autoPlay
+                            playsInline
+                            muted
+                            className="camera-preview"
+                        />
+                    </div>
                     
                     {/* 카메라가 활성화되지 않았을 때 placeholder 표시 */}
                     {cameraStatus !== 'active' && (
