@@ -156,10 +156,11 @@
 
     .camera-preview-wrapper {
         width: 100%;
-        flex: 1 1 auto;
+        flex: 0 0 auto;
         margin-bottom: 8px;
-        max-height: none;
-        /* 비율 제약 제거 */
+        aspect-ratio: 3 / 4;
+        max-height: calc(100dvh - 200px);
+        align-self: center;
     }
 
     .countdown-number {
@@ -242,7 +243,8 @@
     }
 
     .camera-preview-wrapper {
-        min-height: 700px;
+        aspect-ratio: 3 / 4;
+        min-height: 0;
         max-height: 800px;
     }
 
@@ -283,9 +285,10 @@
     margin-bottom: 0;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
     min-height: 0;
-    flex: 1 1 auto;
+    flex: 0 0 auto;
     aspect-ratio: 3 / 4; /* 인생네컷 비율 (3:4) */
     max-width: 100%;
+    align-self: center;
 }
 
 /* 태블릿 이상에서도 비율 제약 없이 크게 */
@@ -310,10 +313,16 @@
     z-index: 0;
 }
 
+/* Safari: width/height 100%만 쓰면 object-fit이 깨질 수 있어 cover 패턴 사용 */
 .camera-preview {
-    display: block;
-    width: 100%;
-    height: 100%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    min-width: 100%;
+    min-height: 100%;
+    width: auto;
+    height: auto;
+    transform: translate(-50%, -50%);
     object-fit: cover;
     object-position: center center;
     background: #000;
@@ -509,16 +518,16 @@
     .camera-screen {
         padding: 5px;
         overflow: hidden !important;
-        height: 100vh !important;
-        max-height: 100vh !important;
+        height: 100dvh !important;
+        max-height: 100dvh !important;
     }
 
     .camera-container {
         padding: 6px !important;
         border-radius: 8px;
-        height: calc(100vh - 10px) !important;
-        max-height: calc(100vh - 10px) !important;
-        min-height: calc(100vh - 10px) !important;
+        height: calc(100dvh - 10px) !important;
+        max-height: calc(100dvh - 10px) !important;
+        min-height: calc(100dvh - 10px) !important;
         display: flex !important;
         flex-direction: column !important;
         gap: 0 !important;
@@ -550,11 +559,11 @@
 
     .camera-preview-wrapper {
         margin-bottom: 0 !important;
-        margin-top: 0 !important;
-        flex: 1 1 auto !important;
+        margin-top: auto !important;
+        flex: 0 0 auto !important;
         width: 100%;
         height: auto !important;
-        max-height: none !important;
+        max-height: calc(100dvh - 140px) !important;
         aspect-ratio: 3 / 4;
         align-self: center;
         overflow: hidden !important;
@@ -563,7 +572,7 @@
 
     .camera-controls {
         padding: 4px 0 !important;
-        margin-top: 0 !important;
+        margin-top: auto !important;
         margin-bottom: 0 !important;
         height: 90px !important;
         min-height: 90px !important;
@@ -604,15 +613,15 @@
     .camera-screen {
         padding: 3px;
         overflow: hidden !important;
-        height: 100vh !important;
-        max-height: 100vh !important;
+        height: 100dvh !important;
+        max-height: 100dvh !important;
     }
 
     .camera-container {
         padding: 5px !important;
-        height: calc(100vh - 6px) !important;
-        max-height: calc(100vh - 6px) !important;
-        min-height: calc(100vh - 6px) !important;
+        height: calc(100dvh - 6px) !important;
+        max-height: calc(100dvh - 6px) !important;
+        min-height: calc(100dvh - 6px) !important;
         display: flex !important;
         flex-direction: column !important;
         gap: 0 !important;
@@ -643,11 +652,11 @@
 
     .camera-preview-wrapper {
         margin-bottom: 0 !important;
-        margin-top: 0 !important;
-        flex: 1 1 auto !important;
+        margin-top: auto !important;
+        flex: 0 0 auto !important;
         width: 100%;
         height: auto !important;
-        max-height: none !important;
+        max-height: calc(100dvh - 150px) !important;
         aspect-ratio: 3 / 4;
         align-self: center;
         overflow: hidden !important;
@@ -705,6 +714,7 @@
     flex: 1;
     display: flex;
     flex-direction: column;
+    justify-content: center;
     max-width: 720px;
     margin: 0 auto;
     width: 100%;
@@ -737,7 +747,7 @@
 }
 
 .camera-screen--kiosk .camera-preview-wrapper {
-    flex: 1 1 auto;
+    flex: 0 0 auto;
     width: 100%;
     height: auto;
     aspect-ratio: 3 / 4;
@@ -746,6 +756,8 @@
     overflow: hidden;
     min-height: 0;
     max-width: min(100%, calc((100dvh - 220px) * 3 / 4));
+    max-height: calc(100dvh - 220px);
+    margin: auto 0;
 }
 
 .btn-capture--hero {

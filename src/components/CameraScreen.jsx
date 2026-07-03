@@ -107,9 +107,17 @@ function CameraScreen({
         console.log('비디오 요소 확인됨:', video)
 
         try {
-            // iOS Safari: 전면 카메라 지정 (video: true만 쓰면 비율/방향이 어긋날 수 있음)
+            // iOS Safari: 전면 카메라 + 3:4 비율 요청 (스트림·컨테이너 비율 맞춤)
             const constraints = (isMobileDevice() || isSafari())
-                ? { video: { facingMode: 'user' }, audio: false }
+                ? {
+                    video: {
+                        facingMode: 'user',
+                        aspectRatio: { ideal: 0.75 },
+                        width: { ideal: 720 },
+                        height: { ideal: 960 },
+                    },
+                    audio: false,
+                }
                 : { video: true }
             
             console.log('카메라 제약 조건:', constraints)
@@ -183,7 +191,13 @@ function CameraScreen({
                 
                 // 여러 이벤트로 확인
                 video.addEventListener('loadedmetadata', () => {
-                    console.log('비디오 메타데이터 로드됨')
+                    console.log('비디오 메타데이터 로드됨', {
+                        videoWidth: video.videoWidth,
+                        videoHeight: video.videoHeight,
+                        aspect: video.videoWidth / video.videoHeight,
+                        clientWidth: video.clientWidth,
+                        clientHeight: video.clientHeight,
+                    })
                 }, { once: true })
                 
                 video.addEventListener('loadeddata', () => {
