@@ -107,14 +107,12 @@ function CameraScreen({
         console.log('비디오 요소 확인됨:', video)
 
         try {
-            // iOS Safari: 전면 카메라 + 3:4 비율 요청 (스트림·컨테이너 비율 맞춤)
+            // iOS Safari: 전면 카메라 + 3:4 비율 힌트 (해상도는 기기 기본값 사용)
             const constraints = (isMobileDevice() || isSafari())
                 ? {
                     video: {
                         facingMode: 'user',
                         aspectRatio: { ideal: 0.75 },
-                        width: { ideal: 720 },
-                        height: { ideal: 960 },
                     },
                     audio: false,
                 }
