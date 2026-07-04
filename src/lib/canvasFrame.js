@@ -920,48 +920,98 @@ export function drawBottomText(ctx, frame, width, height, options = {}) {
     })
 }
 
-/** 하단 이미지 (비동기) */
-export function drawBottomImage(ctx, frame, width, height, options = {}) {
-    const { scaleFrom200 = false } = options
-    if (!frame.layout.bottomImage) return
+const bottomImageCache = new Map()
 
+/** 하단 로고 이미지 프리로드 */
+export function loadBottomImage(src) {
+    if (!src) return Promise.resolve(null)
+
+    const cached = bottomImageCache.get(src)
+    if (cached?.complete && cached.naturalWidth > 0) {
+        return Promise.resolve(cached)
+    }
+
+    if (cached) {
+        return new Promise((resolve) => {
+            cached.addEventListener('load', () => resolve(cached), { once: true })
+            cached.addEventListener('error', () => resolve(null), { once: true })
+        })
+    }
+
+    return new Promise((resolve) => {
+        const img = new Image()
+        img.crossOrigin = 'anonymous'
+        img.onload = () => resolve(img)
+        img.onerror = () => resolve(null)
+        img.src = src
+        bottomImageCache.set(src, img)
+    })
+}
+
+/** 프레임 하단 이미지 에셋 프리로드 */
+export async function preloadFrameAssets(frames) {
+    const list = Array.isArray(frames) ? frames : [frames]
+    await Promise.all(
+        list.map((frame) => loadBottomImage(frame?.layout?.bottomImage))
+    )
+}
+
+function paintBottomImage(ctx, frame, width, height, logoImg, options = {}) {
+    const { scaleFrom200 = false } = options
     const metrics = computeFrameInner(frame, width, height, { scaleFrom200 })
     const { frameBorderWidth, bottomHeight, bottomY } = metrics
 
-    const logoImg = new Image()
-    logoImg.crossOrigin = 'anonymous'
-    logoImg.onload = () => {
-        const barX = frameBorderWidth
-        const barW = width - frameBorderWidth * 2
-        const barH = bottomHeight
-        const barY = bottomY
+    const barX = frameBorderWidth
+    const barW = width - frameBorderWidth * 2
+    const barH = bottomHeight
+    const barY = bottomY
 
-        let drawWidth, drawHeight, drawX, drawY
+    let drawWidth, drawHeight, drawX, drawY
 
-        if (frame.layout.bottomImageCovers) {
-            drawX = barX
-            drawY = barY
-            drawWidth = barW
-            drawHeight = barH
-        } else {
-            const imgAspect = logoImg.width / logoImg.height
-            const bottomAspect = width / bottomHeight
+    if (frame.layout.bottomImageCovers) {
+        drawX = barX
+        drawY = barY
+        drawWidth = barW
+        drawHeight = barH
+    } else {
+        const imgAspect = logoImg.width / logoImg.height
 
-            if (imgAspect > bottomAspect) {
-                drawWidth = width * 0.9
-                drawHeight = drawWidth / imgAspect
-            } else {
-                drawHeight = bottomHeight * 0.8
-                drawWidth = drawHeight * imgAspect
-            }
+        drawHeight = bottomHeight * 0.85
+        drawWidth = drawHeight * imgAspect
 
-            drawX = (width - drawWidth) / 2
-            drawY = bottomY + (bottomHeight - drawHeight) / 2
+        if (drawWidth > barW * 0.92) {
+            drawWidth = barW * 0.92
+            drawHeight = drawWidth / imgAspect
         }
 
-        ctx.drawImage(logoImg, drawX, drawY, drawWidth, drawHeight)
+        drawX = (width - drawWidth) / 2
+        drawY = bottomY + (bottomHeight - drawHeight) / 2
     }
-    logoImg.src = frame.layout.bottomImage
+
+    ctx.drawImage(logoImg, drawX, drawY, drawWidth, drawHeight)
+}
+
+/** 하단 이미지 (비동기 — onComplete 콜백으로 재그리기 지원) */
+export function drawBottomImage(ctx, frame, width, height, options = {}) {
+    if (!frame.layout.bottomImage) return
+
+    const { onComplete } = options
+    const src = frame.layout.bottomImage
+    const cached = bottomImageCache.get(src)
+
+    if (cached?.complete && cached.naturalWidth > 0) {
+        paintBottomImage(ctx, frame, width, height, cached, options)
+        return
+    }
+
+    loadBottomImage(src).then((logoImg) => {
+        if (!logoImg) {
+            onComplete?.()
+            return
+        }
+        paintBottomImage(ctx, frame, width, height, logoImg, options)
+        onComplete?.()
+    })
 }
 
 /** 프레임 테두리 + 십자선 + 하단 장식 (사진 위에 그리기) */
@@ -981,7 +1031,10 @@ export function drawFrameOverlay(ctx, frame, width, height, options = {}) {
     }
 
     if (frame.layout.bottomImage) {
-        drawBottomImage(ctx, frame, width, height, { scaleFrom200 })
+        drawBottomImage(ctx, frame, width, height, {
+            scaleFrom200,
+            onComplete: options.onBottomImageDrawn,
+        })
     } else {
         drawBottomText(ctx, frame, width, height, { scaleFrom200 })
     }

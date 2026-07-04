@@ -13,10 +13,9 @@
         "frameColor": "#0F2847",
         "frameWidth": 20,
         "slotColor": "#FFFBF5",
-        "bottomText": "Hope",
+        "bottomImage": "/themes/peace-attic-summer/hope-logo-bottom.png",
         "textColor": "#FFFFFF",
         "fontFamily": "Inter, sans-serif",
-        "logoStyle": true,
         "accentColor": "#D4A853",
         "crossLineColor": "#2A4A6F",
         "crossLineWidth": 7
@@ -32,12 +31,18 @@
           { "x": 0, "y": 0.5, "width": 0.5, "height": 0.5 },
           { "x": 0.5, "y": 0.5, "width": 0.5, "height": 0.5 }
         ],
-        "frameColor": "#0369A1",
+        "frameColor": "#0284C7",
         "frameWidth": 20,
         "slotColor": "#F0F9FF",
         "bottomGradient": ["#38BDF8", "#0284C7"],
         "bottomPattern": "waves",
         "patternColor": "rgba(255,255,255,0.5)",
+        "bottomText": "SUMMER SKY",
+        "textColor": "#FFFFFF",
+        "fontFamily": "Inter, sans-serif",
+        "accentColor": "#FBBF24",
+        "themeDecor": "sun",
+        "themeDecor2": "cloud",
         "crossLineColor": "#7DD3FC",
         "crossLineWidth": 7
       }
@@ -60,11 +65,11 @@
         "bottomPattern": "paper",
         "patternColor": "rgba(120,80,50,0.1)",
         "stampText": "ENTRY\nKOR",
-        "stampDate": "2025",
+        "stampDate": "2026",
         "passportSeal": "PASSPORT",
         "passportMrz": [
           "P<KOR<<<<<<<<<<<<<<<<<<<<<<<<<<<<",
-          "A0<<<<20250629<<<<<<<<<<<<<<<<<<<"
+          "A0<<<<20260703<<<<<<<<<<<<<<<<<<<"
         ],
         "textColor": "#7C2D12",
         "accentColor": "#C45C4A",

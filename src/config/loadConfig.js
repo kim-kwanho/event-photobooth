@@ -1,5 +1,6 @@
 import { defaultEventConfig } from './defaults'
 import { loadThemeFrames } from '../lib/loadFrames'
+import { preloadFrameAssets } from '../lib/canvasFrame'
 
 function deepMerge(target, source) {
     const result = { ...target }
@@ -30,5 +31,6 @@ export async function loadEventConfig() {
     }
 
     const frames = await loadThemeFrames(config.theme)
+    await preloadFrameAssets(frames)
     return { ...config, frames }
 }

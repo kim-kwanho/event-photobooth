@@ -180,7 +180,6 @@ npm run dev:all
   "theme": {
     "id": "peace-attic-summer",
     "framesPath": "/themes/peace-attic-summer/frames.json",
-    "framesStorage": "local",
     "defaultFrameId": 1
   },
   "kiosk": {
@@ -235,21 +234,33 @@ npm run dev:all
 
 ```
 public/themes/
-  peace-attic-summer/frames.json   # 현재 행사 테마 (6종)
-  christmas/frames.json            # 크리스마스 예시
-  default/frames.json                # 최소 예시
+  peace-attic-summer/
+    frames.json                 # 현재 행사 테마 (6종)
+    hope-logo-bottom.png        # Hope 프레임 하단 로고 (투명 PNG)
+    02_Summer_Sky_MASTER.svg    # Summer Sky Figma import용 마스터
+  christmas/frames.json         # 크리스마스 예시
+  default/frames.json           # 최소 예시
 ```
 
 ### 현재 테마 `peace-attic-summer` 프레임
 
 | ID | 이름 | 특징 |
 |----|------|------|
-| 1 | Hope | 네이비 테두리, 하단 Hope 로고 (`logoStyle`) |
-| 2 | Summer Sky | 하늘색 하단 그라데이션 + 물결 |
+| 1 | Hope | 네이비 `#0F2847`, 하단 **Hope Builders** 로고 (`bottomImage`) |
+| 2 | Summer Sky | 하늘색 테두리·슬롯, 하단 그라데이션 + 물결, `SUMMER SKY` 텍스트, 태양·구름 장식 |
 | 3 | Passport | 여권 스탬프·MRZ·VISA 마크 (`bottomStyle: "passport"`) |
 | 4 | Sunset | 노을 그라데이션 + 별 패턴 |
 | 5 | Retro Film | 필름 톤 + `35mm` 하단 텍스트 |
 | 6 | Ocean | 민트 그라데이션 + 물결 |
+
+### Figma 디자인 파일
+
+| 프레임 | Figma |
+|--------|-------|
+| Hope (`01_Hope_MASTER`) | [평안네컷_프레임_2026_복사본](https://www.figma.com/design/4BaFuJTnezKkJKBDx15yxm) (편집 가능 복사본) |
+| Summer Sky | `public/themes/peace-attic-summer/02_Summer_Sky_MASTER.svg` → Figma에 import |
+
+원본 마스터 파일 권한이 없을 때는 복사본 파일에서 직접 수정하거나, SVG를 Figma에 드래그해 넣으면 됩니다.
 
 ### 새 테마 만들기
 
@@ -294,15 +305,17 @@ public/themes/
 
 | 필드 | 설명 |
 |------|------|
-| `bottomText` + `logoStyle` | Hope 스타일 하단 로고 (타원·별) |
+| `bottomImage` | 하단 로고 PNG 경로 (`bottomText`·`logoStyle`보다 우선). 앱 시작 시 프리로드 |
+| `bottomImageCovers` | `true`면 하단 바 전체를 이미지로 채움 |
+| `bottomText` + `logoStyle` | Canvas로 그리는 Hope 스타일 (타원·별). `bottomImage` 없을 때 |
 | `bottomStyle: "passport"` | 여권 하단 (스탬프·MRZ·`stampText`·`passportMrz`) |
 | `bottomGradient` / `bottomColor` | 하단 바 배경 |
 | `bottomPattern` | `waves`, `stars`, `dots`, `paper` |
 | `frameStyle: "ring"` | 사진 영역을 둘러싼 링 테두리 (하단 바 없을 때) |
 | `frameGradient` | 링/테두리 그라데이션 |
-| `themeDecor` | `sun`, `cloud`, `stamp`, `sunset` 등 코너 장식 |
+| `themeDecor` / `themeDecor2` | `sun`, `cloud`, `stamp`, `sunset` 등 테두리 코너 장식 (최대 2개) |
 
-렌더링 로직: [`src/lib/canvasFrame.js`](src/lib/canvasFrame.js)
+렌더링·로고 프리로드: [`src/lib/canvasFrame.js`](src/lib/canvasFrame.js) · [`src/config/loadConfig.js`](src/config/loadConfig.js)
 
 ---
 
@@ -378,9 +391,10 @@ Supabase에서 프레임을 불러오려면 `event.json`에 추가:
 
 ```
 ├── public/
-│   ├── config/event.json       # 행사 설정 ★
-│   ├── themes/*/frames.json    # 프레임 테마
-│   └── assets/backgrounds/     # 시작 화면 배경
+│   ├── config/event.json              # 행사 설정 ★
+│   ├── themes/*/frames.json           # 프레임 테마
+│   ├── themes/*/hope-logo-bottom.png  # Hope 하단 로고 등 에셋
+│   └── assets/backgrounds/            # 시작 화면 배경
 ├── src/
 │   ├── config/                 # loadConfig, ConfigContext, defaults
 │   ├── hooks/                  # useBoothFlow, useKioskMode
@@ -426,6 +440,9 @@ Supabase에서 프레임을 불러오려면 `event.json`에 추가:
 | Admin 진입 불가 | `VITE_ADMIN_PIN` 일치 여부 |
 | QR 링크 404 | `VITE_APP_URL` 또는 배포 도메인, `photos` Public URL |
 | 카메라 안 됨 | HTTPS 또는 localhost, 브라우저 권한 |
+| iPhone Safari 미리보기 왜곡 | `facingMode: 'user'`·`aspectRatio: 0.75` 적용됨. 여전히 문제면 Safari 캐시 삭제 후 재접속 |
+| iPhone 촬영 화질 저하 | `getUserMedia`에 `width`/`height` ideal 제한을 두지 않음 (고해상도 유지) |
+| 하단 로고가 안 보임 | `bottomImage` 경로·PNG 존재 여부. 강력 새로고침 |
 | 프레임이 안 바뀜 | `framesPath` 경로, `framesStorage` 설정, 캐시 새로고침 |
 | 갤러리 비어 있음 | 결과 화면까지 완료해야 IndexedDB 저장 |
 
