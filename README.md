@@ -456,4 +456,4 @@ React 18 · Vite 5 · React Router 6 · Express 5 · Supabase Storage · Canvas 
 
 ## 라이선스
 
-MIT
+MIT,
