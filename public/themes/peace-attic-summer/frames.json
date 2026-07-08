@@ -5,7 +5,7 @@
       "name": "Hope",
       "layout": {
         "frameStyle": "overlay",
-        "frameOverlayImage": "/themes/peace-attic-summer/01-hope-overlay.png",
+        "frameOverlayImage": "https://kmlgfluephsybivcasuy.supabase.co/storage/v1/object/public/themes/peace-attic-summer/01-hope-overlay.png",
         "overlayKnockout": false,
         "slots": [
           { "x": 0.016667, "y": 0.0125, "width": 0.48, "height": 0.451875 },
@@ -23,7 +23,7 @@
       "name": "Peace",
       "layout": {
         "frameStyle": "overlay",
-        "frameOverlayImage": "/themes/peace-attic-summer/02-peace-overlay.png",
+        "frameOverlayImage": "https://kmlgfluephsybivcasuy.supabase.co/storage/v1/object/public/themes/peace-attic-summer/02-peace-overlay.png",
         "overlayKnockout": false,
         "slots": [
           { "x": 0.016667, "y": 0.0125, "width": 0.480833, "height": 0.451875 },
@@ -41,7 +41,7 @@
       "name": "Summer",
       "layout": {
         "frameStyle": "overlay",
-        "frameOverlayImage": "/themes/peace-attic-summer/03-summer-overlay.png",
+        "frameOverlayImage": "https://kmlgfluephsybivcasuy.supabase.co/storage/v1/object/public/themes/peace-attic-summer/03-summer-overlay.png",
         "overlayKnockout": false,
         "slots": [
           { "x": 0.016667, "y": 0.0125, "width": 0.480833, "height": 0.451875 },
@@ -56,3 +56,4 @@
     }
   ]
 }
+
