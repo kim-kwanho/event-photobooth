@@ -6,8 +6,11 @@ import {
 } from '../lib/canvasFrame'
 import './FrameSelectScreen.css'
 
-const PREVIEW_W = 200
-const PREVIEW_H = 267
+const PREVIEW_W = 280
+const PREVIEW_H = 373
+/** 선택 화면 전용 — 흰 프레임 대비를 위한 슬롯 placeholder */
+const PREVIEW_SLOT_FILL = '#c5cdd6'
+const PREVIEW_CANVAS_FILL = '#dbe2ea'
 
 function FrameSelectScreen({
     frames,
@@ -25,13 +28,13 @@ function FrameSelectScreen({
         if (!canvas) return
 
         const ctx = canvas.getContext('2d')
-        ctx.fillStyle = '#ffffff'
+        ctx.fillStyle = PREVIEW_CANVAS_FILL
         ctx.fillRect(0, 0, PREVIEW_W, PREVIEW_H)
 
         frame.layout.slots.forEach((_, index) => {
             const rect = computeSlotRect(frame, index, PREVIEW_W, PREVIEW_H)
             if (!rect) return
-            ctx.fillStyle = frame.layout.slotColor || '#e8e8e8'
+            ctx.fillStyle = PREVIEW_SLOT_FILL
             ctx.fillRect(rect.x, rect.y, rect.width, rect.height)
         })
 

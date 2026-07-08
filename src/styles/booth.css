@@ -162,11 +162,20 @@
     :root {
         --booth-stage-max-w: min(92vw, 640px);
     }
+
+    /* 프레임 선택: 가로 큰 카드 스크롤용으로 더 넓게 */
+    .booth-shell--kiosk:has(.frame-select-booth) {
+        --booth-stage-max-w: min(96vw, 920px);
+    }
 }
 
 @media (min-width: 1025px) {
     :root {
         --booth-stage-max-w: 440px;
+    }
+
+    .booth-shell--kiosk:has(.frame-select-booth) {
+        --booth-stage-max-w: min(90vw, 880px);
     }
 }
 
@@ -196,6 +205,10 @@
 @media (min-width: 768px) and (max-width: 1366px) and (orientation: landscape) {
     :root {
         --booth-stage-max-w: 560px;
+    }
+
+    .booth-shell--kiosk:has(.frame-select-booth) {
+        --booth-stage-max-w: min(94vw, 960px);
     }
 
     .booth-shell--kiosk .booth-stage-outer {

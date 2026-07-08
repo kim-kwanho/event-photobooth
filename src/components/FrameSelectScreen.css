@@ -6,48 +6,65 @@
     min-height: 320px;
 }
 
+/* E: 큰 가로 스크롤 카드 */
 .frame-carousel {
     display: flex;
-    gap: 14px;
+    gap: 16px;
     overflow-x: auto;
     scroll-snap-type: x mandatory;
-    padding: 8px 4px 12px;
+    padding: 12px 8px 16px;
     -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
 }
 
 .frame-carousel-item {
     flex: 0 0 auto;
     scroll-snap-align: center;
-    background: #f8f9fb;
+    background: #e8ecf1;
     border: 3px solid transparent;
-    border-radius: 14px;
-    padding: 10px;
+    border-radius: 18px;
+    padding: 14px 12px 12px;
     cursor: pointer;
-    transition: border-color 0.2s, transform 0.15s;
+    transition: border-color 0.2s, transform 0.15s, box-shadow 0.2s, background 0.2s;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 8px;
-    min-width: 160px;
+    gap: 10px;
+    min-width: 180px;
     touch-action: manipulation;
 }
 
+.frame-carousel-item:active {
+    transform: scale(0.98);
+}
+
+/* D: 선택 강조 */
 .frame-carousel-item.selected {
-    border-color: var(--booth-accent, #6b46c1);
-    transform: scale(1.02);
-    box-shadow: 0 8px 24px rgba(107, 70, 193, 0.25);
+    border-color: var(--booth-accent, #0284c7);
+    background: #ffffff;
+    transform: scale(1.04);
+    box-shadow:
+        0 0 0 4px rgba(2, 132, 199, 0.2),
+        0 12px 32px rgba(2, 132, 199, 0.28);
+}
+
+.frame-carousel-item.selected .frame-carousel-name {
+    color: var(--booth-accent, #0284c7);
 }
 
 .frame-carousel-item canvas {
-    width: 140px;
+    width: 156px;
     height: auto;
-    border-radius: 6px;
+    border-radius: 8px;
     display: block;
+    box-shadow: 0 2px 10px rgba(15, 23, 42, 0.12);
+    background: #cfd6de;
 }
 
 .frame-carousel-name {
-    font-size: 14px;
-    font-weight: 700;
+    font-size: 15px;
+    font-weight: 800;
+    letter-spacing: 0.02em;
     color: #1a1a2e;
 }
 
@@ -72,41 +89,43 @@
     width: 100%;
 }
 
-/* 태블릿 · iPad 세로 */
+/* 태블릿 · iPad — 큰 카드 가로 스크롤 유지 */
 @media (min-width: 768px) {
     .frame-select-booth {
-        padding: 24px 28px 28px;
-        gap: 24px;
+        padding: 24px 20px 28px;
+        gap: 20px;
         min-height: min(68dvh, 820px);
         justify-content: center;
     }
 
     .frame-carousel {
-        display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
         gap: 20px;
-        overflow-x: visible;
-        scroll-snap-type: none;
-        padding: 8px 0 16px;
-        max-width: 720px;
-        margin: 0 auto;
-        width: 100%;
+        padding: 12px 4px 20px;
+        max-width: none;
+        justify-content: flex-start;
     }
 
     .frame-carousel-item {
-        min-width: 0;
-        width: 100%;
-        padding: 16px 12px;
+        min-width: 220px;
+        padding: 18px 16px 14px;
+        border-width: 4px;
+        border-radius: 20px;
+    }
+
+    .frame-carousel-item.selected {
+        transform: scale(1.05);
+        box-shadow:
+            0 0 0 5px rgba(2, 132, 199, 0.22),
+            0 16px 40px rgba(2, 132, 199, 0.3);
     }
 
     .frame-carousel-item canvas {
-        width: 100%;
-        max-width: 200px;
-        height: auto;
+        width: 200px;
+        max-width: none;
     }
 
     .frame-carousel-name {
-        font-size: 16px;
+        font-size: 18px;
     }
 
     .frame-select-actions {
@@ -129,32 +148,45 @@
     }
 }
 
-/* iPad 가로 */
+/* iPad 가로 — 카드 살짝 축소해 한 화면에 더 보이게 */
 @media (min-width: 900px) and (max-height: 820px) and (orientation: landscape) {
     .frame-select-booth {
         min-height: 0;
-        padding: 16px 24px 20px;
-        gap: 16px;
+        padding: 14px 20px 18px;
+        gap: 14px;
     }
 
     .frame-carousel {
-        max-width: 680px;
         gap: 16px;
+        padding: 8px 4px 12px;
+    }
+
+    .frame-carousel-item {
+        min-width: 180px;
+        padding: 12px 12px 10px;
     }
 
     .frame-carousel-item canvas {
-        max-width: 180px;
+        width: 160px;
+    }
+
+    .frame-carousel-name {
+        font-size: 16px;
     }
 }
 
-/* iPad Pro 등 넓은 세로 */
+/* iPad Pro 세로 — 더 큰 미리보기 */
 @media (min-width: 1024px) and (orientation: portrait) {
-    .frame-carousel {
-        max-width: 840px;
-        gap: 24px;
+    .frame-carousel-item {
+        min-width: 260px;
+        padding: 20px 18px 16px;
     }
 
     .frame-carousel-item canvas {
-        max-width: 240px;
+        width: 240px;
+    }
+
+    .frame-carousel-name {
+        font-size: 20px;
     }
 }
