@@ -72,12 +72,23 @@
     display: flex;
     flex-direction: column;
     gap: 10px;
-    padding: 0;
+    padding: 0 16px 16px;
+}
+
+.result-booth .booth-btn-secondary {
+    background: #f8f9fb;
+    color: #374151;
+    border: 1px solid #e5e7eb;
+}
+
+.result-booth .booth-btn-secondary:active {
+    background: #eef0f4;
 }
 
 .result-booth .result-save-hint {
     color: #6b7280;
     font-size: 12px;
+    text-align: center;
 }
 
 @media (max-width: 600px) {

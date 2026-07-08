@@ -36,11 +36,7 @@ function FrameSelectScreen({
         })
 
         drawFrameOverlay(ctx, frame, PREVIEW_W, PREVIEW_H, {
-            onBottomImageDrawn: () => {
-                const c = canvasRefs.current[frame.id]
-                if (!c) return
-                drawFrameOverlay(c.getContext('2d'), frame, PREVIEW_W, PREVIEW_H)
-            },
+            onBottomImageDrawn: () => drawFramePreview(frame),
         })
     }, [])
 
