@@ -124,6 +124,7 @@ npm run dev:all
 | `VITE_ADMIN_PIN` | 권장 | `/admin` 접근 PIN. 비우면 PIN 없이 접근 |
 | `VITE_API_BASE_URL` | 선택 | API 베이스 (기본 `/api`, Vite가 3001로 프록시) |
 | `VITE_APP_URL` | 선택 | QR 링크용 공개 URL. 비우면 `window.location.origin` 사용 |
+| `FIGMA_ACCESS_TOKEN` | 선택 | `npm run export:figma-frames` — Figma overlay PNG export용 (커밋 금지) |
 
 ---
 
@@ -235,32 +236,95 @@ npm run dev:all
 ```
 public/themes/
   peace-attic-summer/
-    frames.json                 # 현재 행사 테마 (6종)
-    hope-logo-bottom.png        # Hope 프레임 하단 로고 (투명 PNG)
-    02_Summer_Sky_MASTER.svg    # Summer Sky Figma import용 마스터
-  christmas/frames.json         # 크리스마스 예시
-  default/frames.json           # 최소 예시
+    frames.json              # 프레임 3종 (Hope · Peace · Summer)
+    figma.json               # Figma node-id ↔ overlay PNG 매핑
+    01-hope-overlay.png      # Figma export overlay
+    02-peace-overlay.png
+    03-summer-overlay.png
+  christmas/frames.json      # 크리스마스 예시 (Canvas 렌더)
+  default/frames.json        # 최소 예시
 ```
 
 ### 현재 테마 `peace-attic-summer` 프레임
 
-| ID | 이름 | 특징 |
+| ID | 이름 | 방식 |
 |----|------|------|
-| 1 | Hope | 네이비 `#0F2847`, 하단 **Hope Builders** 로고 (`bottomImage`) |
-| 2 | Summer Sky | 하늘색 테두리·슬롯, 하단 그라데이션 + 물결, `SUMMER SKY` 텍스트, 태양·구름 장식 |
-| 3 | Passport | 여권 스탬프·MRZ·VISA 마크 (`bottomStyle: "passport"`) |
-| 4 | Sunset | 노을 그라데이션 + 별 패턴 |
-| 5 | Retro Film | 필름 톤 + `35mm` 하단 텍스트 |
-| 6 | Ocean | 민트 그라데이션 + 물결 |
+| 1 | Hope | Figma overlay PNG |
+| 2 | Peace | Figma overlay PNG |
+| 3 | Summer | Figma overlay PNG |
 
-### Figma 디자인 파일
+### Figma overlay 워크플로우
 
-| 프레임 | Figma |
-|--------|-------|
-| Hope (`01_Hope_MASTER`) | [평안네컷_프레임_2026_복사본](https://www.figma.com/design/4BaFuJTnezKkJKBDx15yxm) (편집 가능 복사본) |
-| Summer Sky | `public/themes/peace-attic-summer/02_Summer_Sky_MASTER.svg` → Figma에 import |
+1. [평안네컷_프레임](https://www.figma.com/design/4BaFuJTnezKkJKBDx15yxm) 에서 프레임 디자인 (1200×1600)
+2. **4컷 placeholder 레이어 숨기기** + **프레임 Fill 투명** 처리
+3. 테두리·구분선·하단 로고만 남기고 export
+4. 로컬에서 PNG 받기:
 
-원본 마스터 파일 권한이 없을 때는 복사본 파일에서 직접 수정하거나, SVG를 Figma에 드래그해 넣으면 됩니다.
+```bash
+FIGMA_ACCESS_TOKEN=figd_xxx npm run export:figma-frames
+```
+
+`public/themes/peace-attic-summer/figma.json` 에 node-id·출력 파일명이 정의되어 있습니다. Figma에서 구분선·레이아웃을 바꾼 뒤에는 **PNG 재export + `frames.json` 슬롯 좌표**를 함께 맞추세요.
+
+### 프레임 JSON — overlay 모드 (현재)
+
+```json
+{
+  "id": 1,
+  "name": "Hope",
+  "layout": {
+    "frameStyle": "overlay",
+    "frameOverlayImage": "/themes/peace-attic-summer/01-hope-overlay.png",
+    "overlayKnockout": false,
+    "slots": [
+      { "x": 0.016667, "y": 0.0125, "width": 0.48, "height": 0.451875 },
+      { "x": 0.508333, "y": 0.0125, "width": 0.475, "height": 0.451875 },
+      { "x": 0.016667, "y": 0.473125, "width": 0.48, "height": 0.446875 },
+      { "x": 0.508333, "y": 0.473125, "width": 0.475, "height": 0.446875 }
+    ],
+    "frameWidth": 0,
+    "bottomHeight": 0,
+    "slotColor": "#FFFFFF"
+  }
+}
+```
+
+| 필드 | 설명 |
+|------|------|
+| `frameStyle: "overlay"` | Figma PNG를 사진 위에 덮는 모드 |
+| `frameOverlayImage` | overlay PNG 경로 |
+| `slots` | 사진 배치 영역 (캔버스 전체 기준 0~1 비율) |
+| `overlayKnockout` | `true`면 JSON 슬롯으로 PNG를 추가로 뚫음 (Figma 투명 export 시 `false`) |
+
+### 프레임 JSON — Canvas 모드 (레거시·예시 테마)
+
+`christmas`·`default` 테마처럼 Canvas로 테두리·하단을 그리는 방식:
+
+```json
+{
+  "layout": {
+    "slots": [
+      { "x": 0, "y": 0, "width": 0.5, "height": 0.5 }
+    ],
+    "frameColor": "#0F2847",
+    "frameWidth": 20,
+    "slotColor": "#FFFBF5",
+    "bottomImage": "/themes/.../logo.png",
+    "crossLineColor": "#2A4A6F",
+    "crossLineWidth": 7
+  }
+}
+```
+
+| 필드 | 설명 |
+|------|------|
+| `bottomImage` | 하단 로고 PNG |
+| `bottomText` + `logoStyle` | Canvas Hope 스타일 텍스트 |
+| `bottomStyle: "passport"` | 여권 하단 스타일 |
+| `bottomGradient` / `bottomPattern` | 하단 바 장식 |
+| `themeDecor` / `themeDecor2` | 코너 장식 (`sun`, `cloud` 등) |
+
+렌더링: [`src/lib/canvasFrame.js`](src/lib/canvasFrame.js) · 로드: [`src/config/loadConfig.js`](src/config/loadConfig.js)
 
 ### 새 테마 만들기
 
@@ -275,47 +339,7 @@ public/themes/
 }
 ```
 
-3. 시작 화면 배경: `public/assets/backgrounds/start.png` 또는 `branding.startBackground` 경로 지정
-
-### 프레임 JSON 구조 (요약)
-
-각 프레임은 `layout` 객체를 가집니다.
-
-```json
-{
-  "id": 1,
-  "name": "프레임 이름",
-  "layout": {
-    "slots": [
-      { "x": 0, "y": 0, "width": 0.5, "height": 0.5 },
-      { "x": 0.5, "y": 0, "width": 0.5, "height": 0.5 },
-      { "x": 0, "y": 0.5, "width": 0.5, "height": 0.5 },
-      { "x": 0.5, "y": 0.5, "width": 0.5, "height": 0.5 }
-    ],
-    "frameColor": "#0F2847",
-    "frameWidth": 20,
-    "slotColor": "#FFFBF5",
-    "crossLineColor": "#2A4A6F",
-    "crossLineWidth": 7
-  }
-}
-```
-
-자주 쓰는 옵션:
-
-| 필드 | 설명 |
-|------|------|
-| `bottomImage` | 하단 로고 PNG 경로 (`bottomText`·`logoStyle`보다 우선). 앱 시작 시 프리로드 |
-| `bottomImageCovers` | `true`면 하단 바 전체를 이미지로 채움 |
-| `bottomText` + `logoStyle` | Canvas로 그리는 Hope 스타일 (타원·별). `bottomImage` 없을 때 |
-| `bottomStyle: "passport"` | 여권 하단 (스탬프·MRZ·`stampText`·`passportMrz`) |
-| `bottomGradient` / `bottomColor` | 하단 바 배경 |
-| `bottomPattern` | `waves`, `stars`, `dots`, `paper` |
-| `frameStyle: "ring"` | 사진 영역을 둘러싼 링 테두리 (하단 바 없을 때) |
-| `frameGradient` | 링/테두리 그라데이션 |
-| `themeDecor` / `themeDecor2` | `sun`, `cloud`, `stamp`, `sunset` 등 테두리 코너 장식 (최대 2개) |
-
-렌더링·로고 프리로드: [`src/lib/canvasFrame.js`](src/lib/canvasFrame.js) · [`src/config/loadConfig.js`](src/config/loadConfig.js)
+3. Figma overlay 사용 시 `figma.json` + `npm run export:figma-frames` 로 PNG 생성
 
 ---
 
@@ -393,8 +417,12 @@ Supabase에서 프레임을 불러오려면 `event.json`에 추가:
 ├── public/
 │   ├── config/event.json              # 행사 설정 ★
 │   ├── themes/*/frames.json           # 프레임 테마
-│   ├── themes/*/hope-logo-bottom.png  # Hope 하단 로고 등 에셋
+│   ├── themes/peace-attic-summer/
+│   │   ├── figma.json                 # Figma export 매핑
+│   │   └── *-overlay.png              # Figma overlay 에셋
 │   └── assets/backgrounds/            # 시작 화면 배경
+├── scripts/
+│   └── export-figma-frames.mjs        # Figma → overlay PNG
 ├── src/
 │   ├── config/                 # loadConfig, ConfigContext, defaults
 │   ├── hooks/                  # useBoothFlow, useKioskMode
@@ -429,6 +457,7 @@ Supabase에서 프레임을 불러오려면 `event.json`에 추가:
 | `npm start` | 빌드 결과 서빙 + API |
 | `npm run preview` | 빌드 미리보기 |
 | `npm run lint` | ESLint |
+| `npm run export:figma-frames` | Figma REST API로 overlay PNG export (`FIGMA_ACCESS_TOKEN` 필요) |
 
 ---
 
@@ -442,7 +471,9 @@ Supabase에서 프레임을 불러오려면 `event.json`에 추가:
 | 카메라 안 됨 | HTTPS 또는 localhost, 브라우저 권한 |
 | iPhone Safari 미리보기 왜곡 | `facingMode: 'user'`·`aspectRatio: 0.75` 적용됨. 여전히 문제면 Safari 캐시 삭제 후 재접속 |
 | iPhone 촬영 화질 저하 | `getUserMedia`에 `width`/`height` ideal 제한을 두지 않음 (고해상도 유지) |
-| 하단 로고가 안 보임 | `bottomImage` 경로·PNG 존재 여부. 강력 새로고침 |
+| 하단 로고가 안 보임 | overlay: PNG 경로·export 여부. Canvas: `bottomImage` 경로 확인 |
+| 사진이 프레임 구멍과 어긋남 | Figma 수정 후 PNG 재export + `frames.json` `slots` 좌표 맞추기 |
+| 사진이 안 보임 (overlay) | Figma export 시 placeholder 숨김·Fill 투명 확인 (4컷 영역 투명해야 함) |
 | 프레임이 안 바뀜 | `framesPath` 경로, `framesStorage` 설정, 캐시 새로고침 |
 | 갤러리 비어 있음 | 결과 화면까지 완료해야 IndexedDB 저장 |
 
@@ -456,4 +487,4 @@ React 18 · Vite 5 · React Router 6 · Express 5 · Supabase Storage · Canvas 
 
 ## 라이선스
 
-MIT,
+MIT
