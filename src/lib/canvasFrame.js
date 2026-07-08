@@ -4,6 +4,11 @@
 
 import { getFilterCss } from './imageFilters'
 
+/** Figma export PNG를 전체 오버레이로 쓰는 프레임 */
+export function isOverlayFrame(frame) {
+    return frame?.layout?.frameStyle === 'overlay' && Boolean(frame?.layout?.frameOverlayImage)
+}
+
 export function getBottomHeightRatio(frame) {
     if (frame.layout.bottomHeight === 0) return 0
     return frame.layout.bottomHeight ?? 0.08
@@ -11,6 +16,18 @@ export function getBottomHeightRatio(frame) {
 
 /** 프레임 내부 영역 메트릭 */
 export function computeFrameInner(frame, width, height, { scaleFrom200 = false } = {}) {
+    if (isOverlayFrame(frame)) {
+        return {
+            frameBorderWidth: 0,
+            bottomHeight: 0,
+            frameInnerX: 0,
+            frameInnerY: 0,
+            frameInnerWidth: width,
+            frameInnerHeight: height,
+            bottomY: height,
+        }
+    }
+
     const rawBorder = frame.layout.frameWidth || 15
     const frameBorderWidth = scaleFrom200 ? rawBorder * (width / 200) : rawBorder
     const bottomHeight = height * getBottomHeightRatio(frame)
@@ -920,13 +937,13 @@ export function drawBottomText(ctx, frame, width, height, options = {}) {
     })
 }
 
-const bottomImageCache = new Map()
+const frameImageCache = new Map()
 
-/** 하단 로고 이미지 프리로드 */
-export function loadBottomImage(src) {
+/** 프레임 PNG 에셋 프리로드 (하단 로고 · Figma overlay 공용) */
+export function loadFrameImage(src) {
     if (!src) return Promise.resolve(null)
 
-    const cached = bottomImageCache.get(src)
+    const cached = frameImageCache.get(src)
     if (cached?.complete && cached.naturalWidth > 0) {
         return Promise.resolve(cached)
     }
@@ -944,16 +961,27 @@ export function loadBottomImage(src) {
         img.onload = () => resolve(img)
         img.onerror = () => resolve(null)
         img.src = src
-        bottomImageCache.set(src, img)
+        frameImageCache.set(src, img)
     })
 }
 
-/** 프레임 하단 이미지 에셋 프리로드 */
+/** @deprecated loadFrameImage 사용 */
+export const loadBottomImage = loadFrameImage
+
+function getFrameImageSources(frame) {
+    const layout = frame?.layout
+    if (!layout) return []
+    const srcs = []
+    if (layout.frameOverlayImage) srcs.push(layout.frameOverlayImage)
+    if (layout.bottomImage) srcs.push(layout.bottomImage)
+    return srcs
+}
+
+/** 프레임 PNG 에셋 프리로드 */
 export async function preloadFrameAssets(frames) {
     const list = Array.isArray(frames) ? frames : [frames]
-    await Promise.all(
-        list.map((frame) => loadBottomImage(frame?.layout?.bottomImage))
-    )
+    const srcs = [...new Set(list.flatMap(getFrameImageSources))]
+    await Promise.all(srcs.map(loadFrameImage))
 }
 
 function paintBottomImage(ctx, frame, width, height, logoImg, options = {}) {
@@ -991,20 +1019,61 @@ function paintBottomImage(ctx, frame, width, height, logoImg, options = {}) {
     ctx.drawImage(logoImg, drawX, drawY, drawWidth, drawHeight)
 }
 
+function punchOverlaySlotKnockouts(ctx, frame, width, height, options = {}) {
+    if (frame.layout.overlayKnockout !== true) return
+
+    ctx.save()
+    ctx.globalCompositeOperation = 'destination-out'
+    ctx.fillStyle = '#000'
+    frame.layout.slots.forEach((_, index) => {
+        const rect = computeSlotRect(frame, index, width, height, options)
+        if (rect) {
+            ctx.fillRect(rect.x, rect.y, rect.width, rect.height)
+        }
+    })
+    ctx.restore()
+}
+
+function paintFrameOverlayImage(ctx, overlayImg, frame, width, height, options = {}) {
+    ctx.drawImage(overlayImg, 0, 0, width, height)
+    punchOverlaySlotKnockouts(ctx, frame, width, height, options)
+}
+
+/** Figma export PNG 전체 오버레이 (사진 위에 덮기) */
+export function drawFrameOverlayImage(ctx, frame, width, height, options = {}) {
+    const src = frame.layout.frameOverlayImage
+    if (!src) return
+
+    const { onComplete } = options
+    const cached = frameImageCache.get(src)
+
+    if (cached?.complete && cached.naturalWidth > 0) {
+        paintFrameOverlayImage(ctx, cached, frame, width, height, options)
+        return
+    }
+
+    loadFrameImage(src).then((overlayImg) => {
+        if (overlayImg) {
+            paintFrameOverlayImage(ctx, overlayImg, frame, width, height, options)
+        }
+        onComplete?.()
+    })
+}
+
 /** 하단 이미지 (비동기 — onComplete 콜백으로 재그리기 지원) */
 export function drawBottomImage(ctx, frame, width, height, options = {}) {
     if (!frame.layout.bottomImage) return
 
     const { onComplete } = options
     const src = frame.layout.bottomImage
-    const cached = bottomImageCache.get(src)
+    const cached = frameImageCache.get(src)
 
     if (cached?.complete && cached.naturalWidth > 0) {
         paintBottomImage(ctx, frame, width, height, cached, options)
         return
     }
 
-    loadBottomImage(src).then((logoImg) => {
+    loadFrameImage(src).then((logoImg) => {
         if (!logoImg) {
             onComplete?.()
             return
@@ -1017,6 +1086,15 @@ export function drawBottomImage(ctx, frame, width, height, options = {}) {
 /** 프레임 테두리 + 십자선 + 하단 장식 (사진 위에 그리기) */
 export function drawFrameOverlay(ctx, frame, width, height, options = {}) {
     const { scaleFrom200 = false } = options
+    const onAsyncDrawn = options.onBottomImageDrawn ?? options.onOverlayDrawn
+
+    if (isOverlayFrame(frame)) {
+        drawFrameOverlayImage(ctx, frame, width, height, {
+            scaleFrom200,
+            onComplete: onAsyncDrawn,
+        })
+        return
+    }
 
     drawFrameBorderSync(ctx, frame, width, height, {
         scaleFrom200,
@@ -1033,7 +1111,7 @@ export function drawFrameOverlay(ctx, frame, width, height, options = {}) {
     if (frame.layout.bottomImage) {
         drawBottomImage(ctx, frame, width, height, {
             scaleFrom200,
-            onComplete: options.onBottomImageDrawn,
+            onComplete: onAsyncDrawn,
         })
     } else {
         drawBottomText(ctx, frame, width, height, { scaleFrom200 })
