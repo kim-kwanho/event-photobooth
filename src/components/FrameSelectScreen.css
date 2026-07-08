@@ -29,6 +29,7 @@
     align-items: center;
     gap: 8px;
     min-width: 160px;
+    touch-action: manipulation;
 }
 
 .frame-carousel-item.selected {
@@ -57,18 +58,103 @@
     padding-top: 4px;
 }
 
+.frame-select-booth .booth-btn-secondary {
+    background: #f8f9fb;
+    color: #374151;
+    border: 1px solid #e5e7eb;
+}
+
+.frame-select-booth .booth-btn-secondary:active {
+    background: #eef0f4;
+}
+
 .frame-confirm-btn {
     width: 100%;
 }
 
+/* 태블릿 · iPad 세로 */
 @media (min-width: 768px) {
+    .frame-select-booth {
+        padding: 24px 28px 28px;
+        gap: 24px;
+        min-height: min(68dvh, 820px);
+        justify-content: center;
+    }
+
+    .frame-carousel {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 20px;
+        overflow-x: visible;
+        scroll-snap-type: none;
+        padding: 8px 0 16px;
+        max-width: 720px;
+        margin: 0 auto;
+        width: 100%;
+    }
+
+    .frame-carousel-item {
+        min-width: 0;
+        width: 100%;
+        padding: 16px 12px;
+    }
+
+    .frame-carousel-item canvas {
+        width: 100%;
+        max-width: 200px;
+        height: auto;
+    }
+
+    .frame-carousel-name {
+        font-size: 16px;
+    }
+
     .frame-select-actions {
         flex-direction: row;
         justify-content: center;
+        gap: 12px;
+        max-width: 520px;
+        margin: 0 auto;
+        width: 100%;
     }
 
     .frame-confirm-btn {
         flex: 1;
-        max-width: 360px;
+        max-width: none;
+    }
+
+    .frame-select-actions .booth-btn-secondary {
+        flex: 0 0 auto;
+        min-width: 120px;
+    }
+}
+
+/* iPad 가로 */
+@media (min-width: 900px) and (max-height: 820px) and (orientation: landscape) {
+    .frame-select-booth {
+        min-height: 0;
+        padding: 16px 24px 20px;
+        gap: 16px;
+    }
+
+    .frame-carousel {
+        max-width: 680px;
+        gap: 16px;
+    }
+
+    .frame-carousel-item canvas {
+        max-width: 180px;
+    }
+}
+
+/* iPad Pro 등 넓은 세로 */
+@media (min-width: 1024px) and (orientation: portrait) {
+    .frame-carousel {
+        max-width: 840px;
+        gap: 24px;
+    }
+
+    .frame-carousel-item canvas {
+        max-width: 240px;
     }
 }

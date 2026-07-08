@@ -154,7 +154,13 @@
 /* 기기별 스테이지 크기 */
 @media (min-width: 768px) and (max-width: 1024px) {
     :root {
-        --booth-stage-max-w: 480px;
+        --booth-stage-max-w: 560px;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 1366px) and (orientation: portrait) {
+    :root {
+        --booth-stage-max-w: min(92vw, 640px);
     }
 }
 
@@ -236,6 +242,10 @@
     .booth-stage-inner:has(.result-booth--kiosk),
     .booth-stage-inner:has(.frame-select-booth) {
         padding: 0;
+    }
+
+    .booth-stage-inner:has(.frame-select-booth) {
+        width: 100%;
     }
 }
 
