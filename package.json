@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "start": "node server.js",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
-    "export:figma-frames": "node scripts/export-figma-frames.mjs"
+    "export:figma-frames": "node scripts/export-figma-frames.mjs",
+    "upload:theme-overlays": "node scripts/upload-theme-overlays.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.87.1",

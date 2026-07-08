@@ -22,6 +22,24 @@
       "name": "Summer",
       "nodeId": "3:30",
       "output": "03-summer-overlay.png"
+    },
+    {
+      "id": 4,
+      "name": "Vision",
+      "nodeId": "19:2",
+      "output": "04-vision-overlay.png"
+    },
+    {
+      "id": 5,
+      "name": "Love",
+      "nodeId": "19:28",
+      "output": "05-love-overlay.png"
+    },
+    {
+      "id": 6,
+      "name": "Rest",
+      "nodeId": "19:46",
+      "output": "06-rest-overlay.png"
     }
   ]
 }

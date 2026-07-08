@@ -53,7 +53,60 @@
         "bottomHeight": 0,
         "slotColor": "#FFFFFF"
       }
+    },
+    {
+      "id": 4,
+      "name": "Vision",
+      "layout": {
+        "frameStyle": "overlay",
+        "frameOverlayImage": "https://kmlgfluephsybivcasuy.supabase.co/storage/v1/object/public/themes/peace-attic-summer/04-vision-overlay.png",
+        "overlayKnockout": false,
+        "slots": [
+          { "x": 0.016667, "y": 0.0125, "width": 0.48, "height": 0.451875 },
+          { "x": 0.508333, "y": 0.0125, "width": 0.475, "height": 0.451875 },
+          { "x": 0.016667, "y": 0.473125, "width": 0.48, "height": 0.446875 },
+          { "x": 0.508333, "y": 0.473125, "width": 0.475, "height": 0.446875 }
+        ],
+        "frameWidth": 0,
+        "bottomHeight": 0,
+        "slotColor": "#FFFFFF"
+      }
+    },
+    {
+      "id": 5,
+      "name": "Love",
+      "layout": {
+        "frameStyle": "overlay",
+        "frameOverlayImage": "https://kmlgfluephsybivcasuy.supabase.co/storage/v1/object/public/themes/peace-attic-summer/05-love-overlay.png",
+        "overlayKnockout": false,
+        "slots": [
+          { "x": 0.016667, "y": 0.0125, "width": 0.48, "height": 0.451875 },
+          { "x": 0.508333, "y": 0.0125, "width": 0.475, "height": 0.451875 },
+          { "x": 0.016667, "y": 0.473125, "width": 0.48, "height": 0.446875 },
+          { "x": 0.508333, "y": 0.473125, "width": 0.475, "height": 0.446875 }
+        ],
+        "frameWidth": 0,
+        "bottomHeight": 0,
+        "slotColor": "#FFFFFF"
+      }
+    },
+    {
+      "id": 6,
+      "name": "Rest",
+      "layout": {
+        "frameStyle": "overlay",
+        "frameOverlayImage": "https://kmlgfluephsybivcasuy.supabase.co/storage/v1/object/public/themes/peace-attic-summer/06-rest-overlay.png",
+        "overlayKnockout": false,
+        "slots": [
+          { "x": 0.016667, "y": 0.0125, "width": 0.48, "height": 0.451875 },
+          { "x": 0.508333, "y": 0.0125, "width": 0.475, "height": 0.451875 },
+          { "x": 0.016667, "y": 0.473125, "width": 0.48, "height": 0.446875 },
+          { "x": 0.508333, "y": 0.473125, "width": 0.475, "height": 0.446875 }
+        ],
+        "frameWidth": 0,
+        "bottomHeight": 0,
+        "slotColor": "#FFFFFF"
+      }
     }
   ]
 }
-
