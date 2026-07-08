@@ -232,19 +232,18 @@ npm run dev:all
 ## 테마·프레임
 
 > **프레임 디자인 에셋(overlay PNG, `figma.json`)은 저장소에 포함되지 않습니다.**  
-> 행사용 Figma 파일은 별도 보관하고, 로컬에서 `figma.json` 설정 후 `npm run export:figma-frames` 로 PNG를 생성하세요. 템플릿: [`figma.json.example`](public/themes/peace-attic-summer/figma.json.example)
+> 로컬에서 Figma export → Supabase `themes` 버킷에 업로드하고, `frames.json`에는 **Supabase public URL**을 넣습니다.  
+> 템플릿: [`figma.json.example`](public/themes/peace-attic-summer/figma.json.example)
 
 ### 디렉터리
 
 ```
 public/themes/
   peace-attic-summer/
-    frames.json              # 프레임 3종 (Hope · Peace · Summer) — 슬롯 좌표
+    frames.json              # 프레임 6종 · 슬롯 좌표 · Supabase overlay URL
     figma.json.example       # Figma export 매핑 템플릿 → figma.json 으로 복사
     figma.json               # (git 제외) 본인 Figma fileKey·node-id
-    01-hope-overlay.png      # (git 제외) Figma export overlay
-    02-peace-overlay.png
-    03-summer-overlay.png
+    01-hope-overlay.png …    # (git 제외) 로컬 export 후 Supabase 업로드
   christmas/frames.json      # 크리스마스 예시 (Canvas 렌더)
   default/frames.json        # 최소 예시
 ```
@@ -253,23 +252,30 @@ public/themes/
 
 | ID | 이름 | 방식 |
 |----|------|------|
-| 1 | Hope | Figma overlay PNG |
-| 2 | Peace | Figma overlay PNG |
-| 3 | Summer | Figma overlay PNG |
+| 1 | Hope | Figma overlay → Supabase |
+| 2 | Peace | Figma overlay → Supabase |
+| 3 | Summer | Figma overlay → Supabase |
+| 4 | Vision | Figma overlay → Supabase |
+| 5 | Love | Figma overlay → Supabase |
+| 6 | Rest | Figma overlay → Supabase |
+
+키오스크 **프레임 선택** 화면은 큰 미리보기 **가로 스크롤** + 대비 높은 슬롯 placeholder로 구성됩니다.
 
 ### Figma overlay 워크플로우
 
 1. 본인 Figma 파일에서 프레임 디자인 (1200×1600)
 2. **4컷 placeholder 레이어 숨기기** + **프레임 Fill 투명** 처리
 3. 테두리·구분선·하단 로고만 남기고 export
-4. `figma.json.example` → `figma.json` 복사 후 `fileKey`·`nodeId` 입력
-5. 로컬에서 PNG 생성:
+4. `figma.json.example` → `figma.json` 복사 후 `fileKey`·`nodeId`·`output` 입력
+5. 로컬에서 PNG 생성·Supabase 업로드:
 
 ```bash
 FIGMA_ACCESS_TOKEN=figd_xxx npm run export:figma-frames
+npm run upload:theme-overlays
 ```
 
-Figma에서 구분선·레이아웃을 바꾼 뒤에는 **PNG 재export + `frames.json` 슬롯 좌표**를 함께 맞추세요.
+6. `frames.json`에 프레임 항목을 추가하고 `frameOverlayImage`를 Supabase public URL로 설정
+7. Figma에서 구분선·레이아웃을 바꾼 뒤에는 **PNG 재export + 재업로드 + `slots` 좌표**를 함께 맞추세요
 
 ### 프레임 JSON — overlay 모드 (현재)
 
@@ -279,7 +285,7 @@ Figma에서 구분선·레이아웃을 바꾼 뒤에는 **PNG 재export + `frame
   "name": "Hope",
   "layout": {
     "frameStyle": "overlay",
-    "frameOverlayImage": "/themes/peace-attic-summer/01-hope-overlay.png",
+    "frameOverlayImage": "https://YOUR_PROJECT.supabase.co/storage/v1/object/public/themes/peace-attic-summer/01-hope-overlay.png",
     "overlayKnockout": false,
     "slots": [
       { "x": 0.016667, "y": 0.0125, "width": 0.48, "height": 0.451875 },
@@ -297,7 +303,7 @@ Figma에서 구분선·레이아웃을 바꾼 뒤에는 **PNG 재export + `frame
 | 필드 | 설명 |
 |------|------|
 | `frameStyle: "overlay"` | Figma PNG를 사진 위에 덮는 모드 |
-| `frameOverlayImage` | overlay PNG 경로 |
+| `frameOverlayImage` | overlay PNG URL (배포용은 Supabase public URL 권장) |
 | `slots` | 사진 배치 영역 (캔버스 전체 기준 0~1 비율) |
 | `overlayKnockout` | `true`면 JSON 슬롯으로 PNG를 추가로 뚫음 (Figma 투명 export 시 `false`) |
 
@@ -344,7 +350,7 @@ Figma에서 구분선·레이아웃을 바꾼 뒤에는 **PNG 재export + `frame
 }
 ```
 
-3. Figma overlay 사용 시 `figma.json.example` → `figma.json` 복사 후 `npm run export:figma-frames` 로 PNG 생성
+3. Figma overlay 사용 시 `figma.json` + `export:figma-frames` + `upload:theme-overlays` 후 `frames.json` URL 등록
 
 ---
 
@@ -355,7 +361,7 @@ Figma에서 구분선·레이아웃을 바꾼 뒤에는 **PNG 재export + `frame
 | 버킷 | 용도 |
 |------|------|
 | `photos` | 완성 평안네컷 이미지 (QR 공유) |
-| `themes` | Admin 프레임 디자이너 JSON·로고 |
+| `themes` | overlay PNG · Admin 프레임 JSON·로고 (`{themeId}/*-overlay.png`) |
 
 ### RLS 정책
 
@@ -427,7 +433,8 @@ Supabase에서 프레임을 불러오려면 `event.json`에 추가:
 │   │   └── *-overlay.png              # (git 제외) Figma overlay 에셋
 │   └── assets/backgrounds/            # 시작 화면 배경
 ├── scripts/
-│   └── export-figma-frames.mjs        # Figma → overlay PNG
+│   ├── export-figma-frames.mjs        # Figma → overlay PNG
+│   └── upload-theme-overlays.mjs      # overlay PNG → Supabase themes
 ├── src/
 │   ├── config/                 # loadConfig, ConfigContext, defaults
 │   ├── hooks/                  # useBoothFlow, useKioskMode
@@ -463,6 +470,7 @@ Supabase에서 프레임을 불러오려면 `event.json`에 추가:
 | `npm run preview` | 빌드 미리보기 |
 | `npm run lint` | ESLint |
 | `npm run export:figma-frames` | Figma REST API로 overlay PNG export (`FIGMA_ACCESS_TOKEN` 필요) |
+| `npm run upload:theme-overlays` | 로컬 `*-overlay.png`를 Supabase `themes` 버킷에 업로드 |
 
 ---
 
@@ -470,14 +478,15 @@ Supabase에서 프레임을 불러오려면 `event.json`에 추가:
 
 | 증상 | 확인 |
 |------|------|
-| Supabase 업로드 실패 | `storage-policies.sql` 실행, `photos` 버킷 Public |
+| Supabase 업로드 실패 | `storage-policies.sql` 실행, `photos`/`themes` 버킷 Public, 프로젝트 ACTIVE |
 | Admin 진입 불가 | `VITE_ADMIN_PIN` 일치 여부 |
 | QR 링크 404 | `VITE_APP_URL` 또는 배포 도메인, `photos` Public URL |
 | 카메라 안 됨 | HTTPS 또는 localhost, 브라우저 권한 |
 | iPhone Safari 미리보기 왜곡 | `facingMode: 'user'`·`aspectRatio: 0.75` 적용됨. 여전히 문제면 Safari 캐시 삭제 후 재접속 |
 | iPhone 촬영 화질 저하 | `getUserMedia`에 `width`/`height` ideal 제한을 두지 않음 (고해상도 유지) |
-| 하단 로고가 안 보임 | overlay: PNG 경로·export 여부. Canvas: `bottomImage` 경로 확인 |
-| 사진이 프레임 구멍과 어긋남 | Figma 수정 후 PNG 재export + `frames.json` `slots` 좌표 맞추기 |
+| 하단 로고·프레임이 안 보임 | `frameOverlayImage` Supabase URL·버킷 파일 존재 여부. Canvas: `bottomImage` 경로 |
+| Vercel에서 프레임만 비어 있음 | git에 PNG가 없음 → `upload:theme-overlays` 후 `frames.json` URL이 Supabase인지 확인 |
+| 사진이 프레임 구멍과 어긋남 | Figma 수정 후 PNG 재export·재업로드 + `frames.json` `slots` 좌표 맞추기 |
 | 사진이 안 보임 (overlay) | Figma export 시 placeholder 숨김·Fill 투명 확인 (4컷 영역 투명해야 함) |
 | 프레임이 안 바뀜 | `framesPath` 경로, `framesStorage` 설정, 캐시 새로고침 |
 | 갤러리 비어 있음 | 결과 화면까지 완료해야 IndexedDB 저장 |
