@@ -1,0 +1,27 @@
+{
+  "fileKey": "YOUR_FIGMA_FILE_KEY",
+  "fileUrl": "https://www.figma.com/design/YOUR_FIGMA_FILE_KEY",
+  "exportScale": 2,
+  "exportFormat": "png",
+  "notes": "이 파일을 figma.json 으로 복사한 뒤 fileKey·nodeId·output 을 채우세요. figma.json 과 overlay PNG 는 git 에 포함되지 않습니다.",
+  "frames": [
+    {
+      "id": 1,
+      "name": "Hope",
+      "nodeId": "1:4",
+      "output": "01-hope-overlay.png"
+    },
+    {
+      "id": 2,
+      "name": "Peace",
+      "nodeId": "2:2",
+      "output": "02-peace-overlay.png"
+    },
+    {
+      "id": 3,
+      "name": "Summer",
+      "nodeId": "3:30",
+      "output": "03-summer-overlay.png"
+    }
+  ]
+}

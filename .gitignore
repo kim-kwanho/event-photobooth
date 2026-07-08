@@ -57,3 +57,7 @@ logs
 # Temporary files
 *.tmp
 *.temp
+
+# Proprietary frame design assets (로컬 export 후 배포 — git 미포함)
+public/themes/**/figma.json
+public/themes/**/*-overlay.png

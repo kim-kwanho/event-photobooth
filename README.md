@@ -231,14 +231,18 @@ npm run dev:all
 
 ## 테마·프레임
 
+> **프레임 디자인 에셋(overlay PNG, `figma.json`)은 저장소에 포함되지 않습니다.**  
+> 행사용 Figma 파일은 별도 보관하고, 로컬에서 `figma.json` 설정 후 `npm run export:figma-frames` 로 PNG를 생성하세요. 템플릿: [`figma.json.example`](public/themes/peace-attic-summer/figma.json.example)
+
 ### 디렉터리
 
 ```
 public/themes/
   peace-attic-summer/
-    frames.json              # 프레임 3종 (Hope · Peace · Summer)
-    figma.json               # Figma node-id ↔ overlay PNG 매핑
-    01-hope-overlay.png      # Figma export overlay
+    frames.json              # 프레임 3종 (Hope · Peace · Summer) — 슬롯 좌표
+    figma.json.example       # Figma export 매핑 템플릿 → figma.json 으로 복사
+    figma.json               # (git 제외) 본인 Figma fileKey·node-id
+    01-hope-overlay.png      # (git 제외) Figma export overlay
     02-peace-overlay.png
     03-summer-overlay.png
   christmas/frames.json      # 크리스마스 예시 (Canvas 렌더)
@@ -255,16 +259,17 @@ public/themes/
 
 ### Figma overlay 워크플로우
 
-1. [평안네컷_프레임](https://www.figma.com/design/4BaFuJTnezKkJKBDx15yxm) 에서 프레임 디자인 (1200×1600)
+1. 본인 Figma 파일에서 프레임 디자인 (1200×1600)
 2. **4컷 placeholder 레이어 숨기기** + **프레임 Fill 투명** 처리
 3. 테두리·구분선·하단 로고만 남기고 export
-4. 로컬에서 PNG 받기:
+4. `figma.json.example` → `figma.json` 복사 후 `fileKey`·`nodeId` 입력
+5. 로컬에서 PNG 생성:
 
 ```bash
 FIGMA_ACCESS_TOKEN=figd_xxx npm run export:figma-frames
 ```
 
-`public/themes/peace-attic-summer/figma.json` 에 node-id·출력 파일명이 정의되어 있습니다. Figma에서 구분선·레이아웃을 바꾼 뒤에는 **PNG 재export + `frames.json` 슬롯 좌표**를 함께 맞추세요.
+Figma에서 구분선·레이아웃을 바꾼 뒤에는 **PNG 재export + `frames.json` 슬롯 좌표**를 함께 맞추세요.
 
 ### 프레임 JSON — overlay 모드 (현재)
 
@@ -339,7 +344,7 @@ FIGMA_ACCESS_TOKEN=figd_xxx npm run export:figma-frames
 }
 ```
 
-3. Figma overlay 사용 시 `figma.json` + `npm run export:figma-frames` 로 PNG 생성
+3. Figma overlay 사용 시 `figma.json.example` → `figma.json` 복사 후 `npm run export:figma-frames` 로 PNG 생성
 
 ---
 
@@ -418,8 +423,8 @@ Supabase에서 프레임을 불러오려면 `event.json`에 추가:
 │   ├── config/event.json              # 행사 설정 ★
 │   ├── themes/*/frames.json           # 프레임 테마
 │   ├── themes/peace-attic-summer/
-│   │   ├── figma.json                 # Figma export 매핑
-│   │   └── *-overlay.png              # Figma overlay 에셋
+│   │   ├── figma.json.example         # Figma export 매핑 템플릿
+│   │   └── *-overlay.png              # (git 제외) Figma overlay 에셋
 │   └── assets/backgrounds/            # 시작 화면 배경
 ├── scripts/
 │   └── export-figma-frames.mjs        # Figma → overlay PNG
