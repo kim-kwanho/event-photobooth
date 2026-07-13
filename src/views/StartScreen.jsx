@@ -10,7 +10,7 @@ function StartScreen() {
     const config = useConfig()
     const buttonRef = useRef(null)
     const { name, tagline } = config.event
-    const { startBackground, primaryColor, accentColor } = config.branding
+    const { startBackground } = config.branding
     const appRoute = config.routes.app
     const kioskMode = config.features?.kioskMode
     const [pulse, setPulse] = useState(true)
@@ -59,23 +59,23 @@ function StartScreen() {
 
     return (
         <div
-            className={`start-screen-full${kioskMode ? ' start-screen--attract' : ''}${hasBgImage ? '' : ' start-screen--gradient'}`}
-            style={{
-                '--start-primary': primaryColor || '#7C3AED',
-                '--start-accent': accentColor || '#F472B6',
-            }}
+            className={`start-screen-full photobooth-bg-host${kioskMode ? ' start-screen--attract' : ''}`}
             onClick={kioskMode ? handleStart : undefined}
             role={kioskMode ? 'button' : undefined}
             tabIndex={kioskMode ? 0 : undefined}
         >
-            {!hasBgImage && <div className="start-bg-gradient" aria-hidden="true" />}
+            {!hasBgImage && <div className="photobooth-bg-gradient" aria-hidden="true" />}
             {hasBgImage && (
                 <div
-                    className="start-screen-background loaded"
+                    className="photobooth-bg-image"
                     style={{ backgroundImage: `url(${startBackground})` }}
+                    aria-hidden="true"
                 />
             )}
-            <div className="start-bg-orbs" aria-hidden="true" />
+            <div
+                className={`photobooth-bg-orbs${hasBgImage ? ' photobooth-bg-orbs--hidden' : ''}`}
+                aria-hidden="true"
+            />
 
             <div className="start-screen-container">
                 <header className="start-hero">

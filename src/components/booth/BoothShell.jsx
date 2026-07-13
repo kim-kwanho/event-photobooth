@@ -10,23 +10,29 @@ function BoothShell({
     title,
     subtitle,
     bare = false,
+    immersive = false,
 }) {
     const steps = getBoothSteps({ frameFirst, frameSelect })
     const showProgress = steps.length > 1 && (kioskMode || currentScreen !== 'camera')
+    const showSubtitle = subtitle && !immersive
 
     return (
-        <div className={`booth-shell${kioskMode ? ' booth-shell--kiosk' : ''}`}>
+        <div
+            className={`booth-shell${kioskMode ? ' booth-shell--kiosk' : ''}${immersive ? ' booth-shell--immersive' : ''}`}
+        >
             {showProgress && (
                 <BoothProgress steps={steps} currentScreen={currentScreen} />
             )}
-            {(title || subtitle) && (
+            {(title || showSubtitle) && (
                 <header className="booth-screen-header">
                     {title && <h2 className="booth-title">{title}</h2>}
-                    {subtitle && <p className="booth-subtitle">{subtitle}</p>}
+                    {showSubtitle && <p className="booth-subtitle">{subtitle}</p>}
                 </header>
             )}
-            {bare ? (
-                <div className="booth-bare-content">{children}</div>
+            {bare || immersive ? (
+                <div className={immersive ? 'booth-immersive-content' : 'booth-bare-content'}>
+                    {children}
+                </div>
             ) : (
                 <div className="booth-stage-outer">
                     <div className="booth-stage">
