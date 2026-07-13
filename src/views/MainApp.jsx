@@ -41,6 +41,8 @@ function MainApp() {
     const photoCount = config.camera?.photoCount ?? 4
     const countdownSeconds = config.camera?.countdownSeconds ?? 6
     const captureQuality = config.camera?.quality ?? 0.9
+    const startBackground = config.branding?.startBackground?.trim() || ''
+    const hasStartBgImage = Boolean(startBackground)
 
     const [currentScreen, setCurrentScreen] = useState(() =>
         getInitialScreen(flowOptions)
@@ -219,7 +221,24 @@ function MainApp() {
     }
 
     return (
-        <div className={`main-container${kioskMode ? ' kiosk-mode' : ''}`}>
+        <div className={`main-container${kioskMode ? ' kiosk-mode photobooth-bg-host' : ''}`}>
+            {kioskMode && !hasStartBgImage && (
+                <div className="photobooth-bg-gradient" aria-hidden="true" />
+            )}
+            {kioskMode && hasStartBgImage && (
+                <div
+                    className="photobooth-bg-image"
+                    style={{ backgroundImage: `url(${startBackground})` }}
+                    aria-hidden="true"
+                />
+            )}
+            {kioskMode && (
+                <div
+                    className={`photobooth-bg-orbs${hasStartBgImage ? ' photobooth-bg-orbs--hidden' : ''}`}
+                    aria-hidden="true"
+                />
+            )}
+
             <Header
                 onMenuClick={showGallery ? () => setSideMenuOpen(true) : undefined}
                 showMenu={showGallery}
@@ -242,11 +261,13 @@ function MainApp() {
             {currentScreen === 'frameSelect' && (
                 <BoothShell
                     {...boothProps}
+                    immersive={kioskMode}
                     title="프레임을 골라주세요"
                     subtitle="마음에 드는 디자인을 선택한 뒤 촬영을 시작합니다"
                 >
                     <FrameSelectScreen
                         frames={frames}
+                        defaultFrameId={defaultFrameId}
                         onFrameSelect={handleFrameSelect}
                         onBack={frameFirst ? undefined : () => {
                             const prev = getPrevScreen('frameSelect', flowOptions)
@@ -254,6 +275,7 @@ function MainApp() {
                         }}
                         selectedPhotos={frameFirst ? [] : selectedPhotos}
                         frameFirst={frameFirst}
+                        kioskMode={kioskMode}
                     />
                 </BoothShell>
             )}

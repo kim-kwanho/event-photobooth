@@ -9,80 +9,10 @@
     z-index: 1000;
     overscroll-behavior: none;
     touch-action: manipulation;
-    background: #0f0f14;
 }
 
 .start-screen--attract {
     cursor: pointer;
-}
-
-/* CSS 그라데이션 배경 (이미지 없을 때) */
-.start-screen--gradient .start-bg-gradient {
-    position: absolute;
-    inset: 0;
-    background:
-        radial-gradient(ellipse 80% 60% at 50% 0%, rgba(124, 58, 237, 0.35) 0%, transparent 55%),
-        radial-gradient(ellipse 60% 50% at 100% 100%, rgba(244, 114, 182, 0.2) 0%, transparent 50%),
-        radial-gradient(ellipse 50% 40% at 0% 80%, rgba(99, 102, 241, 0.15) 0%, transparent 45%),
-        linear-gradient(165deg, #0f0f14 0%, #1a1528 45%, #12101c 100%);
-    z-index: 0;
-}
-
-.start-bg-orbs {
-    position: absolute;
-    inset: 0;
-    z-index: 0;
-    pointer-events: none;
-    overflow: hidden;
-}
-
-.start-bg-orbs::before,
-.start-bg-orbs::after {
-    content: '';
-    position: absolute;
-    border-radius: 50%;
-    filter: blur(80px);
-    opacity: 0.4;
-    animation: start-orb-float 12s ease-in-out infinite alternate;
-}
-
-.start-bg-orbs::before {
-    width: 320px;
-    height: 320px;
-    background: var(--start-primary, #7c3aed);
-    top: -80px;
-    right: -60px;
-}
-
-.start-bg-orbs::after {
-    width: 260px;
-    height: 260px;
-    background: var(--start-accent, #f472b6);
-    bottom: -60px;
-    left: -40px;
-    animation-delay: -6s;
-}
-
-@keyframes start-orb-float {
-    from { transform: translate(0, 0) scale(1); }
-    to { transform: translate(-20px, 24px) scale(1.08); }
-}
-
-.start-screen-background {
-    position: absolute;
-    inset: 0;
-    background-size: cover;
-    background-position: center;
-    background-color: #0f0f14;
-    z-index: 0;
-}
-
-.start-screen-background.loaded {
-    opacity: 1;
-}
-
-.start-screen-background.loaded + .start-bg-orbs {
-    display: none;
 }
 
 .start-screen-container {
@@ -110,7 +40,7 @@
     font-size: 12px;
     font-weight: 700;
     letter-spacing: 0.35em;
-    color: var(--start-accent, #f472b6);
+    color: var(--app-accent, #f472b6);
     opacity: 0.95;
 }
 
@@ -175,7 +105,7 @@
     height: 22px;
     margin-top: 2px;
     border-radius: 3px;
-    background: linear-gradient(90deg, var(--start-primary, #7c3aed), var(--start-accent, #f472b6));
+    background: linear-gradient(90deg, var(--app-primary, #7c3aed), var(--app-accent, #f472b6));
 }
 
 /* 단계 표시 */
@@ -204,7 +134,7 @@
     width: 20px;
     height: 20px;
     border-radius: 50%;
-    background: var(--start-primary, #7c3aed);
+    background: var(--app-primary, #7c3aed);
     color: #fff;
     font-size: 11px;
     font-weight: 800;
@@ -236,8 +166,8 @@
     letter-spacing: 0.02em;
     background: linear-gradient(
         135deg,
-        var(--start-primary, #7c3aed) 0%,
-        var(--start-accent, #f472b6) 100%
+        var(--app-primary, #7c3aed) 0%,
+        var(--app-accent, #f472b6) 100%
     );
     box-shadow:
         0 8px 32px rgba(124, 58, 237, 0.45),

@@ -18,7 +18,7 @@
 }
 
 .booth-shell--kiosk {
-    background: #0a0a12;
+    background: transparent;
 }
 
 .booth-shell--kiosk .booth-stage-outer {
@@ -184,6 +184,31 @@
     display: flex;
     flex-direction: column;
     min-height: 0;
+}
+
+.booth-immersive-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    width: 100%;
+}
+
+.booth-shell--immersive {
+    flex: 1;
+    min-height: 0;
+}
+
+.booth-shell--immersive .booth-screen-header {
+    padding: 0 20px 4px;
+}
+
+.booth-shell--immersive .booth-title {
+    margin-bottom: 4px;
+}
+
+.booth-shell--immersive .booth-subtitle {
+    display: none;
 }
 
 .booth-screen-header {

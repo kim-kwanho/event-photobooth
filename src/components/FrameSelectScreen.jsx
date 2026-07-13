@@ -12,16 +12,29 @@ const PREVIEW_H = 373
 const PREVIEW_SLOT_FILL = '#c5cdd6'
 const PREVIEW_CANVAS_FILL = '#dbe2ea'
 
+function resolveInitialFrameId(frames, defaultFrameId) {
+    if (!frames?.length) return null
+    if (defaultFrameId != null && frames.some((f) => f.id === defaultFrameId)) {
+        return defaultFrameId
+    }
+    return frames[0].id
+}
+
 function FrameSelectScreen({
     frames,
+    defaultFrameId,
     onFrameSelect,
     onBack,
     selectedPhotos = [],
     frameFirst = false,
+    kioskMode = false,
 }) {
     const canvasRefs = useRef({})
-    const [pickedId, setPickedId] = useState(frames[0]?.id ?? null)
+    const [pickedId, setPickedId] = useState(() => resolveInitialFrameId(frames, defaultFrameId))
     const listRef = useRef(null)
+    const scrollRafRef = useRef(null)
+
+    const pickedFrame = frames.find((f) => f.id === pickedId)
 
     const drawFramePreview = useCallback((frame) => {
         const canvas = canvasRefs.current[frame.id]
@@ -70,41 +83,114 @@ function FrameSelectScreen({
         })
     }, [frames, selectedPhotos, frameFirst, drawFramePreview, drawPhotoInPreview])
 
-    const handleConfirm = () => {
-        const frame = frames.find((f) => f.id === pickedId)
-        if (frame) onFrameSelect(frame)
-    }
-
-    const scrollToFrame = (frameId) => {
+    const scrollToFrame = useCallback((frameId, smooth = true) => {
         setPickedId(frameId)
         const el = listRef.current?.querySelector(`[data-frame-id="${frameId}"]`)
-        el?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' })
+        el?.scrollIntoView({
+            behavior: smooth ? 'smooth' : 'auto',
+            inline: 'center',
+            block: 'nearest',
+        })
+    }, [])
+
+    useEffect(() => {
+        if (!frames.length) return
+
+        const id = resolveInitialFrameId(frames, defaultFrameId)
+        if (id == null) return
+
+        const timer = setTimeout(() => scrollToFrame(id, false), 50)
+        return () => clearTimeout(timer)
+    }, [frames, defaultFrameId, scrollToFrame])
+
+    const syncPickedFromScroll = useCallback(() => {
+        const container = listRef.current
+        if (!container) return
+
+        const center = container.scrollLeft + container.clientWidth / 2
+        let closestId = null
+        let closestDist = Infinity
+
+        container.querySelectorAll('[data-frame-id]').forEach((el) => {
+            const itemCenter = el.offsetLeft + el.offsetWidth / 2
+            const dist = Math.abs(center - itemCenter)
+            if (dist < closestDist) {
+                closestDist = dist
+                closestId = Number(el.dataset.frameId)
+            }
+        })
+
+        if (closestId == null) return
+
+        setPickedId((current) => (current === closestId ? current : closestId))
+    }, [])
+
+    const handleCarouselScroll = () => {
+        if (scrollRafRef.current) return
+        scrollRafRef.current = requestAnimationFrame(() => {
+            scrollRafRef.current = null
+            syncPickedFromScroll()
+        })
     }
 
+    const handleConfirm = () => {
+        if (pickedFrame) onFrameSelect(pickedFrame)
+    }
+
+    const confirmLabel = pickedFrame
+        ? frameFirst
+            ? `${pickedFrame.name} 프레임으로 촬영하기`
+            : `${pickedFrame.name} 프레임으로 완성하기`
+        : frameFirst
+            ? '이 프레임으로 촬영하기'
+            : '이 프레임으로 완성하기'
+
     return (
-        <div className="frame-select-booth">
-            <div className="frame-carousel" ref={listRef}>
+        <div className={`frame-select-booth${kioskMode ? ' frame-select-booth--immersive' : ''}`}>
+            <div className="frame-carousel-wrap">
+                <div className="frame-carousel-fade frame-carousel-fade--left" aria-hidden="true" />
+                <div
+                    className="frame-carousel"
+                    ref={listRef}
+                    onScroll={handleCarouselScroll}
+                >
+                    {frames.map((frame) => (
+                        <button
+                            key={frame.id}
+                            type="button"
+                            data-frame-id={frame.id}
+                            className={`frame-carousel-item${pickedId === frame.id ? ' selected' : ''}`}
+                            onClick={() => scrollToFrame(frame.id)}
+                        >
+                            <canvas
+                                ref={(el) => {
+                                    canvasRefs.current[frame.id] = el
+                                }}
+                                width={PREVIEW_W}
+                                height={PREVIEW_H}
+                            />
+                            <span className="frame-carousel-name">{frame.name}</span>
+                        </button>
+                    ))}
+                </div>
+                <div className="frame-carousel-fade frame-carousel-fade--right" aria-hidden="true" />
+            </div>
+
+            <div className="frame-carousel-dots" role="tablist" aria-label="프레임 목록">
                 {frames.map((frame) => (
                     <button
                         key={frame.id}
                         type="button"
-                        data-frame-id={frame.id}
-                        className={`frame-carousel-item${pickedId === frame.id ? ' selected' : ''}`}
+                        role="tab"
+                        aria-selected={pickedId === frame.id}
+                        aria-label={frame.name}
+                        className={`frame-carousel-dot${pickedId === frame.id ? ' active' : ''}`}
                         onClick={() => scrollToFrame(frame.id)}
-                    >
-                        <canvas
-                            ref={(el) => {
-                                canvasRefs.current[frame.id] = el
-                            }}
-                            width={PREVIEW_W}
-                            height={PREVIEW_H}
-                        />
-                        <span className="frame-carousel-name">{frame.name}</span>
-                    </button>
+                    />
                 ))}
             </div>
 
-            <div className="frame-select-actions">
+            <div className="frame-select-footer">
                 {onBack && (
                     <button type="button" className="booth-btn booth-btn-secondary" onClick={onBack}>
                         이전
@@ -116,7 +202,7 @@ function FrameSelectScreen({
                     onClick={handleConfirm}
                     disabled={!pickedId}
                 >
-                    {frameFirst ? '이 프레임으로 촬영하기' : '이 프레임으로 완성하기'}
+                    {confirmLabel}
                 </button>
             </div>
         </div>

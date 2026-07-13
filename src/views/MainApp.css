@@ -2,8 +2,13 @@
     position: relative;
     width: 100%;
     min-height: 100vh;
+    min-height: 100dvh;
     display: flex;
     flex-direction: column;
+}
+
+.main-container.kiosk-mode {
+    min-height: 100dvh;
 }
 
 /* 화면 전환 */

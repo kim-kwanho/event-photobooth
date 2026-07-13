@@ -30,8 +30,26 @@
     flex: 1;
 }
 
+.header--kiosk {
+    background: transparent;
+    box-shadow: none;
+    padding: 10px 20px 4px;
+}
+
 .header--kiosk h1 {
     font-size: 22px;
+    color: #fff;
+    text-shadow: 0 1px 8px rgba(0, 0, 0, 0.35);
+}
+
+.header--kiosk .fullscreen-btn {
+    background: rgba(255, 255, 255, 0.12);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.header--kiosk .fullscreen-btn:active {
+    background: rgba(255, 255, 255, 0.22);
 }
 
 .fullscreen-btn {

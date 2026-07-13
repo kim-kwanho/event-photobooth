@@ -1,0 +1,78 @@
+/* 시작 화면 · 키오스크 부스 공통 배경 (그라데이션 + orb) */
+
+@keyframes photobooth-orb-float {
+    from { transform: translate(0, 0) scale(1); }
+    to { transform: translate(-20px, 24px) scale(1.08); }
+}
+
+.photobooth-bg-host {
+    position: relative;
+    background: #0f0f14;
+    overflow: hidden;
+}
+
+.photobooth-bg-gradient {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background:
+        radial-gradient(ellipse 80% 60% at 50% 0%, rgba(124, 58, 237, 0.35) 0%, transparent 55%),
+        radial-gradient(ellipse 60% 50% at 100% 100%, rgba(244, 114, 182, 0.2) 0%, transparent 50%),
+        radial-gradient(ellipse 50% 40% at 0% 80%, rgba(99, 102, 241, 0.15) 0%, transparent 45%),
+        linear-gradient(165deg, #0f0f14 0%, #1a1528 45%, #12101c 100%);
+}
+
+.photobooth-bg-image {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background-size: cover;
+    background-position: center;
+    background-color: #0f0f14;
+}
+
+.photobooth-bg-orbs {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.photobooth-bg-orbs::before,
+.photobooth-bg-orbs::after {
+    content: '';
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.4;
+    animation: photobooth-orb-float 12s ease-in-out infinite alternate;
+}
+
+.photobooth-bg-orbs::before {
+    width: 320px;
+    height: 320px;
+    background: var(--app-primary, #7c3aed);
+    top: -80px;
+    right: -60px;
+}
+
+.photobooth-bg-orbs::after {
+    width: 260px;
+    height: 260px;
+    background: var(--app-accent, #f472b6);
+    bottom: -60px;
+    left: -40px;
+    animation-delay: -6s;
+}
+
+.photobooth-bg-orbs--hidden {
+    display: none;
+}
+
+.photobooth-bg-host > *:not(.photobooth-bg-gradient):not(.photobooth-bg-image):not(.photobooth-bg-orbs) {
+    position: relative;
+    z-index: 1;
+}
