@@ -4,7 +4,6 @@ import StartScreen from './views/StartScreen'
 import MainApp from './views/MainApp'
 import AdminPage from './pages/admin/AdminPage'
 import AdminLayout from './pages/admin/AdminLayout'
-import FrameDesignerPage from './pages/admin/FrameDesignerPage'
 import AdminGate from './pages/admin/AdminGate'
 import ResultViewPage from './pages/ResultViewPage'
 
@@ -26,7 +25,6 @@ function AppRoutes() {
                     }
                 >
                     <Route index element={<AdminPage />} />
-                    <Route path="frames" element={<FrameDesignerPage />} />
                 </Route>
             ) : (
                 <Route path={admin} element={<Navigate to={landing} replace />} />
