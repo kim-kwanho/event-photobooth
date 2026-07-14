@@ -11,14 +11,11 @@ function AdminLayout() {
             <header className="admin-layout-header">
                 <div>
                     <h1>{config.event.name} · 관리</h1>
-                    <p>사진 관리(Supabase Storage)와 프레임 디자인을 한곳에서</p>
+                    <p>사진 관리(Supabase Storage)</p>
                 </div>
                 <nav className="admin-layout-nav">
                     <NavLink to={adminBase} end className={({ isActive }) => (isActive ? 'active' : '')}>
                         사진 관리
-                    </NavLink>
-                    <NavLink to={`${adminBase}/frames`} className={({ isActive }) => (isActive ? 'active' : '')}>
-                        프레임 디자인
                     </NavLink>
                 </nav>
             </header>
