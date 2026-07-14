@@ -105,6 +105,14 @@
     background: #cfd6de;
 }
 
+.frame-select-booth--strip .frame-carousel-item {
+    min-width: 110px;
+}
+
+.frame-select-booth--strip .frame-carousel-item canvas {
+    width: 90px;
+}
+
 .frame-carousel-item.selected canvas {
     box-shadow: 0 6px 20px rgba(2, 132, 199, 0.2);
 }

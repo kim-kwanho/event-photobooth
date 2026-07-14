@@ -1,23 +1,30 @@
 export const BOOTH_STEP_META = {
-    frameSelect: { label: '프레임', order: 0 },
-    camera: { label: '촬영', order: 1 },
-    photoSelect: { label: '편집', order: 2 },
-    result: { label: '완성', order: 3 },
+    sizeSelect: { label: '크기', order: 0 },
+    frameSelect: { label: '프레임', order: 1 },
+    camera: { label: '촬영', order: 2 },
+    photoSelect: { label: '편집', order: 3 },
+    result: { label: '완성', order: 4 },
 }
 
 /** 플로우 순서 결정 */
-export function getBoothSteps({ frameFirst, frameSelect }) {
+export function getBoothSteps({ frameFirst, frameSelect, sizeSelect }) {
     if (frameFirst && frameSelect) {
-        return ['frameSelect', 'camera', 'photoSelect', 'result']
+        const steps = []
+        if (sizeSelect) steps.push('sizeSelect')
+        steps.push('frameSelect', 'camera', 'photoSelect', 'result')
+        return steps
     }
     if (frameSelect) {
-        return ['camera', 'frameSelect', 'photoSelect', 'result']
+        const steps = ['camera']
+        if (sizeSelect) steps.push('sizeSelect')
+        steps.push('frameSelect', 'photoSelect', 'result')
+        return steps
     }
     return ['camera', 'photoSelect', 'result']
 }
 
-export function getInitialScreen({ frameFirst, frameSelect }) {
-    const steps = getBoothSteps({ frameFirst, frameSelect })
+export function getInitialScreen(flowOptions) {
+    const steps = getBoothSteps(flowOptions)
     return steps[0]
 }
 

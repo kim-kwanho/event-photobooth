@@ -30,7 +30,7 @@ export async function loadEventConfig() {
         console.warn('event.json 로드 실패, 기본 설정 사용:', error)
     }
 
-    const frames = await loadThemeFrames(config.theme)
+    const { frames, sizes } = await loadThemeFrames(config.theme)
     await preloadFrameAssets(frames)
-    return { ...config, frames }
+    return { ...config, frames, sizes }
 }

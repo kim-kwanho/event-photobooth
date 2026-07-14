@@ -1,17 +1,54 @@
 {
+  "sizes": [
+    {
+      "id": "card",
+      "name": "카드형",
+      "description": "2×2 네 컷",
+      "width": 1200,
+      "height": 1600
+    },
+    {
+      "id": "strip",
+      "name": "스트립형",
+      "description": "세로 네 컷",
+      "width": 658,
+      "height": 2009
+    }
+  ],
   "frames": [
     {
       "id": 1,
       "name": "Hope",
+      "sizeId": "card",
       "layout": {
         "frameStyle": "overlay",
         "frameOverlayImage": "https://kmlgfluephsybivcasuy.supabase.co/storage/v1/object/public/themes/peace-attic-summer/01-hope-overlay.png",
         "overlayKnockout": false,
         "slots": [
-          { "x": 0.016667, "y": 0.0125, "width": 0.48, "height": 0.451875 },
-          { "x": 0.508333, "y": 0.0125, "width": 0.475, "height": 0.451875 },
-          { "x": 0.016667, "y": 0.473125, "width": 0.48, "height": 0.446875 },
-          { "x": 0.508333, "y": 0.473125, "width": 0.475, "height": 0.446875 }
+          {
+            "x": 0.016667,
+            "y": 0.0125,
+            "width": 0.48,
+            "height": 0.451875
+          },
+          {
+            "x": 0.508333,
+            "y": 0.0125,
+            "width": 0.475,
+            "height": 0.451875
+          },
+          {
+            "x": 0.016667,
+            "y": 0.473125,
+            "width": 0.48,
+            "height": 0.446875
+          },
+          {
+            "x": 0.508333,
+            "y": 0.473125,
+            "width": 0.475,
+            "height": 0.446875
+          }
         ],
         "frameWidth": 0,
         "bottomHeight": 0,
@@ -21,15 +58,36 @@
     {
       "id": 2,
       "name": "Peace",
+      "sizeId": "card",
       "layout": {
         "frameStyle": "overlay",
         "frameOverlayImage": "https://kmlgfluephsybivcasuy.supabase.co/storage/v1/object/public/themes/peace-attic-summer/02-peace-overlay.png",
         "overlayKnockout": false,
         "slots": [
-          { "x": 0.016667, "y": 0.0125, "width": 0.480833, "height": 0.451875 },
-          { "x": 0.509167, "y": 0.0125, "width": 0.474167, "height": 0.451875 },
-          { "x": 0.016667, "y": 0.473125, "width": 0.480833, "height": 0.446875 },
-          { "x": 0.509167, "y": 0.473125, "width": 0.474167, "height": 0.446875 }
+          {
+            "x": 0.016667,
+            "y": 0.0125,
+            "width": 0.480833,
+            "height": 0.451875
+          },
+          {
+            "x": 0.509167,
+            "y": 0.0125,
+            "width": 0.474167,
+            "height": 0.451875
+          },
+          {
+            "x": 0.016667,
+            "y": 0.473125,
+            "width": 0.480833,
+            "height": 0.446875
+          },
+          {
+            "x": 0.509167,
+            "y": 0.473125,
+            "width": 0.474167,
+            "height": 0.446875
+          }
         ],
         "frameWidth": 0,
         "bottomHeight": 0,
@@ -39,15 +97,36 @@
     {
       "id": 3,
       "name": "Summer",
+      "sizeId": "card",
       "layout": {
         "frameStyle": "overlay",
         "frameOverlayImage": "https://kmlgfluephsybivcasuy.supabase.co/storage/v1/object/public/themes/peace-attic-summer/03-summer-overlay.png",
         "overlayKnockout": false,
         "slots": [
-          { "x": 0.016667, "y": 0.0125, "width": 0.480833, "height": 0.451875 },
-          { "x": 0.509167, "y": 0.0125, "width": 0.474167, "height": 0.451875 },
-          { "x": 0.016667, "y": 0.473125, "width": 0.480833, "height": 0.446875 },
-          { "x": 0.509167, "y": 0.473125, "width": 0.474167, "height": 0.446875 }
+          {
+            "x": 0.016667,
+            "y": 0.0125,
+            "width": 0.480833,
+            "height": 0.451875
+          },
+          {
+            "x": 0.509167,
+            "y": 0.0125,
+            "width": 0.474167,
+            "height": 0.451875
+          },
+          {
+            "x": 0.016667,
+            "y": 0.473125,
+            "width": 0.480833,
+            "height": 0.446875
+          },
+          {
+            "x": 0.509167,
+            "y": 0.473125,
+            "width": 0.474167,
+            "height": 0.446875
+          }
         ],
         "frameWidth": 0,
         "bottomHeight": 0,
@@ -57,15 +136,36 @@
     {
       "id": 4,
       "name": "Vision",
+      "sizeId": "card",
       "layout": {
         "frameStyle": "overlay",
         "frameOverlayImage": "https://kmlgfluephsybivcasuy.supabase.co/storage/v1/object/public/themes/peace-attic-summer/04-vision-overlay.png",
         "overlayKnockout": false,
         "slots": [
-          { "x": 0.016667, "y": 0.0125, "width": 0.48, "height": 0.451875 },
-          { "x": 0.508333, "y": 0.0125, "width": 0.475, "height": 0.451875 },
-          { "x": 0.016667, "y": 0.473125, "width": 0.48, "height": 0.446875 },
-          { "x": 0.508333, "y": 0.473125, "width": 0.475, "height": 0.446875 }
+          {
+            "x": 0.016667,
+            "y": 0.0125,
+            "width": 0.48,
+            "height": 0.451875
+          },
+          {
+            "x": 0.508333,
+            "y": 0.0125,
+            "width": 0.475,
+            "height": 0.451875
+          },
+          {
+            "x": 0.016667,
+            "y": 0.473125,
+            "width": 0.48,
+            "height": 0.446875
+          },
+          {
+            "x": 0.508333,
+            "y": 0.473125,
+            "width": 0.475,
+            "height": 0.446875
+          }
         ],
         "frameWidth": 0,
         "bottomHeight": 0,
@@ -75,15 +175,36 @@
     {
       "id": 5,
       "name": "Love",
+      "sizeId": "card",
       "layout": {
         "frameStyle": "overlay",
         "frameOverlayImage": "https://kmlgfluephsybivcasuy.supabase.co/storage/v1/object/public/themes/peace-attic-summer/05-love-overlay.png",
         "overlayKnockout": false,
         "slots": [
-          { "x": 0.016667, "y": 0.0125, "width": 0.48, "height": 0.451875 },
-          { "x": 0.508333, "y": 0.0125, "width": 0.475, "height": 0.451875 },
-          { "x": 0.016667, "y": 0.473125, "width": 0.48, "height": 0.446875 },
-          { "x": 0.508333, "y": 0.473125, "width": 0.475, "height": 0.446875 }
+          {
+            "x": 0.016667,
+            "y": 0.0125,
+            "width": 0.48,
+            "height": 0.451875
+          },
+          {
+            "x": 0.508333,
+            "y": 0.0125,
+            "width": 0.475,
+            "height": 0.451875
+          },
+          {
+            "x": 0.016667,
+            "y": 0.473125,
+            "width": 0.48,
+            "height": 0.446875
+          },
+          {
+            "x": 0.508333,
+            "y": 0.473125,
+            "width": 0.475,
+            "height": 0.446875
+          }
         ],
         "frameWidth": 0,
         "bottomHeight": 0,
@@ -93,15 +214,114 @@
     {
       "id": 6,
       "name": "Rest",
+      "sizeId": "card",
       "layout": {
         "frameStyle": "overlay",
         "frameOverlayImage": "https://kmlgfluephsybivcasuy.supabase.co/storage/v1/object/public/themes/peace-attic-summer/06-rest-overlay.png",
         "overlayKnockout": false,
         "slots": [
-          { "x": 0.016667, "y": 0.0125, "width": 0.48, "height": 0.451875 },
-          { "x": 0.508333, "y": 0.0125, "width": 0.475, "height": 0.451875 },
-          { "x": 0.016667, "y": 0.473125, "width": 0.48, "height": 0.446875 },
-          { "x": 0.508333, "y": 0.473125, "width": 0.475, "height": 0.446875 }
+          {
+            "x": 0.016667,
+            "y": 0.0125,
+            "width": 0.48,
+            "height": 0.451875
+          },
+          {
+            "x": 0.508333,
+            "y": 0.0125,
+            "width": 0.475,
+            "height": 0.451875
+          },
+          {
+            "x": 0.016667,
+            "y": 0.473125,
+            "width": 0.48,
+            "height": 0.446875
+          },
+          {
+            "x": 0.508333,
+            "y": 0.473125,
+            "width": 0.475,
+            "height": 0.446875
+          }
+        ],
+        "frameWidth": 0,
+        "bottomHeight": 0,
+        "slotColor": "#FFFFFF"
+      }
+    },
+    {
+      "id": 7,
+      "name": "HA Way",
+      "sizeId": "strip",
+      "layout": {
+        "frameStyle": "overlay",
+        "frameOverlayImage": "https://kmlgfluephsybivcasuy.supabase.co/storage/v1/object/public/themes/peace-attic-summer/08-ha-way-overlay.png?v=figma-overlay",
+        "overlayKnockout": false,
+        "slots": [
+          {
+            "x": 0.075988,
+            "y": 0.023892,
+            "width": 0.848024,
+            "height": 0.189149
+          },
+          {
+            "x": 0.075988,
+            "y": 0.227974,
+            "width": 0.848024,
+            "height": 0.189149
+          },
+          {
+            "x": 0.075988,
+            "y": 0.432056,
+            "width": 0.848024,
+            "height": 0.189149
+          },
+          {
+            "x": 0.075988,
+            "y": 0.636137,
+            "width": 0.848024,
+            "height": 0.189149
+          }
+        ],
+        "frameWidth": 0,
+        "bottomHeight": 0,
+        "slotColor": "#FFFFFF"
+      }
+    },
+    {
+      "id": 8,
+      "name": "HA Vibes",
+      "sizeId": "strip",
+      "layout": {
+        "frameStyle": "overlay",
+        "frameOverlayImage": "https://kmlgfluephsybivcasuy.supabase.co/storage/v1/object/public/themes/peace-attic-summer/09-ha-vibes-overlay.png?v=figma-overlay",
+        "overlayKnockout": false,
+        "slots": [
+          {
+            "x": 0.075988,
+            "y": 0.023892,
+            "width": 0.848024,
+            "height": 0.189149
+          },
+          {
+            "x": 0.075988,
+            "y": 0.227974,
+            "width": 0.848024,
+            "height": 0.189149
+          },
+          {
+            "x": 0.075988,
+            "y": 0.432056,
+            "width": 0.848024,
+            "height": 0.189149
+          },
+          {
+            "x": 0.075988,
+            "y": 0.636137,
+            "width": 0.848024,
+            "height": 0.189149
+          }
         ],
         "frameWidth": 0,
         "bottomHeight": 0,

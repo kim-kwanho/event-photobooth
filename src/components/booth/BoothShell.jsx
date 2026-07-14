@@ -6,13 +6,14 @@ function BoothShell({
     currentScreen,
     frameFirst,
     frameSelect,
+    sizeSelect = false,
     kioskMode,
     title,
     subtitle,
     bare = false,
     immersive = false,
 }) {
-    const steps = getBoothSteps({ frameFirst, frameSelect })
+    const steps = getBoothSteps({ frameFirst, frameSelect, sizeSelect })
     const showProgress = steps.length > 1 && (kioskMode || currentScreen !== 'camera')
     const showSubtitle = subtitle && !immersive
 

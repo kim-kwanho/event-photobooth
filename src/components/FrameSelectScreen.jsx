@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback, useState } from 'react'
+import { useEffect, useRef, useCallback, useState, useMemo } from 'react'
 import {
     computeSlotRect,
     drawFrameOverlay,
@@ -6,11 +6,23 @@ import {
 } from '../lib/canvasFrame'
 import './FrameSelectScreen.css'
 
-const PREVIEW_W = 280
-const PREVIEW_H = 373
 /** 선택 화면 전용 — 흰 프레임 대비를 위한 슬롯 placeholder */
 const PREVIEW_SLOT_FILL = '#c5cdd6'
 const PREVIEW_CANVAS_FILL = '#dbe2ea'
+
+function resolvePreviewSize(previewAspect) {
+    if (!previewAspect?.width || !previewAspect?.height) {
+        return { w: 280, h: 373 }
+    }
+    const ratio = previewAspect.width / previewAspect.height
+    if (ratio < 0.5) {
+        // 스트립형 — 좁고 길게
+        const w = 140
+        return { w, h: Math.round(w / ratio) }
+    }
+    const w = 280
+    return { w, h: Math.round(w / ratio) }
+}
 
 function resolveInitialFrameId(frames, defaultFrameId) {
     if (!frames?.length) return null
@@ -28,13 +40,19 @@ function FrameSelectScreen({
     selectedPhotos = [],
     frameFirst = false,
     kioskMode = false,
+    previewAspect = null,
 }) {
     const canvasRefs = useRef({})
     const [pickedId, setPickedId] = useState(() => resolveInitialFrameId(frames, defaultFrameId))
     const listRef = useRef(null)
     const scrollRafRef = useRef(null)
+    const { w: previewW, h: previewH } = useMemo(
+        () => resolvePreviewSize(previewAspect),
+        [previewAspect]
+    )
 
     const pickedFrame = frames.find((f) => f.id === pickedId)
+    const isStrip = previewAspect ? previewAspect.width / previewAspect.height < 0.5 : false
 
     const drawFramePreview = useCallback((frame) => {
         const canvas = canvasRefs.current[frame.id]
@@ -42,19 +60,19 @@ function FrameSelectScreen({
 
         const ctx = canvas.getContext('2d')
         ctx.fillStyle = PREVIEW_CANVAS_FILL
-        ctx.fillRect(0, 0, PREVIEW_W, PREVIEW_H)
+        ctx.fillRect(0, 0, previewW, previewH)
 
         frame.layout.slots.forEach((_, index) => {
-            const rect = computeSlotRect(frame, index, PREVIEW_W, PREVIEW_H)
+            const rect = computeSlotRect(frame, index, previewW, previewH)
             if (!rect) return
             ctx.fillStyle = PREVIEW_SLOT_FILL
             ctx.fillRect(rect.x, rect.y, rect.width, rect.height)
         })
 
-        drawFrameOverlay(ctx, frame, PREVIEW_W, PREVIEW_H, {
+        drawFrameOverlay(ctx, frame, previewW, previewH, {
             onBottomImageDrawn: () => drawFramePreview(frame),
         })
-    }, [])
+    }, [previewW, previewH])
 
     const drawPhotoInPreview = useCallback((frame, slotIndex, photoSrc) => {
         const canvas = canvasRefs.current[frame.id]
@@ -63,11 +81,11 @@ function FrameSelectScreen({
         const ctx = canvas.getContext('2d')
         const img = new Image()
         img.onload = () => {
-            drawPhotoInSlot(ctx, img, frame, slotIndex, PREVIEW_W, PREVIEW_H)
-            drawFrameOverlay(ctx, frame, PREVIEW_W, PREVIEW_H)
+            drawPhotoInSlot(ctx, img, frame, slotIndex, previewW, previewH)
+            drawFrameOverlay(ctx, frame, previewW, previewH)
         }
         img.src = photoSrc
-    }, [])
+    }, [previewW, previewH])
 
     useEffect(() => {
         frames.forEach((frame) => {
@@ -146,7 +164,7 @@ function FrameSelectScreen({
             : '이 프레임으로 완성하기'
 
     return (
-        <div className={`frame-select-booth${kioskMode ? ' frame-select-booth--immersive' : ''}`}>
+        <div className={`frame-select-booth${kioskMode ? ' frame-select-booth--immersive' : ''}${isStrip ? ' frame-select-booth--strip' : ''}`}>
             <div className="frame-carousel-wrap">
                 <div className="frame-carousel-fade frame-carousel-fade--left" aria-hidden="true" />
                 <div
@@ -166,8 +184,8 @@ function FrameSelectScreen({
                                 ref={(el) => {
                                     canvasRefs.current[frame.id] = el
                                 }}
-                                width={PREVIEW_W}
-                                height={PREVIEW_H}
+                                width={previewW}
+                                height={previewH}
                             />
                             <span className="frame-carousel-name">{frame.name}</span>
                         </button>

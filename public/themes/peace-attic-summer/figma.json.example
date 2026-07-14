@@ -40,6 +40,18 @@
       "name": "Rest",
       "nodeId": "19:46",
       "output": "06-rest-overlay.png"
+    },
+    {
+      "id": 7,
+      "name": "HA Way",
+      "nodeId": "52:41",
+      "output": "08-ha-way-overlay.png"
+    },
+    {
+      "id": 8,
+      "name": "HA Vibes",
+      "nodeId": "51:30",
+      "output": "09-ha-vibes-overlay.png"
     }
   ]
 }

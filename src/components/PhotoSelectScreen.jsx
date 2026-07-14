@@ -26,9 +26,14 @@ function PhotoSelectScreen({
     photoDrag = false,
     showFrameBack = true,
     kioskMode = false,
+    outputSize = null,
 }) {
     const config = useConfig()
     const eventName = config.event.name
+    const previewWidth = outputSize?.width || config.output?.width || 1200
+    const previewHeight = outputSize?.height || config.output?.height || 1600
+    const previewAspectStyle = { aspectRatio: `${previewWidth} / ${previewHeight}` }
+    const isStripPreview = previewWidth / previewHeight < 0.5
     const frameCanvasRef = useRef(null)
     const slotCanvasRefs = useRef([null, null, null, null])
     const dragRef = useRef(null)
@@ -407,7 +412,10 @@ function PhotoSelectScreen({
             </p>
 
             <div className="photo-select-body">
-                <div className="frame-preview-background">
+                <div
+                    className={`frame-preview-background${isStripPreview ? ' frame-preview-background--strip' : ''}`}
+                    style={previewAspectStyle}
+                >
                     <canvas
                         ref={frameCanvasRef}
                         id="frameOverlayCanvas"

@@ -10,6 +10,7 @@ import {
 } from '../hooks/useBoothFlow'
 import BoothShell from '../components/booth/BoothShell'
 import CameraScreen from '../components/CameraScreen'
+import SizeSelectScreen from '../components/SizeSelectScreen'
 import FrameSelectScreen from '../components/FrameSelectScreen'
 import PhotoSelectScreen from '../components/PhotoSelectScreen'
 import ResultScreen from '../components/ResultScreen'
@@ -29,11 +30,13 @@ function MainApp() {
     const config = useConfig()
     const navigate = useNavigate()
     const frames = config.frames || []
+    const sizes = config.sizes || []
     const { frameSelect, photoDrag, gallery, kioskMode, filters } = config.features
     const frameFirst = config.flow?.frameFirst ?? false
+    const sizeSelectEnabled = frameSelect && sizes.length > 1
     const flowOptions = useMemo(
-        () => ({ frameFirst, frameSelect }),
-        [frameFirst, frameSelect]
+        () => ({ frameFirst, frameSelect, sizeSelect: sizeSelectEnabled }),
+        [frameFirst, frameSelect, sizeSelectEnabled]
     )
     const defaultFrameId = config.theme?.defaultFrameId
     const idleSeconds = config.kiosk?.idleSeconds ?? 60
@@ -50,6 +53,9 @@ function MainApp() {
     const [selectedPhotos, setSelectedPhotos] = useState(
         () => Array(photoCount).fill(null)
     )
+    const [selectedSize, setSelectedSize] = useState(() =>
+        sizeSelectEnabled ? null : (sizes[0] || null)
+    )
     const [selectedFrame, setSelectedFrame] = useState(null)
     const [photoTransforms, setPhotoTransforms] = useState(emptyTransforms)
     const [photoFilter, setPhotoFilter] = useState('none')
@@ -57,14 +63,27 @@ function MainApp() {
     const [db, setDb] = useState(null)
     const [sideMenuOpen, setSideMenuOpen] = useState(false)
 
+    const framesForSize = useMemo(() => {
+        if (!selectedSize) return frames
+        return frames.filter((f) => f.sizeId === selectedSize.id)
+    }, [frames, selectedSize])
+
+    const outputSize = useMemo(() => {
+        if (selectedSize?.width && selectedSize?.height) {
+            return { width: selectedSize.width, height: selectedSize.height }
+        }
+        return config.output
+    }, [selectedSize, config.output])
+
     const resetToStart = useCallback(() => {
         setSideMenuOpen(false)
         setCurrentScreen(getInitialScreen(flowOptions))
         setSelectedPhotos(Array(photoCount).fill(null))
+        setSelectedSize(sizeSelectEnabled ? null : (sizes[0] || null))
         setSelectedFrame(null)
         setPhotoTransforms(emptyTransforms())
         setPhotoFilter('none')
-    }, [flowOptions, photoCount])
+    }, [flowOptions, photoCount, sizeSelectEnabled, sizes])
 
     const handleKioskIdle = useCallback(() => {
         resetToStart()
@@ -107,6 +126,12 @@ function MainApp() {
             })
     }, [config.event.id, config.storage.dbNamePrefix])
 
+    const handleSizeSelect = (size) => {
+        setSelectedSize(size)
+        setSelectedFrame(null)
+        setCurrentScreen('frameSelect')
+    }
+
     const handleCaptureComplete = (photos) => {
         if (!photos || photos.length !== photoCount) return
 
@@ -126,7 +151,11 @@ function MainApp() {
 
         if (frameSelect) {
             setSelectedFrame(null)
-            setCurrentScreen('frameSelect')
+            if (sizeSelectEnabled && !selectedSize) {
+                setCurrentScreen('sizeSelect')
+            } else {
+                setCurrentScreen('frameSelect')
+            }
         } else {
             setSelectedFrame(getDefaultFrame(frames, defaultFrameId))
             setCurrentScreen('photoSelect')
@@ -217,6 +246,7 @@ function MainApp() {
         currentScreen,
         frameFirst,
         frameSelect,
+        sizeSelect: sizeSelectEnabled,
         kioskMode,
     }
 
@@ -258,7 +288,22 @@ function MainApp() {
                 />
             )}
 
-            {currentScreen === 'frameSelect' && (
+            {currentScreen === 'sizeSelect' && (
+                <BoothShell
+                    {...boothProps}
+                    immersive={kioskMode}
+                    title="크기를 골라주세요"
+                    subtitle="카드형 또는 스트립형 중 선택하세요"
+                >
+                    <SizeSelectScreen
+                        sizes={sizes}
+                        onSizeSelect={handleSizeSelect}
+                        kioskMode={kioskMode}
+                    />
+                </BoothShell>
+            )}
+
+            {currentScreen === 'frameSelect' && (!sizeSelectEnabled || selectedSize) && (
                 <BoothShell
                     {...boothProps}
                     immersive={kioskMode}
@@ -266,22 +311,30 @@ function MainApp() {
                     subtitle="마음에 드는 디자인을 선택한 뒤 촬영을 시작합니다"
                 >
                     <FrameSelectScreen
-                        frames={frames}
+                        frames={framesForSize}
                         defaultFrameId={defaultFrameId}
                         onFrameSelect={handleFrameSelect}
-                        onBack={frameFirst ? undefined : () => {
+                        onBack={sizeSelectEnabled ? () => {
+                            setSelectedFrame(null)
+                            setCurrentScreen('sizeSelect')
+                        } : (frameFirst ? undefined : () => {
                             const prev = getPrevScreen('frameSelect', flowOptions)
                             if (prev) setCurrentScreen(prev)
-                        }}
+                        })}
                         selectedPhotos={frameFirst ? [] : selectedPhotos}
                         frameFirst={frameFirst}
                         kioskMode={kioskMode}
+                        previewAspect={
+                            selectedSize
+                                ? { width: selectedSize.width, height: selectedSize.height }
+                                : null
+                        }
                     />
                 </BoothShell>
             )}
 
             {currentScreen === 'camera' && (
-                <BoothShell {...boothProps} bare>
+                <BoothShell {...boothProps} immersive={kioskMode} bare={!kioskMode}>
                     <CameraScreen
                         onCaptureComplete={handleCaptureComplete}
                         photoCount={photoCount}
@@ -328,6 +381,7 @@ function MainApp() {
                         photoDrag={photoDrag}
                         showFrameBack={frameSelect && !frameFirst}
                         kioskMode={kioskMode}
+                        outputSize={outputSize}
                     />
                 </BoothShell>
             )}
@@ -343,7 +397,7 @@ function MainApp() {
                         selectedPhotos={selectedPhotos}
                         photoTransforms={photoTransforms}
                         photoFilter={photoFilter}
-                        outputSize={config.output}
+                        outputSize={outputSize}
                         onPhotoSaved={handleGalleryPhotoSaved}
                         onSave={handleSave}
                         onNewPhoto={handleNewPhoto}
