@@ -30,6 +30,11 @@ body {
     scroll-behavior: smooth;
 }
 
+body:has(.main-container.kiosk-mode) {
+    overflow: hidden;
+    max-height: 100dvh;
+}
+
 /* 스크롤바 스타일링 - 자연스럽게 */
 ::-webkit-scrollbar {
     width: 8px;

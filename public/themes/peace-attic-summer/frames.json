@@ -9,8 +9,8 @@
     },
     {
       "id": "strip",
-      "name": "스트립형",
-      "description": "세로 네 컷",
+      "name": "필름형",
+      "description": "필름처럼 세로 네 컷",
       "width": 658,
       "height": 2009
     }
@@ -61,32 +61,32 @@
       "sizeId": "card",
       "layout": {
         "frameStyle": "overlay",
-        "frameOverlayImage": "https://kmlgfluephsybivcasuy.supabase.co/storage/v1/object/public/themes/peace-attic-summer/02-peace-overlay.png",
+        "frameOverlayImage": "https://kmlgfluephsybivcasuy.supabase.co/storage/v1/object/public/themes/peace-attic-summer/02-peace-overlay.png?v=ha-card",
         "overlayKnockout": false,
         "slots": [
           {
             "x": 0.016667,
             "y": 0.0125,
-            "width": 0.480833,
-            "height": 0.451875
+            "width": 0.483333,
+            "height": 0.45375
           },
           {
-            "x": 0.509167,
+            "x": 0.5,
             "y": 0.0125,
-            "width": 0.474167,
-            "height": 0.451875
+            "width": 0.483333,
+            "height": 0.45375
           },
           {
             "x": 0.016667,
-            "y": 0.473125,
-            "width": 0.480833,
-            "height": 0.446875
+            "y": 0.46625,
+            "width": 0.483333,
+            "height": 0.45375
           },
           {
-            "x": 0.509167,
-            "y": 0.473125,
-            "width": 0.474167,
-            "height": 0.446875
+            "x": 0.5,
+            "y": 0.46625,
+            "width": 0.483333,
+            "height": 0.45375
           }
         ],
         "frameWidth": 0,

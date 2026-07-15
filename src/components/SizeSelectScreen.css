@@ -6,14 +6,45 @@
     padding: 0 0 env(safe-area-inset-bottom, 0);
 }
 
-.size-select-grid {
+.size-select-panel {
     flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    min-height: 0;
+    width: 100%;
+    padding: 12px 20px max(20px, env(safe-area-inset-bottom, 0));
+}
+
+.size-select-booth--immersive .size-select-panel {
+    gap: clamp(14px, 2.5vh, 28px);
+}
+
+.size-select-title {
+    margin: 0;
+    flex-shrink: 0;
+    text-align: center;
+    color: #fff;
+    font-size: clamp(20px, 4vw, 28px);
+    font-weight: 800;
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.35);
+}
+
+.size-select-grid {
+    flex: 0 0 auto;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 20px;
-    padding: 16px 24px 12px;
+    width: 100%;
     flex-wrap: wrap;
+}
+
+.size-select-booth--immersive .size-select-grid {
+    flex-wrap: nowrap;
+    gap: 16px;
 }
 
 .size-select-card {
@@ -33,6 +64,9 @@
 }
 
 .size-select-booth--immersive .size-select-card {
+    flex: 1 1 0;
+    min-width: 0;
+    max-width: 200px;
     background: rgba(255, 255, 255, 0.08);
     border-color: rgba(255, 255, 255, 0.12);
     opacity: 0.78;
@@ -67,6 +101,14 @@
 
 .size-select-preview--strip {
     max-width: 72px;
+}
+
+.size-select-booth--immersive .size-select-preview {
+    max-width: 110px;
+}
+
+.size-select-booth--immersive .size-select-preview--strip {
+    max-width: 56px;
 }
 
 .size-select-slots {
@@ -127,18 +169,8 @@
     color: rgba(255, 255, 255, 0.45);
 }
 
-.size-select-footer {
-    display: flex;
-    justify-content: center;
-    padding: 12px 20px 24px;
-    flex-shrink: 0;
-}
-
-.size-select-booth--immersive .size-select-footer {
-    background: linear-gradient(to top, rgba(15, 15, 20, 0.92) 70%, transparent);
-}
-
 .size-confirm-btn {
+    flex-shrink: 0;
     width: 100%;
     max-width: 420px;
     min-height: 56px;
@@ -146,14 +178,17 @@
 }
 
 @media (min-width: 768px) {
-    .size-select-grid {
+    .size-select-panel {
         gap: 28px;
-        padding: 24px 32px 16px;
+        padding: 20px 32px max(28px, env(safe-area-inset-bottom, 0));
     }
 
-    .size-select-card {
-        flex-basis: 240px;
-        max-width: 280px;
+    .size-select-grid {
+        gap: 28px;
+    }
+
+    .size-select-booth--immersive .size-select-card {
+        max-width: 240px;
         padding: 28px 20px 20px;
     }
 
@@ -165,11 +200,15 @@
         max-width: 88px;
     }
 
-    .size-select-name {
-        font-size: 22px;
+    .size-select-booth--immersive .size-select-preview {
+        max-width: 140px;
     }
 
-    .size-select-footer {
-        padding: 16px 24px 32px;
+    .size-select-booth--immersive .size-select-preview--strip {
+        max-width: 72px;
+    }
+
+    .size-select-name {
+        font-size: 22px;
     }
 }

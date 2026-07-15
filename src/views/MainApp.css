@@ -8,7 +8,10 @@
 }
 
 .main-container.kiosk-mode {
+    height: 100dvh;
+    max-height: 100dvh;
     min-height: 100dvh;
+    overflow: hidden;
 }
 
 /* 화면 전환 */

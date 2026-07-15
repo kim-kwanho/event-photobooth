@@ -19,6 +19,7 @@
 
 .booth-shell--kiosk {
     background: transparent;
+    min-height: 0;
 }
 
 .booth-shell--kiosk .booth-stage-outer {

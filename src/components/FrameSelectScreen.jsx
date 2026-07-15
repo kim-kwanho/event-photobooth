@@ -16,7 +16,7 @@ function resolvePreviewSize(previewAspect) {
     }
     const ratio = previewAspect.width / previewAspect.height
     if (ratio < 0.5) {
-        // 스트립형 — 좁고 길게
+        // 필름형 — 좁고 길게
         const w = 140
         return { w, h: Math.round(w / ratio) }
     }

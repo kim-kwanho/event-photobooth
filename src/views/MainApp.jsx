@@ -292,13 +292,14 @@ function MainApp() {
                 <BoothShell
                     {...boothProps}
                     immersive={kioskMode}
-                    title="크기를 골라주세요"
-                    subtitle="카드형 또는 스트립형 중 선택하세요"
+                    title={kioskMode ? undefined : '크기를 골라주세요'}
+                    subtitle={kioskMode ? undefined : '카드형 또는 필름형 중 선택하세요'}
                 >
                     <SizeSelectScreen
                         sizes={sizes}
                         onSizeSelect={handleSizeSelect}
                         kioskMode={kioskMode}
+                        title="크기를 골라주세요"
                     />
                 </BoothShell>
             )}
