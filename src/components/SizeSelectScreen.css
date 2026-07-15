@@ -19,7 +19,9 @@
 }
 
 .size-select-booth--immersive .size-select-panel {
-    gap: clamp(14px, 2.5vh, 28px);
+    gap: clamp(10px, 2vh, 24px);
+    /* scale/그림자 잘림 여유 */
+    padding-inline: max(20px, 3vw);
 }
 
 .size-select-title {
@@ -33,18 +35,21 @@
 }
 
 .size-select-grid {
-    flex: 0 0 auto;
+    flex: 0 1 auto;
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 20px;
     width: 100%;
+    max-width: 720px;
+    min-height: 0;
     flex-wrap: wrap;
 }
 
 .size-select-booth--immersive .size-select-grid {
     flex-wrap: nowrap;
-    gap: 16px;
+    gap: clamp(12px, 2.5vw, 28px);
+    align-items: stretch;
 }
 
 .size-select-card {
@@ -66,10 +71,13 @@
 .size-select-booth--immersive .size-select-card {
     flex: 1 1 0;
     min-width: 0;
-    max-width: 200px;
+    max-width: 260px;
+    justify-content: flex-start;
     background: rgba(255, 255, 255, 0.08);
     border-color: rgba(255, 255, 255, 0.12);
     opacity: 0.78;
+    /* 선택 scale이 옆 카드·화면을 안 잘리게 */
+    overflow: visible;
 }
 
 .size-select-card:active {
@@ -80,15 +88,16 @@
     border-color: var(--booth-accent, #0284c7);
     background: rgba(255, 255, 255, 0.96);
     opacity: 1;
-    transform: scale(1.04);
+    transform: scale(1.03);
     box-shadow:
         0 0 0 4px rgba(2, 132, 199, 0.25),
-        0 16px 40px rgba(0, 0, 0, 0.3);
+        0 12px 32px rgba(0, 0, 0, 0.28);
 }
 
 .size-select-preview {
     width: 100%;
     max-width: 140px;
+    max-height: 36vh;
     border-radius: 10px;
     background: #cfd6de;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.18);
@@ -97,18 +106,23 @@
     align-items: center;
     justify-content: center;
     padding: 8%;
+    box-sizing: border-box;
 }
 
 .size-select-preview--strip {
     max-width: 72px;
 }
 
+/* iPad·키오스크: 세로로 긴 필름형도 뷰포트 안에 맞게 */
 .size-select-booth--immersive .size-select-preview {
-    max-width: 110px;
+    width: auto;
+    max-width: min(148px, 26vw);
+    max-height: clamp(120px, 34vh, 240px);
 }
 
 .size-select-booth--immersive .size-select-preview--strip {
-    max-width: 56px;
+    max-width: min(68px, 12vw);
+    max-height: clamp(120px, 34vh, 240px);
 }
 
 .size-select-slots {
@@ -179,36 +193,61 @@
 
 @media (min-width: 768px) {
     .size-select-panel {
-        gap: 28px;
-        padding: 20px 32px max(28px, env(safe-area-inset-bottom, 0));
-    }
-
-    .size-select-grid {
-        gap: 28px;
+        gap: 24px;
+        padding: 16px 40px max(24px, env(safe-area-inset-bottom, 0));
     }
 
     .size-select-booth--immersive .size-select-card {
-        max-width: 240px;
-        padding: 28px 20px 20px;
-    }
-
-    .size-select-preview {
-        max-width: 168px;
-    }
-
-    .size-select-preview--strip {
-        max-width: 88px;
+        max-width: 280px;
+        padding: 22px 18px 16px;
+        gap: 8px;
     }
 
     .size-select-booth--immersive .size-select-preview {
-        max-width: 140px;
+        max-width: min(160px, 18vw);
+        max-height: clamp(140px, 32vh, 260px);
     }
 
     .size-select-booth--immersive .size-select-preview--strip {
-        max-width: 72px;
+        max-width: min(72px, 8vw);
+        max-height: clamp(140px, 32vh, 260px);
     }
 
     .size-select-name {
         font-size: 22px;
+    }
+}
+
+/* iPad 가로 · 짧은 세로 — 미리보기 더 낮춤 */
+@media (min-width: 768px) and (max-height: 900px) {
+    .size-select-booth--immersive .size-select-panel {
+        gap: 12px;
+        padding-top: 8px;
+        padding-bottom: max(16px, env(safe-area-inset-bottom, 0));
+    }
+
+    .size-select-booth--immersive .size-select-preview,
+    .size-select-booth--immersive .size-select-preview--strip {
+        max-height: clamp(100px, 26vh, 180px);
+    }
+
+    .size-select-title {
+        font-size: clamp(18px, 3.2vw, 24px);
+    }
+
+    .size-confirm-btn {
+        min-height: 52px;
+    }
+}
+
+@media (orientation: landscape) and (max-height: 700px) {
+    .size-select-booth--immersive .size-select-preview,
+    .size-select-booth--immersive .size-select-preview--strip {
+        max-height: clamp(88px, 22vh, 140px);
+    }
+
+    .size-select-booth--immersive .size-select-desc,
+    .size-select-booth--immersive .size-select-dims {
+        font-size: 11px;
     }
 }

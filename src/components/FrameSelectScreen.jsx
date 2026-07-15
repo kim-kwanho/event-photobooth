@@ -16,8 +16,8 @@ function resolvePreviewSize(previewAspect) {
     }
     const ratio = previewAspect.width / previewAspect.height
     if (ratio < 0.5) {
-        // 필름형 — 좁고 길게
-        const w = 140
+        // 필름형 — 좁고 길게 (iPad에서도 선명하게)
+        const w = 200
         return { w, h: Math.round(w / ratio) }
     }
     const w = 280
@@ -165,47 +165,49 @@ function FrameSelectScreen({
 
     return (
         <div className={`frame-select-booth${kioskMode ? ' frame-select-booth--immersive' : ''}${isStrip ? ' frame-select-booth--strip' : ''}`}>
-            <div className="frame-carousel-wrap">
-                <div className="frame-carousel-fade frame-carousel-fade--left" aria-hidden="true" />
-                <div
-                    className="frame-carousel"
-                    ref={listRef}
-                    onScroll={handleCarouselScroll}
-                >
+            <div className="frame-select-stage">
+                <div className="frame-carousel-wrap">
+                    <div className="frame-carousel-fade frame-carousel-fade--left" aria-hidden="true" />
+                    <div
+                        className="frame-carousel"
+                        ref={listRef}
+                        onScroll={handleCarouselScroll}
+                    >
+                        {frames.map((frame) => (
+                            <button
+                                key={frame.id}
+                                type="button"
+                                data-frame-id={frame.id}
+                                className={`frame-carousel-item${pickedId === frame.id ? ' selected' : ''}`}
+                                onClick={() => scrollToFrame(frame.id)}
+                            >
+                                <canvas
+                                    ref={(el) => {
+                                        canvasRefs.current[frame.id] = el
+                                    }}
+                                    width={previewW}
+                                    height={previewH}
+                                />
+                                <span className="frame-carousel-name">{frame.name}</span>
+                            </button>
+                        ))}
+                    </div>
+                    <div className="frame-carousel-fade frame-carousel-fade--right" aria-hidden="true" />
+                </div>
+
+                <div className="frame-carousel-dots" role="tablist" aria-label="프레임 목록">
                     {frames.map((frame) => (
                         <button
                             key={frame.id}
                             type="button"
-                            data-frame-id={frame.id}
-                            className={`frame-carousel-item${pickedId === frame.id ? ' selected' : ''}`}
+                            role="tab"
+                            aria-selected={pickedId === frame.id}
+                            aria-label={frame.name}
+                            className={`frame-carousel-dot${pickedId === frame.id ? ' active' : ''}`}
                             onClick={() => scrollToFrame(frame.id)}
-                        >
-                            <canvas
-                                ref={(el) => {
-                                    canvasRefs.current[frame.id] = el
-                                }}
-                                width={previewW}
-                                height={previewH}
-                            />
-                            <span className="frame-carousel-name">{frame.name}</span>
-                        </button>
+                        />
                     ))}
                 </div>
-                <div className="frame-carousel-fade frame-carousel-fade--right" aria-hidden="true" />
-            </div>
-
-            <div className="frame-carousel-dots" role="tablist" aria-label="프레임 목록">
-                {frames.map((frame) => (
-                    <button
-                        key={frame.id}
-                        type="button"
-                        role="tab"
-                        aria-selected={pickedId === frame.id}
-                        aria-label={frame.name}
-                        className={`frame-carousel-dot${pickedId === frame.id ? ' active' : ''}`}
-                        onClick={() => scrollToFrame(frame.id)}
-                    />
-                ))}
             </div>
 
             <div className="frame-select-footer">

@@ -28,7 +28,7 @@
 - [기능 플래그](#기능-플래그)
 - [테마·프레임](#테마프레임)
 - [Supabase 설정](#supabase-설정)
-- [Admin · 프레임 디자이너](#admin--프레임-디자이너)
+- [Admin](#admin)
 - [배포](#배포)
 - [프로젝트 구조](#프로젝트-구조)
 - [스크립트](#스크립트)
@@ -38,9 +38,23 @@
 
 ## 촬영 플로우
 
-`flow.frameFirst` 와 `features.frameSelect` 조합에 따라 화면 순서가 달라집니다.
+`flow.frameFirst` · `features.frameSelect` · `frames.json`의 `sizes` 유무에 따라 화면 순서가 달라집니다.
 
-**프레임 먼저** (`frameFirst: true`, 현재 평안다락방 설정)
+**크기 선택 포함** (`sizes` 2개 이상, 현재 평안다락방 설정 · `frameFirst: true`)
+
+```mermaid
+flowchart LR
+    A[시작] --> S[크기 선택]
+    S --> B[프레임 선택]
+    B --> C[4컷 촬영]
+    C --> D[편집·필터]
+    D --> E[완성·QR]
+```
+
+크기: **카드형** (1200×1600 · 2×2) / **필름형** (658×2009 · 세로 네 컷).  
+고른 `sizeId`에 맞는 프레임만 목록에 나타납니다.
+
+**프레임 먼저** (`frameFirst: true`, `sizes` 없음 또는 1개)
 
 ```mermaid
 flowchart LR
@@ -73,8 +87,7 @@ flowchart LR
 |-----|------|
 | `/` | 시작(랜딩) 화면 |
 | `/app` | 포토부스 본체 |
-| `/admin` | 관리자 (PIN) |
-| `/admin/frames` | 프레임 디자이너 |
+| `/admin` | 관리자 (PIN) · 갤러리 |
 | `/result/:id` | QR로 열리는 결과물 페이지 |
 
 ---
@@ -200,7 +213,7 @@ npm run dev:all
 | `flow` | `frameFirst`: 프레임을 촬영보다 먼저 선택할지 |
 | `features` | 기능 on/off — [기능 플래그](#기능-플래그) 참고 |
 | `camera` | 촬영 장수, 카운트다운(초), JPEG 품질 |
-| `output` | 최종 합성 이미지 픽셀 크기 |
+| `output` | 기본 합성 해상도 (크기를 고르면 선택한 `sizes` width/height 우선) |
 | `storage` | IndexedDB 이름 접두사 (`dbNamePrefix`) |
 | `theme` | 프레임 테마 경로·기본 프레임·저장소 |
 | `kiosk` | 유휴 시간(초) 후 시작 화면 복귀, 전체화면 시도 |
@@ -240,7 +253,7 @@ npm run dev:all
 ```
 public/themes/
   peace-attic-summer/
-    frames.json              # 프레임 6종 · 슬롯 좌표 · Supabase overlay URL
+    frames.json              # sizes + 프레임 · 슬롯 좌표 · Supabase overlay URL
     figma.json.example       # Figma export 매핑 템플릿 → figma.json 으로 복사
     figma.json               # (git 제외) 본인 Figma fileKey·node-id
     01-hope-overlay.png …    # (git 제외) 로컬 export 후 Supabase 업로드
@@ -248,23 +261,36 @@ public/themes/
   default/frames.json        # 최소 예시
 ```
 
+### 크기 (`sizes`)
+
+| id | 표시 이름 | 해상도 | 레이아웃 |
+|----|-----------|--------|----------|
+| `card` | 카드형 | 1200×1600 | 2×2 |
+| `strip` | 필름형 | 658×2009 | 세로 네 컷 |
+
+프레임마다 `sizeId`로 위 크기 중 하나에 소속됩니다. `sizes`가 2개 이상이면 부스 맨 앞에 **크기 선택** 단계가 붙습니다.
+
 ### 현재 테마 `peace-attic-summer` 프레임
 
-| ID | 이름 | 방식 |
-|----|------|------|
-| 1 | Hope | Figma overlay → Supabase |
-| 2 | Peace | Figma overlay → Supabase |
-| 3 | Summer | Figma overlay → Supabase |
-| 4 | Vision | Figma overlay → Supabase |
-| 5 | Love | Figma overlay → Supabase |
-| 6 | Rest | Figma overlay → Supabase |
+| ID | 이름 | sizeId | 비고 |
+|----|------|--------|------|
+| 1 | Hope | `card` | Figma overlay → Supabase |
+| 2 | Peace | `card` | HA 카드 디자인 overlay |
+| 3 | Summer | `card` | Figma overlay → Supabase |
+| 4 | Vision | `card` | Figma overlay → Supabase |
+| 5 | Love | `card` | Figma overlay → Supabase |
+| 6 | Rest | `card` | Figma overlay → Supabase |
+| 7 | HA Way | `strip` | 필름형 |
+| 8 | HA Vibes | `strip` | 필름형 |
 
-키오스크 **프레임 선택** 화면은 큰 미리보기 **가로 스크롤** + 대비 높은 슬롯 placeholder로 구성됩니다.
+키오스크 **크기 선택**은 제목·카드·CTA가 한 패널로 구성되고, **프레임 선택**은 큰 미리보기 **가로 스크롤**입니다.
 
 ### Figma overlay 워크플로우
 
-1. 본인 Figma 파일에서 프레임 디자인 (1200×1600)
-2. **4컷 placeholder 레이어 숨기기** + **프레임 Fill 투명** 처리
+1. 본인 Figma에서 카드형(1200×1600) 또는 필름형(658×2009) 프레임 디자인
+2. **4컷 사진 영역은 투명**하게
+   - placeholder 숨기기 + 프레임 Fill 투명, 또는
+   - 배경 이미지(`image 2` 등)를 쓸 경우 **Subtract(차집합)** 로 슬롯만 구멍 내기 (베이스=`image`, 위=`slot`)
 3. 테두리·구분선·하단 로고만 남기고 export
 4. `figma.json.example` → `figma.json` 복사 후 `fileKey`·`nodeId`·`output` 입력
 5. 로컬에서 PNG 생성·Supabase 업로드:
@@ -274,34 +300,45 @@ FIGMA_ACCESS_TOKEN=figd_xxx npm run export:figma-frames
 npm run upload:theme-overlays
 ```
 
-6. `frames.json`에 프레임 항목을 추가하고 `frameOverlayImage`를 Supabase public URL로 설정
+6. `frames.json`에 `sizeId`·`frameOverlayImage`(Supabase public URL)·`slots` 등록
 7. Figma에서 구분선·레이아웃을 바꾼 뒤에는 **PNG 재export + 재업로드 + `slots` 좌표**를 함께 맞추세요
 
 ### 프레임 JSON — overlay 모드 (현재)
 
 ```json
 {
-  "id": 1,
-  "name": "Hope",
-  "layout": {
-    "frameStyle": "overlay",
-    "frameOverlayImage": "https://YOUR_PROJECT.supabase.co/storage/v1/object/public/themes/peace-attic-summer/01-hope-overlay.png",
-    "overlayKnockout": false,
-    "slots": [
-      { "x": 0.016667, "y": 0.0125, "width": 0.48, "height": 0.451875 },
-      { "x": 0.508333, "y": 0.0125, "width": 0.475, "height": 0.451875 },
-      { "x": 0.016667, "y": 0.473125, "width": 0.48, "height": 0.446875 },
-      { "x": 0.508333, "y": 0.473125, "width": 0.475, "height": 0.446875 }
-    ],
-    "frameWidth": 0,
-    "bottomHeight": 0,
-    "slotColor": "#FFFFFF"
-  }
+  "sizes": [
+    { "id": "card", "name": "카드형", "description": "2×2 네 컷", "width": 1200, "height": 1600 },
+    { "id": "strip", "name": "필름형", "description": "필름처럼 세로 네 컷", "width": 658, "height": 2009 }
+  ],
+  "frames": [
+    {
+      "id": 1,
+      "name": "Hope",
+      "sizeId": "card",
+      "layout": {
+        "frameStyle": "overlay",
+        "frameOverlayImage": "https://YOUR_PROJECT.supabase.co/storage/v1/object/public/themes/peace-attic-summer/01-hope-overlay.png",
+        "overlayKnockout": false,
+        "slots": [
+          { "x": 0.016667, "y": 0.0125, "width": 0.48, "height": 0.451875 },
+          { "x": 0.508333, "y": 0.0125, "width": 0.475, "height": 0.451875 },
+          { "x": 0.016667, "y": 0.473125, "width": 0.48, "height": 0.446875 },
+          { "x": 0.508333, "y": 0.473125, "width": 0.475, "height": 0.446875 }
+        ],
+        "frameWidth": 0,
+        "bottomHeight": 0,
+        "slotColor": "#FFFFFF"
+      }
+    }
+  ]
 }
 ```
 
 | 필드 | 설명 |
 |------|------|
+| `sizes` | 크기 카탈로그 (`id` · 표시 이름 · `width`/`height`) |
+| `sizeId` | 프레임이 속한 크기 (`card` / `strip` 등) |
 | `frameStyle: "overlay"` | Figma PNG를 사진 위에 덮는 모드 |
 | `frameOverlayImage` | overlay PNG URL (배포용은 Supabase public URL 권장) |
 | `slots` | 사진 배치 영역 (캔버스 전체 기준 0~1 비율) |
@@ -371,18 +408,15 @@ Supabase Dashboard → **SQL Editor** → [`supabase/storage-policies.sql`](supa
 
 ---
 
-## Admin · 프레임 디자이너
+## Admin
 
 1. http://localhost:8000/admin 접속
 2. `.env`의 `VITE_ADMIN_PIN` 입력
-3. **갤러리** — Supabase·로컬에 저장된 결과물 확인
-4. **프레임 디자이너** (`/admin/frames`)
-   - 슬롯 위치 드래그
-   - 색·테두리·하단 텍스트 편집
-   - 로고 이미지 업로드
-   - **Supabase에 저장** → `themes/{theme.id}/frames.json`
+3. **갤러리** — Supabase·로컬에 저장된 결과물 확인·삭제
 
-Supabase에서 프레임을 불러오려면 `event.json`에 추가:
+프레임 등록·수정은 `frames.json` + Figma export / `upload:theme-overlays` 로 합니다.
+
+Supabase Storage의 `frames.json`을 앱에서 읽으려면:
 
 ```json
 "theme": {
@@ -391,6 +425,8 @@ Supabase에서 프레임을 불러오려면 `event.json`에 추가:
   "defaultFrameId": 1
 }
 ```
+
+(로컬·Vercel 기본값은 `framesPath`: `/themes/peace-attic-summer/frames.json`)
 
 ---
 

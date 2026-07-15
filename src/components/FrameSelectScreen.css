@@ -6,12 +6,27 @@
     padding: 0 0 env(safe-area-inset-bottom, 0);
 }
 
-.frame-carousel-wrap {
-    position: relative;
+/* 프레임 + 도트를 한 덩어리로 화면 중앙에 */
+.frame-select-stage {
     flex: 1;
     display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: center;
+    gap: 16px;
+    min-height: 0;
+    width: 100%;
+}
+
+.frame-carousel-wrap {
+    position: relative;
+    flex: 0 1 auto;
+    display: flex;
     align-items: center;
-    min-height: 280px;
+    justify-content: center;
+    max-height: 100%;
+    min-height: 0;
+    width: 100%;
 }
 
 .frame-carousel-fade {
@@ -38,6 +53,8 @@
     gap: 20px;
     overflow-x: auto;
     scroll-snap-type: x mandatory;
+    /* 아이템이 적을 때 화면 중앙, 많을 때는 스크롤 유지 */
+    justify-content: safe center;
     padding: 16px max(24px, 8vw) 20px;
     width: 100%;
     -webkit-overflow-scrolling: touch;
@@ -106,11 +123,11 @@
 }
 
 .frame-select-booth--strip .frame-carousel-item {
-    min-width: 110px;
+    min-width: 120px;
 }
 
 .frame-select-booth--strip .frame-carousel-item canvas {
-    width: 90px;
+    width: 100px;
 }
 
 .frame-carousel-item.selected canvas {
@@ -170,7 +187,7 @@
 }
 
 .frame-select-booth--immersive .frame-select-footer {
-    background: linear-gradient(to top, rgba(15, 15, 20, 0.92) 70%, transparent);
+    background: transparent;
 }
 
 .frame-select-footer .booth-btn-secondary {
@@ -197,6 +214,8 @@
     display: block;
 }
 
+/* 필름형(소수 카드): 양끝 페이드가 '혼자 뜬' 느낌을 키우므로 숨김 */
+.frame-select-booth--strip .frame-carousel-fade,
 .frame-select-booth:not(.frame-select-booth--immersive) .frame-carousel-fade {
     display: none;
 }
@@ -210,8 +229,8 @@
 /* 태블릿 · iPad */
 @media (min-width: 768px) {
     .frame-carousel {
-        gap: 24px;
-        padding: 20px max(32px, 6vw) 24px;
+        gap: 28px;
+        padding: 20px max(40px, 8vw) 24px;
     }
 
     .frame-carousel-fade {
@@ -226,6 +245,21 @@
 
     .frame-carousel-item canvas {
         width: 200px;
+    }
+
+    /* 필름형 2장도 화면 중앙에 크게 */
+    .frame-select-booth--strip .frame-carousel {
+        gap: 36px;
+        padding-inline: max(48px, 10vw);
+    }
+
+    .frame-select-booth--strip .frame-carousel-item {
+        min-width: 168px;
+        padding: 22px 20px 16px;
+    }
+
+    .frame-select-booth--strip .frame-carousel-item canvas {
+        width: min(148px, 22vh);
     }
 
     .frame-carousel-name {
@@ -293,6 +327,14 @@
 
     .frame-carousel-item canvas {
         width: 240px;
+    }
+
+    .frame-select-booth--strip .frame-carousel-item {
+        min-width: 200px;
+    }
+
+    .frame-select-booth--strip .frame-carousel-item canvas {
+        width: min(170px, 28vh);
     }
 
     .frame-carousel-name {
