@@ -19,6 +19,11 @@ app.use(express.json({ limit: '100mb' }))
 app.use(express.urlencoded({ limit: '100mb', extended: true }))
 app.use(express.static('dist'))
 
+// 헬스체크
+app.get('/api/health', (req, res) => {
+    res.json({ ok: true, time: new Date().toISOString() })
+})
+
 // 프린트 API (Canon Selphy CP1300) — features.print=true 일 때 로컬 키오스크용
 app.post('/api/print', async (req, res) => {
     try {
