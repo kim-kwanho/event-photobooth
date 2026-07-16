@@ -8,110 +8,25 @@
 
 **행사마다 `event.json`과 프레임 테마만 바꿔 배포하는 평안네컷 포토부스 키오스크**
 
-[빠른 시작](#빠른-시작) · [행사 설정](#행사-설정-eventjson) · [배포 가이드](docs/SETUP.md)
+[빠른 시작](#빠른-시작) · [행사 설정](#행사-설정) · [테마·프레임](#테마프레임) · [배포 가이드](docs/SETUP.md)
 
 </div>
 
-<br/>
-태블릿·노트북·키오스크에서 촬영 → 프레임 합성 → Supabase 업로드·QR 공유·로컬 갤러리까지 운영할 수 있습니다.
+태블릿·키오스크에서 **촬영 → 프레임 합성 → Supabase 업로드·QR 공유·로컬 갤러리**까지 운영합니다.
 
-> 저장소: [github.com/kim-kwanho/event-photobooth](https://github.com/kim-kwanho/event-photobooth)
-
----
-
-## 목차
-
-- [촬영 플로우](#촬영-플로우)
-- [빠른 시작](#빠른-시작)
-- [환경 변수](#환경-변수)
-- [행사 설정 (`event.json`)](#행사-설정-eventjson)
-- [기능 플래그](#기능-플래그)
-- [테마·프레임](#테마프레임)
-- [Supabase 설정](#supabase-설정)
-- [Admin](#admin)
-- [배포](#배포)
-- [프로젝트 구조](#프로젝트-구조)
-- [스크립트](#스크립트)
-- [문제 해결](#문제-해결)
-
----
-
-## 촬영 플로우
-
-`flow.frameFirst` · `features.frameSelect` · `frames.json`의 `sizes` 유무에 따라 화면 순서가 달라집니다.
-
-**크기 선택 포함** (`sizes` 2개 이상, 현재 평안다락방 설정 · `frameFirst: true`)
-
-```mermaid
-flowchart LR
-    A[시작] --> S[크기 선택]
-    S --> B[프레임 선택]
-    B --> C[4컷 촬영]
-    C --> D[편집·필터]
-    D --> E[완성·QR]
-```
-
-크기: **카드형** (1200×1600 · 2×2) / **필름형** (658×2009 · 세로 네 컷).  
-고른 `sizeId`에 맞는 프레임만 목록에 나타납니다.
-
-**프레임 먼저** (`frameFirst: true`, `sizes` 없음 또는 1개)
-
-```mermaid
-flowchart LR
-    A[시작] --> B[프레임 선택]
-    B --> C[4컷 촬영]
-    C --> D[편집·필터]
-    D --> E[완성·QR]
-```
-
-**촬영 먼저** (`frameFirst: false`)
-
-```mermaid
-flowchart LR
-    A[시작] --> B[4컷 촬영]
-    B --> C[프레임 선택]
-    C --> D[편집·필터]
-    D --> E[완성·QR]
-```
-
-**프레임 고정** (`frameSelect: false`)
-
-```mermaid
-flowchart LR
-    A[시작] --> B[4컷 촬영]
-    B --> C[편집]
-    C --> D[완성]
-```
-
-| URL | 설명 |
-|-----|------|
-| `/` | 시작(랜딩) 화면 |
-| `/app` | 포토부스 본체 |
-| `/admin` | 관리자 (PIN) · 갤러리 |
-| `/result/:id` | QR로 열리는 결과물 페이지 |
+> 저장소: [github.com/kim-kwanho/event-photobooth](https://github.com/kim-kwanho/event-photobooth) · 배포: [event-photobooth-kwanho.vercel.app](https://event-photobooth-kwanho.vercel.app)
 
 ---
 
 ## 빠른 시작
 
-### 요구 사항
-
-- Node.js **18+**
-- npm
-- (QR·클라우드 저장) [Supabase](https://supabase.com) 프로젝트
-
-### 설치·실행
+**요구:** Node.js 18+ · npm · (QR·클라우드) [Supabase](https://supabase.com)
 
 ```bash
 git clone https://github.com/kim-kwanho/event-photobooth.git
 cd event-photobooth
 npm install
-cp .env.example .env
-```
-
-`.env` 에 Supabase URL·anon key·Admin PIN 을 입력한 뒤:
-
-```bash
+cp .env.example .env   # Supabase URL·anon key·Admin PIN 입력
 npm run dev:all
 ```
 
@@ -119,377 +34,207 @@ npm run dev:all
 |------|------|
 | http://localhost:8000 | 시작 화면 |
 | http://localhost:8000/app | 포토부스 |
-| http://localhost:8000/admin | 관리자 |
-| http://localhost:3001/api | 업로드 API (QR용) |
+| http://localhost:8000/admin | 관리자 (PIN) |
+| http://localhost:3001/api | 업로드 API (QR) |
 
-상세 배포 절차는 [docs/SETUP.md](docs/SETUP.md) 를 참고하세요.
+---
+
+## 촬영 플로우
+
+`flow.frameFirst` · `features.frameSelect` · `frames.json`의 `sizes` 개수에 따라 순서가 달라집니다.
+
+| 조건 | 화면 순서 |
+|------|-----------|
+| `sizes` 2개+ · `frameFirst: true` **(현재)** | 시작 → **크기 선택** → 프레임 → 4컷 촬영 → 편집 → 완성·QR |
+| `frameFirst: true` · `sizes` 0~1개 | 시작 → 프레임 → 4컷 촬영 → 편집 → 완성·QR |
+| `frameFirst: false` | 시작 → 4컷 촬영 → 프레임 → 편집 → 완성·QR |
+| `frameSelect: false` | 시작 → 4컷 촬영 → 편집 → 완성 (`defaultFrameId` 고정) |
+
+**크기:** 카드형 1200×1600 (2×2) · 필름형 658×2009 (세로 네 컷) — 고른 `sizeId`에 맞는 프레임만 표시됩니다.
+
+| URL | 설명 |
+|-----|------|
+| `/` | 랜딩 |
+| `/app` | 포토부스 |
+| `/admin` | 갤러리·관리 |
+| `/result/:id` | QR 결과물 |
 
 ---
 
 ## 환경 변수
 
-`.env` 파일 (커밋 금지). 템플릿은 [.env.example](.env.example).
+`.env` (커밋 금지) · 템플릿: [.env.example](.env.example)
 
 | 변수 | 필수 | 설명 |
 |------|------|------|
-| `VITE_SUPABASE_URL` | QR·업로드 시 | Supabase 프로젝트 URL |
-| `VITE_SUPABASE_ANON_KEY` | QR·업로드 시 | Supabase anon public key |
-| `VITE_ADMIN_PIN` | 권장 | `/admin` 접근 PIN. 비우면 PIN 없이 접근 |
-| `VITE_API_BASE_URL` | 선택 | API 베이스 (기본 `/api`, Vite가 3001로 프록시) |
-| `VITE_APP_URL` | 선택 | QR 링크용 공개 URL. 비우면 `window.location.origin` 사용 |
-| `FIGMA_ACCESS_TOKEN` | 선택 | `npm run export:figma-frames` — Figma overlay PNG export용 (커밋 금지) |
+| `VITE_SUPABASE_URL` | QR·업로드 | Supabase 프로젝트 URL |
+| `VITE_SUPABASE_ANON_KEY` | QR·업로드 | anon public key |
+| `VITE_ADMIN_PIN` | 권장 | `/admin` PIN (비우면 무인증) |
+| `VITE_API_BASE_URL` | 선택 | API 베이스 (기본 `/api` → :3001 프록시) |
+| `VITE_APP_URL` | 선택 | QR 공개 URL (비우면 `window.location.origin`) |
+| `FIGMA_ACCESS_TOKEN` | 선택 | `export:figma-frames`용 (커밋 금지) |
 
 ---
 
-## 행사 설정 (`event.json`)
+## 행사 설정
 
 경로: **`public/config/event.json`** — 행사마다 가장 자주 수정하는 파일입니다.
 
-### 전체 스키마 예시 (현재 평안다락방)
-
-```json
-{
-  "event": {
-    "id": "peace-attic-summer-2025",
-    "name": "평안네컷",
-    "tagline": "허브대학부 평안다락방 · 여름 아웃리치",
-    "locale": "ko"
-  },
-  "branding": {
-    "startBackground": "",
-    "primaryColor": "#0284C7",
-    "accentColor": "#FBBF24",
-    "fontFamily": "Inter, sans-serif"
-  },
-  "routes": {
-    "landing": "/",
-    "app": "/app",
-    "admin": "/admin"
-  },
-  "flow": {
-    "frameFirst": true
-  },
-  "features": {
-    "frameSelect": true,
-    "photoDrag": true,
-    "gallery": true,
-    "qrShare": true,
-    "admin": true,
-    "print": false,
-    "kioskMode": true,
-    "filters": true
-  },
-  "camera": {
-    "photoCount": 4,
-    "countdownSeconds": 6,
-    "quality": 0.9
-  },
-  "output": {
-    "width": 1200,
-    "height": 1600
-  },
-  "storage": {
-    "dbNamePrefix": "photobooth"
-  },
-  "theme": {
-    "id": "peace-attic-summer",
-    "framesPath": "/themes/peace-attic-summer/frames.json",
-    "defaultFrameId": 1
-  },
-  "kiosk": {
-    "idleSeconds": 60,
-    "fullscreen": true
-  }
-}
-```
-
-### 섹션별 설명
-
 | 섹션 | 역할 |
 |------|------|
-| `event` | 행사 ID·이름·한 줄 소개 (`name`은 시작 화면·헤더에 표시) |
-| `branding` | `startBackground` 이미지 경로, 포인트 색, 폰트 |
-| `routes` | 랜딩·앱·admin 경로 (기본값 유지 권장) |
-| `flow` | `frameFirst`: 프레임을 촬영보다 먼저 선택할지 |
-| `features` | 기능 on/off — [기능 플래그](#기능-플래그) 참고 |
-| `camera` | 촬영 장수, 카운트다운(초), JPEG 품질 |
-| `output` | 기본 합성 해상도 (크기를 고르면 선택한 `sizes` width/height 우선) |
-| `storage` | IndexedDB 이름 접두사 (`dbNamePrefix`) |
-| `theme` | 프레임 테마 경로·기본 프레임·저장소 |
-| `kiosk` | 유휴 시간(초) 후 시작 화면 복귀, 전체화면 시도 |
+| `event` | ID·이름·한 줄 소개 |
+| `branding` | 시작 배경·포인트 색·폰트 |
+| `flow.frameFirst` | 프레임을 촬영보다 먼저 선택 |
+| `features` | 기능 on/off — [아래 표](#기능-플래그) |
+| `camera` | 장수·카운트다운·JPEG 품질 |
+| `output` | 기본 합성 해상도 (`sizes` 선택 시 해당 width/height 우선) |
+| `theme` | `id` · `framesPath` · `defaultFrameId` · (선택) `framesStorage` |
+| `kiosk` | 유휴 초·전체화면 |
 
-### `theme.framesStorage`
+`theme.framesStorage`: `local`(기본, git의 `frames.json`) · `supabase`(`themes` 버킷의 `{themeId}/frames.json`)
 
-| 값 | 동작 |
-|----|------|
-| `local` (기본) | `public/themes/.../frames.json` 정적 파일 사용 |
-| `supabase` | `themes` 버킷의 `{theme.id}/frames.json` 로드 (Admin에서 저장 후 사용) |
+현재 설정 예시는 [public/config/event.json](public/config/event.json)을 참고하세요.
 
----
-
-## 기능 플래그
+### 기능 플래그
 
 | 플래그 | 설명 |
 |--------|------|
-| `frameSelect` | 프레임 선택 단계 표시. `false`면 `defaultFrameId`만 사용 |
-| `photoDrag` | 편집 화면에서 사진 위치 드래그 |
-| `filters` | 편집 화면 필터 (원본·밝게·선명·흑백) |
-| `gallery` | 사이드 메뉴 로컬 갤러리 (IndexedDB) |
-| `qrShare` | Supabase 업로드 + QR 코드 생성 |
-| `admin` | `/admin` 관리 페이지 |
-| `kioskMode` | 유휴 오버레이·키오스크 UX |
-| `print` | Admin 인쇄 (로컬 `server.js` + 프린터 필요) |
+| `frameSelect` | 프레임 선택 (`false` → `defaultFrameId`만) |
+| `photoDrag` | 편집 화면 사진 위치 드래그 |
+| `filters` | 원본·밝게·선명·흑백 |
+| `gallery` | IndexedDB 로컬 갤러리 |
+| `qrShare` | Supabase 업로드 + QR |
+| `admin` | `/admin` |
+| `kioskMode` | 키오스크 UX·유휴 리셋 |
+| `print` | Admin 인쇄 (`server.js` + 프린터) |
 
 ---
 
 ## 테마·프레임
 
-> **프레임 디자인 에셋(overlay PNG, `figma.json`)은 저장소에 포함되지 않습니다.**  
-> 로컬에서 Figma export → Supabase `themes` 버킷에 업로드하고, `frames.json`에는 **Supabase public URL**을 넣습니다.  
-> 템플릿: [`figma.json.example`](public/themes/peace-attic-summer/figma.json.example)
-
-### 디렉터리
+> **overlay PNG·`figma.json`은 git에 없습니다.** Figma export → Supabase `themes` 업로드 → `frames.json`에 public URL 등록.
 
 ```
-public/themes/
-  peace-attic-summer/
-    frames.json              # sizes + 프레임 · 슬롯 좌표 · Supabase overlay URL
-    figma.json.example       # Figma export 매핑 템플릿 → figma.json 으로 복사
-    figma.json               # (git 제외) 본인 Figma fileKey·node-id
-    01-hope-overlay.png …    # (git 제외) 로컬 export 후 Supabase 업로드
-  christmas/frames.json      # 크리스마스 예시 (Canvas 렌더)
-  default/frames.json        # 최소 예시
+public/themes/peace-attic-summer/
+  frames.json           # sizes · 슬롯 · Supabase overlay URL
+  figma.json.example    # → figma.json 복사 후 node-id 매핑
+  *-overlay.png         # (git 제외) export 후 Supabase 업로드
 ```
 
-### 크기 (`sizes`)
+### 크기 · 현재 프레임 (`peace-attic-summer`)
 
-| id | 표시 이름 | 해상도 | 레이아웃 |
-|----|-----------|--------|----------|
-| `card` | 카드형 | 1200×1600 | 2×2 |
-| `strip` | 필름형 | 658×2009 | 세로 네 컷 |
-
-프레임마다 `sizeId`로 위 크기 중 하나에 소속됩니다. `sizes`가 2개 이상이면 부스 맨 앞에 **크기 선택** 단계가 붙습니다.
-
-### 현재 테마 `peace-attic-summer` 프레임
+| sizeId | 해상도 | 레이아웃 |
+|--------|--------|----------|
+| `card` | 1200×1600 | 2×2 |
+| `strip` | 658×2009 | 세로 네 컷 |
 
 | ID | 이름 | sizeId | 비고 |
 |----|------|--------|------|
-| 1 | Hope | `card` | Figma overlay → Supabase |
-| 2 | Peace | `card` | HA 카드 디자인 overlay |
-| 3 | Summer | `card` | Figma overlay → Supabase |
-| 4 | Vision | `card` | Figma overlay → Supabase |
-| 5 | Love | `card` | Figma overlay → Supabase |
-| 6 | Rest | `card` | Figma overlay → Supabase |
-| 7 | HA Way | `strip` | 필름형 |
-| 8 | HA Vibes | `strip` | 필름형 |
+| 1–6 | Hope · Peace · Summer · Vision · Love · Rest | `card` | Figma overlay |
+| 7–8 | HA Way · HA Vibes | `strip` | 필름형 overlay |
+| 10 | Film | `strip` | Outreach 2026 · `overlayKnockout: true` |
 
-키오스크 **크기 선택**은 제목·카드·CTA가 한 패널로 구성되고, **프레임 선택**은 큰 미리보기 **가로 스크롤**입니다.
+### overlay 추가·수정 워크플로우
 
-### Figma overlay 워크플로우
+1. Figma: 카드 1200×1600 또는 필름 658×2009
+2. **4컷 placeholder 숨김** (export 시 슬롯 투명)
+3. PNG export (2x) → Supabase 업로드 → `frames.json` 등록
+4. 레이아웃 변경 시 **PNG 재업로드 + `slots` 좌표** 함께 수정
 
-1. 본인 Figma에서 카드형(1200×1600) 또는 필름형(658×2009) 프레임 디자인
-2. **4컷 사진 영역은 투명**하게
-   - placeholder 숨기기 + 프레임 Fill 투명, 또는
-   - 배경 이미지(`image 2` 등)를 쓸 경우 **Subtract(차집합)** 로 슬롯만 구멍 내기 (베이스=`image`, 위=`slot`)
-3. 테두리·구분선·하단 로고만 남기고 export
-4. `figma.json.example` → `figma.json` 복사 후 `fileKey`·`nodeId`·`output` 입력
-5. 로컬에서 PNG 생성·Supabase 업로드:
+**자동 export (Figma API)**
 
 ```bash
+# figma.json 설정 후
 FIGMA_ACCESS_TOKEN=figd_xxx npm run export:figma-frames
 npm run upload:theme-overlays
 ```
 
-6. `frames.json`에 `sizeId`·`frameOverlayImage`(Supabase public URL)·`slots` 등록
-7. Figma에서 구분선·레이아웃을 바꾼 뒤에는 **PNG 재export + 재업로드 + `slots` 좌표**를 함께 맞추세요
+**수동 export (Film 등)**
 
-### 프레임 JSON — overlay 모드 (현재)
-
-```json
-{
-  "sizes": [
-    { "id": "card", "name": "카드형", "description": "2×2 네 컷", "width": 1200, "height": 1600 },
-    { "id": "strip", "name": "필름형", "description": "필름처럼 세로 네 컷", "width": 658, "height": 2009 }
-  ],
-  "frames": [
-    {
-      "id": 1,
-      "name": "Hope",
-      "sizeId": "card",
-      "layout": {
-        "frameStyle": "overlay",
-        "frameOverlayImage": "https://YOUR_PROJECT.supabase.co/storage/v1/object/public/themes/peace-attic-summer/01-hope-overlay.png",
-        "overlayKnockout": false,
-        "slots": [
-          { "x": 0.016667, "y": 0.0125, "width": 0.48, "height": 0.451875 },
-          { "x": 0.508333, "y": 0.0125, "width": 0.475, "height": 0.451875 },
-          { "x": 0.016667, "y": 0.473125, "width": 0.48, "height": 0.446875 },
-          { "x": 0.508333, "y": 0.473125, "width": 0.475, "height": 0.446875 }
-        ],
-        "frameWidth": 0,
-        "bottomHeight": 0,
-        "slotColor": "#FFFFFF"
-      }
-    }
-  ]
-}
+```bash
+# public/themes/peace-attic-summer/10-film.png 저장 후
+npm run sync:film-overlay
+# 또는 단일 파일만: npm run upload:theme-overlays -- peace-attic-summer 10-film-overlay.png
 ```
 
-| 필드 | 설명 |
-|------|------|
-| `sizes` | 크기 카탈로그 (`id` · 표시 이름 · `width`/`height`) |
-| `sizeId` | 프레임이 속한 크기 (`card` / `strip` 등) |
-| `frameStyle: "overlay"` | Figma PNG를 사진 위에 덮는 모드 |
-| `frameOverlayImage` | overlay PNG URL (배포용은 Supabase public URL 권장) |
-| `slots` | 사진 배치 영역 (캔버스 전체 기준 0~1 비율) |
-| `overlayKnockout` | `true`면 JSON 슬롯으로 PNG를 추가로 뚫음 (Figma 투명 export 시 `false`) |
+캐시 무효화: `frameOverlayImage` URL에 `?v=날짜` 쿼리 추가.
 
-### 프레임 JSON — Canvas 모드 (레거시·예시 테마)
+**Film export 참고**
 
-`christmas`·`default` 테마처럼 Canvas로 테두리·하단을 그리는 방식:
+| 영역 | Figma |
+|------|-------|
+| 4컷 슬롯 | placeholder 숨김 (투명) |
+| 스프로킷 구멍 | **흰색 Fill** — Subtract만 쓰면 투명 구멍이 앱 배경색으로 비침 |
+| 슬롯이 불투명 export | `overlayKnockout: true` (JSON `slots`로 사진 영역만 뚫음) |
+
+### `frames.json` (overlay 모드)
 
 ```json
 {
+  "id": 1,
+  "name": "Hope",
+  "sizeId": "card",
   "layout": {
-    "slots": [
-      { "x": 0, "y": 0, "width": 0.5, "height": 0.5 }
-    ],
-    "frameColor": "#0F2847",
-    "frameWidth": 20,
-    "slotColor": "#FFFBF5",
-    "bottomImage": "/themes/.../logo.png",
-    "crossLineColor": "#2A4A6F",
-    "crossLineWidth": 7
+    "frameStyle": "overlay",
+    "frameOverlayImage": "https://YOUR_PROJECT.supabase.co/storage/v1/object/public/themes/peace-attic-summer/01-hope-overlay.png",
+    "overlayKnockout": false,
+    "slots": [{ "x": 0.016667, "y": 0.0125, "width": 0.48, "height": 0.451875 }],
+    "slotColor": "#FFFFFF"
   }
 }
 ```
 
 | 필드 | 설명 |
 |------|------|
-| `bottomImage` | 하단 로고 PNG |
-| `bottomText` + `logoStyle` | Canvas Hope 스타일 텍스트 |
-| `bottomStyle: "passport"` | 여권 하단 스타일 |
-| `bottomGradient` / `bottomPattern` | 하단 바 장식 |
-| `themeDecor` / `themeDecor2` | 코너 장식 (`sun`, `cloud` 등) |
+| `frameOverlayImage` | Supabase public URL 권장 |
+| `slots` | 사진 영역 (0~1 비율) |
+| `overlayKnockout` | `true` = 슬롯으로 PNG 추가 뚫기 (투명 export면 `false`) |
 
-렌더링: [`src/lib/canvasFrame.js`](src/lib/canvasFrame.js) · 로드: [`src/config/loadConfig.js`](src/config/loadConfig.js)
+Canvas 렌더 방식(레거시)은 `christmas`·`default` 테마 참고 · 렌더러: [`src/lib/canvasFrame.js`](src/lib/canvasFrame.js)
 
-### 새 테마 만들기
+### 새 테마
 
-1. `public/themes/내-테마-id/frames.json` 생성
-2. `event.json` 수정:
-
-```json
-"theme": {
-  "id": "내-테마-id",
-  "framesPath": "/themes/내-테마-id/frames.json",
-  "defaultFrameId": 1
-}
-```
-
-3. Figma overlay 사용 시 `figma.json` + `export:figma-frames` + `upload:theme-overlays` 후 `frames.json` URL 등록
+1. `public/themes/{id}/frames.json` 생성
+2. `event.json` → `theme.id` · `theme.framesPath` · `defaultFrameId`
+3. overlay PNG → `upload:theme-overlays` → URL을 `frames.json`에 등록
 
 ---
 
-## Supabase 설정
-
-### 버킷 (둘 다 Public 권장)
+## Supabase
 
 | 버킷 | 용도 |
 |------|------|
-| `photos` | 완성 평안네컷 이미지 (QR 공유) |
-| `themes` | overlay PNG · Admin 프레임 JSON·로고 (`{themeId}/*-overlay.png`) |
+| `photos` | 완성 이미지 (QR) |
+| `themes` | overlay PNG · `{themeId}/frames.json` |
 
-### RLS 정책
-
-Supabase Dashboard → **SQL Editor** → [`supabase/storage-policies.sql`](supabase/storage-policies.sql) 전체 실행.
-
-정책은 `DROP POLICY IF EXISTS` 후 재생성되므로 여러 번 실행해도 됩니다.
+RLS: Dashboard → SQL Editor → [`supabase/storage-policies.sql`](supabase/storage-policies.sql) 실행 (Public 버킷 권장).
 
 ---
 
-## Admin
+## Admin · 배포
 
-1. http://localhost:8000/admin 접속
-2. `.env`의 `VITE_ADMIN_PIN` 입력
-3. **갤러리** — Supabase·로컬에 저장된 결과물 확인·삭제
+**Admin:** `/admin` → `VITE_ADMIN_PIN` → Supabase·로컬 갤러리 확인·삭제. 프레임 수정은 `frames.json` + overlay 업로드.
 
-프레임 등록·수정은 `frames.json` + Figma export / `upload:theme-overlays` 로 합니다.
+**Vercel:** push → `VITE_*` 환경 변수 → `VITE_APP_URL` = 배포 도메인. `event.json`·`frames.json` 변경은 **재배포** 필요.
 
-Supabase Storage의 `frames.json`을 앱에서 읽으려면:
+**QR API:** `qrShare: true`면 업로드 API 필요 — 로컬 `dev:all`(:3001), 프로덕션은 별도 호스팅 또는 Serverless.
 
-```json
-"theme": {
-  "id": "peace-attic-summer",
-  "framesStorage": "supabase",
-  "defaultFrameId": 1
-}
-```
-
-(로컬·Vercel 기본값은 `framesPath`: `/themes/peace-attic-summer/frames.json`)
-
----
-
-## 배포
-
-### Vercel (프론트 + 정적 설정)
-
-**도메인:** https://event-photobooth-kwanho.vercel.app
-
-1. GitHub push
-2. Vercel Import → Environment Variables에 `VITE_*` 등록
-3. **`VITE_APP_URL`** = `https://event-photobooth-kwanho.vercel.app` (QR 링크용)
-4. Deploy
-
-도메인·대안 이름은 [docs/SETUP.md](docs/SETUP.md#6-vercel-배포) 참고.
-
-`event.json`·`public/themes/` 는 빌드에 포함되므로 **행사 설정 변경 후 재배포**가 필요합니다.
-
-### QR·업로드 API
-
-- `qrShare: true` 이면 이미지 업로드 API가 필요합니다.
-- 로컬: `npm run dev:all` (Express `server.js` :3001)
-- 프로덕션: API를 별도 호스팅하거나 Vercel Serverless로 `server.js` 역할을 이전해야 합니다.
-
-### 키오스크·프린트 (선택)
-
-- **키오스크**: `kioskMode: true`, 태블릿 전체화면 + `idleSeconds`로 자동 리셋
-- **프린트**: `print: true` + 행사 PC에서 `npm run dev:all` 상시 실행 + USB 프린터
+상세: [docs/SETUP.md](docs/SETUP.md)
 
 ---
 
 ## 프로젝트 구조
 
 ```
-├── public/
-│   ├── config/event.json              # 행사 설정 ★
-│   ├── themes/*/frames.json           # 프레임 테마
-│   ├── themes/peace-attic-summer/
-│   │   ├── figma.json.example         # Figma export 매핑 템플릿
-│   │   └── *-overlay.png              # (git 제외) Figma overlay 에셋
-│   └── assets/backgrounds/            # 시작 화면 배경
-├── scripts/
-│   ├── export-figma-frames.mjs        # Figma → overlay PNG
-│   └── upload-theme-overlays.mjs      # overlay PNG → Supabase themes
-├── src/
-│   ├── config/                 # loadConfig, ConfigContext, defaults
-│   ├── hooks/                  # useBoothFlow, useKioskMode
-│   ├── components/
-│   │   ├── booth/              # BoothShell, 진행 표시
-│   │   ├── CameraScreen.jsx
-│   │   ├── FrameSelectScreen.jsx
-│   │   ├── PhotoSelectScreen.jsx
-│   │   └── ResultScreen.jsx
-│   ├── lib/
-│   │   ├── canvasFrame.js      # 프레임·합성 렌더러
-│   │   ├── loadFrames.js
-│   │   ├── themeStorage.js     # Supabase themes 버킷
-│   │   ├── imageFilters.js
-│   │   └── database.js         # IndexedDB 갤러리
-│   └── pages/admin/            # Admin, FrameDesigner
-├── server.js                   # 업로드·QR API
-├── supabase/storage-policies.sql
-└── docs/SETUP.md
+public/config/event.json          # 행사 설정 ★
+public/themes/*/frames.json       # 프레임 테마
+scripts/
+  export-figma-frames.mjs         # Figma → PNG
+  upload-theme-overlays.mjs       # PNG → Supabase (전체·단일)
+  sync-film-overlay.mjs           # Film 수동 export 동기화
+src/components/                   # Camera · FrameSelect · PhotoSelect · Result
+src/lib/canvasFrame.js            # 합성 렌더러
+server.js                         # 업로드·QR API
 ```
 
 ---
@@ -498,15 +243,13 @@ Supabase Storage의 `frames.json`을 앱에서 읽으려면:
 
 | 명령 | 설명 |
 |------|------|
-| `npm run dev:all` | Vite(8000) + API(3001) 동시 실행 **권장** |
-| `npm run dev` | 프론트엔드만 |
-| `npm run dev:server` | API 서버만 |
-| `npm run build` | `dist/` 프로덕션 빌드 |
-| `npm start` | 빌드 결과 서빙 + API |
-| `npm run preview` | 빌드 미리보기 |
+| `npm run dev:all` | Vite :8000 + API :3001 **(권장)** |
+| `npm run dev` / `dev:server` | 프론트 / API만 |
+| `npm run build` / `preview` / `start` | 빌드·미리보기·프로덕션 |
 | `npm run lint` | ESLint |
-| `npm run export:figma-frames` | Figma REST API로 overlay PNG export (`FIGMA_ACCESS_TOKEN` 필요) |
-| `npm run upload:theme-overlays` | 로컬 `*-overlay.png`를 Supabase `themes` 버킷에 업로드 |
+| `npm run export:figma-frames` | Figma REST → overlay PNG |
+| `npm run upload:theme-overlays` | overlay → Supabase (`-- themeId file.png` 단일 업로드) |
+| `npm run sync:film-overlay` | `10-film.png` → overlay 복사·업로드 |
 
 ---
 
@@ -514,27 +257,17 @@ Supabase Storage의 `frames.json`을 앱에서 읽으려면:
 
 | 증상 | 확인 |
 |------|------|
-| Supabase 업로드 실패 | `storage-policies.sql` 실행, `photos`/`themes` 버킷 Public, 프로젝트 ACTIVE |
-| Admin 진입 불가 | `VITE_ADMIN_PIN` 일치 여부 |
-| QR 링크 404 | `VITE_APP_URL` 또는 배포 도메인, `photos` Public URL |
-| 카메라 안 됨 | HTTPS 또는 localhost, 브라우저 권한 |
-| iPhone Safari 미리보기 왜곡 | `facingMode: 'user'`·`aspectRatio: 0.75` 적용됨. 여전히 문제면 Safari 캐시 삭제 후 재접속 |
-| iPhone 촬영 화질 저하 | `getUserMedia`에 `width`/`height` ideal 제한을 두지 않음 (고해상도 유지) |
-| 하단 로고·프레임이 안 보임 | `frameOverlayImage` Supabase URL·버킷 파일 존재 여부. Canvas: `bottomImage` 경로 |
-| Vercel에서 프레임만 비어 있음 | git에 PNG가 없음 → `upload:theme-overlays` 후 `frames.json` URL이 Supabase인지 확인 |
-| 사진이 프레임 구멍과 어긋남 | Figma 수정 후 PNG 재export·재업로드 + `frames.json` `slots` 좌표 맞추기 |
-| 사진이 안 보임 (overlay) | Figma export 시 placeholder 숨김·Fill 투명 확인 (4컷 영역 투명해야 함) |
-| 프레임이 안 바뀜 | `framesPath` 경로, `framesStorage` 설정, 캐시 새로고침 |
-| 갤러리 비어 있음 | 결과 화면까지 완료해야 IndexedDB 저장 |
+| Supabase 업로드 실패 | `storage-policies.sql` · 버킷 Public · 프로젝트 ACTIVE |
+| Vercel에서 프레임 비어 있음 | overlay는 Supabase에만 있음 → URL·업로드 확인 |
+| overlay 사진 안 보임 | placeholder 투명 export · 또는 `overlayKnockout: true` |
+| 슬롯·사진 어긋남 | PNG 재export + `slots` 좌표 |
+| 스프로킷 구멍 색 이상 | 구멍 투명 export → Figma에서 **흰색 Fill** |
+| 프레임 변경 안 됨 | `framesPath` · `?v=` 캐시 · hard refresh |
+| QR 404 | `VITE_APP_URL` · `photos` Public |
+| Admin / 카메라 | PIN · HTTPS 또는 localhost · 권한 |
 
 ---
 
-## 기술 스택
+## 기술 스택 · 라이선스
 
-React 18 · Vite 5 · React Router 6 · Express 5 · Supabase Storage · Canvas API · IndexedDB · QRCode
-
----
-
-## 라이선스
-
-MIT
+React 18 · Vite 5 · React Router 6 · Express 5 · Supabase Storage · Canvas · IndexedDB · QRCode — **MIT**
