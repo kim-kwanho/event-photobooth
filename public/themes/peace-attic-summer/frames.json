@@ -327,6 +327,45 @@
         "bottomHeight": 0,
         "slotColor": "#FFFFFF"
       }
+    },
+    {
+      "id": 10,
+      "name": "Film",
+      "sizeId": "strip",
+      "layout": {
+        "frameStyle": "overlay",
+        "frameOverlayImage": "https://kmlgfluephsybivcasuy.supabase.co/storage/v1/object/public/themes/peace-attic-summer/10-film-overlay.png?v=20260716-white-holes",
+        "overlayKnockout": true,
+        "slots": [
+          {
+            "x": 0.075988,
+            "y": 0.023892,
+            "width": 0.848024,
+            "height": 0.189149
+          },
+          {
+            "x": 0.075988,
+            "y": 0.227974,
+            "width": 0.848024,
+            "height": 0.189149
+          },
+          {
+            "x": 0.075988,
+            "y": 0.432056,
+            "width": 0.848024,
+            "height": 0.189149
+          },
+          {
+            "x": 0.075988,
+            "y": 0.636137,
+            "width": 0.848024,
+            "height": 0.189149
+          }
+        ],
+        "frameWidth": 0,
+        "bottomHeight": 0,
+        "slotColor": "#FFFFFF"
+      }
     }
   ]
 }

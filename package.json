@@ -11,7 +11,8 @@
     "start": "node server.js",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
     "export:figma-frames": "node scripts/export-figma-frames.mjs",
-    "upload:theme-overlays": "node scripts/upload-theme-overlays.mjs"
+    "upload:theme-overlays": "node scripts/upload-theme-overlays.mjs",
+    "sync:film-overlay": "node scripts/sync-film-overlay.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.87.1",

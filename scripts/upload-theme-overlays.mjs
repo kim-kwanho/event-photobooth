@@ -4,6 +4,7 @@
  * 사용법:
  *   node scripts/upload-theme-overlays.mjs
  *   node scripts/upload-theme-overlays.mjs peace-attic-summer
+ *   node scripts/upload-theme-overlays.mjs peace-attic-summer 10-film-overlay.png
  */
 
 import { readdir, readFile } from 'node:fs/promises'
@@ -28,6 +29,7 @@ async function loadEnv() {
 }
 
 const themeId = process.argv[2] || 'peace-attic-summer'
+const onlyFile = process.argv[3]
 const THEME_DIR = join(ROOT, 'public/themes', themeId)
 const BUCKET = 'themes'
 
@@ -41,7 +43,9 @@ if (!supabaseUrl || !supabaseKey) {
 }
 
 const supabase = createClient(supabaseUrl, supabaseKey)
-const files = (await readdir(THEME_DIR)).filter((name) => name.endsWith('-overlay.png'))
+const files = (await readdir(THEME_DIR))
+    .filter((name) => name.endsWith('-overlay.png'))
+    .filter((name) => !onlyFile || name === onlyFile)
 
 if (files.length === 0) {
     console.error(`overlay PNG가 없습니다: ${THEME_DIR}`)
