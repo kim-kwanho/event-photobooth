@@ -297,6 +297,11 @@
         "frameStyle": "overlay",
         "frameOverlayImage": "https://kmlgfluephsybivcasuy.supabase.co/storage/v1/object/public/themes/peace-attic-summer/09-ha-vibes-overlay.png?v=figma-overlay",
         "overlayKnockout": false,
+        "captureGuide": {
+          "enabled": true,
+          "mode": "overlaySlot",
+          "opacity": 0.95
+        },
         "slots": [
           {
             "x": 0.075988,

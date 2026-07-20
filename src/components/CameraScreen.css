@@ -96,6 +96,12 @@
         overflow: hidden;
     }
 
+    .camera-preview-wrapper--strip {
+        aspect-ratio: var(--strip-preview-aspect, 1.5);
+        width: min(100%, calc(58vh * var(--strip-preview-aspect, 1.5)));
+        max-height: 58vh;
+    }
+
     .countdown-number {
         font-size: 80px;
         width: 120px;
@@ -286,15 +292,72 @@
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
     min-height: 0;
     flex: 0 0 auto;
-    aspect-ratio: 3 / 4; /* 인생네컷 비율 (3:4) */
+    aspect-ratio: 3 / 4; /* 카드형 인생네컷 비율 (3:4) */
     max-width: 100%;
     align-self: center;
+}
+
+/* 세로 네컷(strip): 슬롯에 가까운 가로 프리뷰 */
+.camera-preview-wrapper--strip {
+    aspect-ratio: var(--strip-preview-aspect, 1.5);
+    width: min(100%, calc(62vh * var(--strip-preview-aspect, 1.5)));
+    max-height: 62vh;
+}
+
+.camera-screen--strip-landscape .camera-preview-wrapper--strip {
+    width: min(100%, calc(70vh * var(--strip-preview-aspect, 1.5)));
+    max-height: 70vh;
+}
+
+.camera-rotate-gate {
+    position: absolute;
+    inset: 0;
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 24px;
+    text-align: center;
+    color: #fff;
+    background: rgba(10, 10, 14, 0.88);
+}
+
+.camera-rotate-icon {
+    font-size: 52px;
+    line-height: 1;
+    animation: camera-rotate-hint 1.6s ease-in-out infinite;
+}
+
+.camera-rotate-title {
+    margin: 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+.camera-rotate-desc {
+    margin: 0;
+    font-size: 0.95rem;
+    opacity: 0.85;
+    line-height: 1.4;
+}
+
+@keyframes camera-rotate-hint {
+    0%, 100% { transform: rotate(0deg); }
+    35% { transform: rotate(90deg); }
+    70% { transform: rotate(90deg); }
 }
 
 /* 태블릿 이상에서도 비율 제약 없이 크게 */
 @media (min-width: 768px) and (min-width: 1024px) {
     .camera-preview-wrapper {
         flex: 1 1 auto;
+    }
+
+    .camera-preview-wrapper--strip {
+        flex: 0 0 auto;
     }
 }
 
@@ -326,6 +389,77 @@
     object-fit: cover;
     object-position: center center;
     background: #000;
+}
+
+/* 컷별 캐릭터 위치 가이드 (미러 밖 — 최종 인쇄와 좌우 동일) */
+.camera-capture-guide {
+    position: absolute;
+    z-index: 3;
+    pointer-events: none;
+    height: var(--guide-height, 42%);
+    width: auto;
+    max-width: 38%;
+    object-fit: contain;
+    object-position: bottom center;
+    opacity: 0;
+    animation: capture-guide-in 280ms ease forwards;
+    user-select: none;
+    -webkit-user-drag: none;
+}
+
+/* 오버레이 슬롯 크롭: 프리뷰 전체에 맞춰 최종 프레임과 동일 배치 */
+.camera-capture-guide--slot {
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    object-fit: fill;
+    object-position: center center;
+    filter: none;
+}
+
+.camera-capture-guide--v-bottom {
+    bottom: 0;
+    top: auto;
+}
+
+.camera-capture-guide--v-center {
+    top: 50%;
+    bottom: auto;
+}
+
+.camera-capture-guide--left {
+    left: 2%;
+    right: auto;
+}
+
+.camera-capture-guide--center {
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+}
+
+.camera-capture-guide--right {
+    right: 2%;
+    left: auto;
+}
+
+.camera-capture-guide--v-center.camera-capture-guide--center {
+    transform: translate(-50%, -50%);
+}
+
+.camera-capture-guide--v-center.camera-capture-guide--left,
+.camera-capture-guide--v-center.camera-capture-guide--right {
+    transform: translateY(-50%);
+}
+
+@keyframes capture-guide-in {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: var(--guide-opacity, 0.92);
+    }
 }
 
 .camera-placeholder {
@@ -848,5 +982,118 @@
         max-height: calc(100dvh - 190px) !important;
         border-radius: 14px;
     }
+}
+
+/* strip 가로 프리뷰: 미디어쿼리/키오스크의 3:4 덮어쓰기 */
+.camera-screen--strip .camera-preview-wrapper.camera-preview-wrapper--strip,
+.camera-screen--kiosk.camera-screen--strip .camera-preview-wrapper.camera-preview-wrapper--strip {
+    aspect-ratio: var(--strip-preview-aspect, 1.5) !important;
+    width: min(100%, calc(62vh * var(--strip-preview-aspect, 1.5))) !important;
+    max-width: min(100%, calc(62vh * var(--strip-preview-aspect, 1.5))) !important;
+    max-height: 62vh !important;
+    height: auto !important;
+    flex: 0 0 auto !important;
+}
+
+/* 가로 모드: 세로용 520px 카드 폭을 풀고 프리뷰를 화면 가득 */
+.camera-screen--strip-landscape.camera-screen--kiosk .camera-container {
+    max-width: min(1200px, 100%) !important;
+    padding: 0 16px 10px !important;
+    gap: 8px !important;
+    justify-content: center;
+}
+
+.camera-screen--strip-landscape .camera-header {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: center;
+    column-gap: 10px;
+    row-gap: 2px;
+    padding: 0 !important;
+    margin: 0 !important;
+    max-height: none !important;
+}
+
+.camera-screen--strip-landscape .camera-back-btn {
+    margin: 0 8px 0 0;
+    padding: 2px 0;
+    font-size: 13px;
+}
+
+.camera-screen--strip-landscape .camera-header h2 {
+    font-size: 18px !important;
+    margin: 0 !important;
+}
+
+.camera-screen--strip-landscape .camera-subtitle,
+.camera-screen--strip-landscape .camera-frame-badge {
+    font-size: 12px !important;
+    margin: 0 !important;
+}
+
+.camera-screen--strip-landscape .camera-preview-wrapper.camera-preview-wrapper--strip,
+.camera-screen--kiosk.camera-screen--strip-landscape .camera-preview-wrapper.camera-preview-wrapper--strip {
+    width: min(96vw, calc((100dvh - 168px) * var(--strip-preview-aspect, 1.5))) !important;
+    max-width: min(96vw, calc((100dvh - 168px) * var(--strip-preview-aspect, 1.5))) !important;
+    max-height: calc(100dvh - 168px) !important;
+    margin: 0 auto !important;
+    border-radius: 14px !important;
+}
+
+.camera-screen--strip-landscape .camera-controls {
+    padding: 4px 0 0 !important;
+    gap: 8px !important;
+}
+
+.camera-screen--strip-landscape .btn-capture--hero {
+    min-height: 48px !important;
+    min-width: min(100%, 360px) !important;
+    font-size: 17px !important;
+}
+
+@media (orientation: landscape) and (max-height: 520px) {
+    .camera-screen--strip-landscape.camera-screen--kiosk .camera-container {
+        padding: 0 12px 6px !important;
+        gap: 4px !important;
+    }
+
+    .camera-screen--strip-landscape .camera-header h2 {
+        font-size: 15px !important;
+    }
+
+    .camera-screen--strip-landscape .camera-subtitle,
+    .camera-screen--strip-landscape .camera-frame-badge {
+        font-size: 11px !important;
+    }
+
+    .camera-screen--strip-landscape .camera-preview-wrapper.camera-preview-wrapper--strip,
+    .camera-screen--kiosk.camera-screen--strip-landscape .camera-preview-wrapper.camera-preview-wrapper--strip {
+        width: min(98vw, calc((100dvh - 132px) * var(--strip-preview-aspect, 1.5))) !important;
+        max-width: min(98vw, calc((100dvh - 132px) * var(--strip-preview-aspect, 1.5))) !important;
+        max-height: calc(100dvh - 132px) !important;
+        border-radius: 10px !important;
+    }
+
+    .camera-screen--strip-landscape .btn-capture--hero {
+        min-height: 42px !important;
+        font-size: 15px !important;
+        border-radius: 12px !important;
+    }
+
+    .camera-screen--strip .camera-rotate-title {
+        font-size: 1.05rem;
+    }
+}
+
+/* 키오스크 + strip 가로: 상단 진행바 공간까지 감안 */
+.booth-shell--kiosk:has(.camera-screen--strip-landscape) .booth-progress {
+    margin-bottom: 4px;
+    transform: scale(0.92);
+    transform-origin: top center;
+}
+
+.booth-shell--kiosk:has(.camera-screen--strip-landscape) .booth-immersive-content {
+    min-height: 0;
 }
 

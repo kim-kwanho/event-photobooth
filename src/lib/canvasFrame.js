@@ -9,6 +9,65 @@ export function isOverlayFrame(frame) {
     return frame?.layout?.frameStyle === 'overlay' && Boolean(frame?.layout?.frameOverlayImage)
 }
 
+/**
+ * 촬영 가이드: 오버레이 PNG에서 슬롯별 크롭 (캐릭터 위치·크기 = 최종 프레임과 동일)
+ * 슬롯 구멍은 투명이라 카메라가 비치고, 캐릭터만 남음.
+ */
+export async function buildCaptureGuideSlotImages(frame) {
+    const src = frame?.layout?.frameOverlayImage
+    const slots = frame?.layout?.slots
+    if (!src || !Array.isArray(slots) || slots.length === 0) return []
+
+    const overlayImg = await loadFrameImage(src)
+    if (!overlayImg?.naturalWidth) return []
+
+    const w = overlayImg.naturalWidth
+    const h = overlayImg.naturalHeight
+    const out = []
+
+    for (let i = 0; i < slots.length; i++) {
+        const rect = computeSlotRect(frame, i, w, h)
+        if (!rect || rect.width < 2 || rect.height < 2) {
+            out.push(null)
+            continue
+        }
+
+        const canvas = document.createElement('canvas')
+        canvas.width = Math.round(rect.width)
+        canvas.height = Math.round(rect.height)
+        const ctx = canvas.getContext('2d')
+        if (!ctx) {
+            out.push(null)
+            continue
+        }
+
+        ctx.drawImage(
+            overlayImg,
+            rect.x,
+            rect.y,
+            rect.width,
+            rect.height,
+            0,
+            0,
+            canvas.width,
+            canvas.height
+        )
+
+        // 남은 거의-검정 픽셀만 투명 처리 (캐릭터·텍스트 유지)
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
+        const px = imageData.data
+        for (let p = 0; p < px.length; p += 4) {
+            if (px[p] <= 14 && px[p + 1] <= 14 && px[p + 2] <= 14) {
+                px[p + 3] = 0
+            }
+        }
+        ctx.putImageData(imageData, 0, 0)
+        out.push(canvas.toDataURL('image/png'))
+    }
+
+    return out
+}
+
 export function getBottomHeightRatio(frame) {
     if (frame.layout.bottomHeight === 0) return 0
     return frame.layout.bottomHeight ?? 0.08

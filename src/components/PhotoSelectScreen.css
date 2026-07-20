@@ -20,8 +20,9 @@
     padding: 12px 16px 16px;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 10px;
     box-sizing: border-box;
+    min-height: 0;
 }
 
 .photo-select-hint {
@@ -30,13 +31,26 @@
     text-align: center;
     margin: 0;
     line-height: 1.4;
+    flex-shrink: 0;
 }
 
 .photo-select-body {
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 12px;
     align-items: center;
+    min-height: 0;
+    flex: 1;
+}
+
+.photo-select-preview-shell {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 0;
+    flex: 1 1 auto;
+    container-type: size;
 }
 
 .frame-preview-background {
@@ -48,12 +62,34 @@
     border-radius: 12px;
     padding: 12px;
     box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.06);
-    aspect-ratio: 3/4;
+    aspect-ratio: 3 / 4;
     min-height: 0;
 }
 
+/* 세로 네컷: 가용 높이에 맞춰 비율 유지 + 카드에 밀착 */
 .frame-preview-background--strip {
-    max-width: 180px;
+    --strip-ar: calc(var(--preview-w, 658) / var(--preview-h, 2009));
+    --strip-avail-h: calc(100dvh - 250px);
+    width: min(100%, calc(var(--strip-avail-h) * var(--strip-ar)));
+    max-width: min(240px, 100%);
+    max-height: var(--strip-avail-h);
+    height: auto;
+    aspect-ratio: var(--preview-w, 658) / var(--preview-h, 2009);
+    padding: 0;
+    background: transparent;
+    box-shadow: none;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.frame-preview-background--strip .frame-overlay,
+.frame-preview-background--strip .photo-slots-container {
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
 }
 
 .frame-overlay {
@@ -75,7 +111,7 @@
     right: 12px;
     bottom: 12px;
     pointer-events: none;
-    overflow: visible;
+    overflow: hidden;
     z-index: 3;
 }
 
@@ -85,7 +121,7 @@
 
 .photo-slot {
     position: absolute;
-    background: transparent;
+    background: #111;
     border-radius: 0;
     overflow: hidden;
     transition: outline 0.15s;
@@ -163,13 +199,14 @@
     max-width: 340px;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 10px;
+    flex-shrink: 0;
 }
 
 .photo-select-controls {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 8px;
 }
 
 .photo-select-booth .booth-btn-secondary {
@@ -182,42 +219,133 @@
     width: 100%;
 }
 
+/* strip: 뷰포트에 맞춘 flex 레이아웃 */
+.photo-select-booth--strip {
+    padding: 8px 12px 12px;
+    gap: 8px;
+    height: 100%;
+    max-height: calc(100dvh - 128px);
+    overflow: hidden;
+}
+
+.photo-select-booth--strip .photo-select-hint {
+    font-size: 12px;
+}
+
+.photo-select-booth--strip .photo-select-body {
+    flex: 1;
+    min-height: 0;
+    gap: 8px;
+}
+
+.photo-select-booth--strip .photo-select-preview-shell {
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
+.photo-select-booth--strip .frame-preview-background--strip {
+    width: min(100cqw, calc(100cqh * var(--preview-w, 658) / var(--preview-h, 2009)));
+    height: auto;
+    max-width: 100%;
+    max-height: 100cqh;
+    aspect-ratio: var(--preview-w, 658) / var(--preview-h, 2009);
+}
+
+.photo-select-booth--strip .photo-select-sidebar {
+    max-width: 100%;
+}
+
+.photo-select-booth--strip .filter-selector {
+    margin: 0;
+}
+
+.photo-select-booth--strip .filter-selector-label {
+    margin: 0 0 6px;
+    font-size: 12px;
+}
+
+.photo-select-booth--strip .filter-selector-options {
+    gap: 6px;
+}
+
+.photo-select-booth--strip .filter-option {
+    min-width: 58px;
+    padding: 6px 8px;
+    border-radius: 10px;
+}
+
+.photo-select-booth--strip .filter-option-emoji {
+    font-size: 16px;
+}
+
+.photo-select-booth--strip .filter-option-name {
+    font-size: 11px;
+}
+
+.photo-select-booth--strip .booth-btn {
+    min-height: 44px;
+    padding: 12px 18px;
+    font-size: 15px;
+}
+
 /* iPad 세로 */
 @media (min-width: 768px) and (max-width: 1024px) {
-    .photo-select-booth {
+    .photo-select-booth:not(.photo-select-booth--strip) {
         padding: 16px 20px 20px;
     }
 
-    .frame-preview-background {
+    .photo-select-booth:not(.photo-select-booth--strip) .frame-preview-background {
         max-width: 380px;
     }
 }
 
-/* iPad 가로 — 미리보기와 컨트롤 나란히 */
+/* 가로 — 미리보기와 컨트롤 나란히 */
 @media (min-width: 768px) and (max-height: 820px) and (orientation: landscape) {
     .photo-select-booth {
-        padding: 10px 16px 12px;
+        padding: 8px 14px 10px;
         gap: 8px;
     }
 
     .photo-select-body {
         flex-direction: row;
-        align-items: flex-start;
+        align-items: center;
         justify-content: center;
-        gap: 20px;
+        gap: 16px;
     }
 
-    .frame-preview-background {
+    .photo-select-preview-shell {
+        flex: 1 1 auto;
+        min-width: 0;
+        height: 100%;
+    }
+
+    .frame-preview-background:not(.frame-preview-background--strip) {
         max-width: min(42vh, 320px);
         flex-shrink: 0;
         padding: 10px;
     }
 
+    .photo-select-booth--strip {
+        max-height: calc(100dvh - 96px);
+    }
+
+    .photo-select-booth--strip .photo-select-body {
+        flex-direction: row;
+        align-items: stretch;
+    }
+
+    .photo-select-booth--strip .frame-preview-background--strip {
+        width: min(100cqw, calc(100cqh * var(--preview-w, 658) / var(--preview-h, 2009)));
+        max-height: 100cqh;
+        height: auto;
+        max-width: 100%;
+    }
+
     .photo-select-sidebar {
-        max-width: 240px;
-        flex: 1;
+        max-width: 220px;
+        flex: 0 0 220px;
         justify-content: center;
-        min-height: min(42vh, 320px);
+        min-height: 0;
     }
 
     .photo-select-hint {
@@ -225,13 +353,32 @@
     }
 }
 
+/* 낮은 세로 화면 */
+@media (max-height: 740px) {
+    .photo-select-booth--strip {
+        max-height: calc(100dvh - 112px);
+        padding: 6px 10px 10px;
+        gap: 6px;
+    }
+
+    .photo-select-booth--strip .photo-select-hint {
+        display: none;
+    }
+
+    .photo-select-booth--strip .booth-btn {
+        min-height: 40px;
+        padding: 10px 14px;
+        font-size: 14px;
+    }
+}
+
 /* 모바일 */
 @media (max-width: 480px) {
-    .photo-select-booth {
+    .photo-select-booth:not(.photo-select-booth--strip) {
         padding: 10px 12px 14px;
     }
 
-    .frame-preview-background {
+    .photo-select-booth:not(.photo-select-booth--strip) .frame-preview-background {
         max-width: 100%;
         padding: 10px;
     }

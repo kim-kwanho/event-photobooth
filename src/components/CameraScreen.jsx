@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { buildCaptureGuideSlotImages } from '../lib/canvasFrame'
 import './CameraScreen.css'
 
 // 모바일 디바이스 감지
@@ -42,6 +43,22 @@ const getUserMedia = async (constraints) => {
     throw new Error('getUserMedia is not supported in this browser')
 }
 
+function getIsLandscape() {
+    if (typeof window === 'undefined') return true
+    if (window.matchMedia?.('(orientation: landscape)').matches) return true
+    return window.innerWidth >= window.innerHeight
+}
+
+function getStripSlotAspect(selectedSize, selectedFrame) {
+    const slot = selectedFrame?.layout?.slots?.[0]
+    if (slot && selectedSize?.width && selectedSize?.height) {
+        const w = slot.width * selectedSize.width
+        const h = slot.height * selectedSize.height
+        if (w > 0 && h > 0) return w / h
+    }
+    return 3 / 2
+}
+
 function CameraScreen({
     onCaptureComplete,
     photoCount = 4,
@@ -51,6 +68,7 @@ function CameraScreen({
     autoStart = false,
     onBack,
     selectedFrame = null,
+    selectedSize = null,
 }) {
     const [countdown, setCountdown] = useState(null)
     const [capturedPhotos, setCapturedPhotos] = useState([])
@@ -58,14 +76,108 @@ function CameraScreen({
     const [cameraStatus, setCameraStatus] = useState('idle') // 'idle', 'requesting', 'active', 'error'
     const [errorMessage, setErrorMessage] = useState('')
     const [isMobile, setIsMobile] = useState(false)
+    const [guideReady, setGuideReady] = useState(false)
+    const [isLandscape, setIsLandscape] = useState(() => getIsLandscape())
     const videoRef = useRef(null)
     const streamRef = useRef(null)
     const canvasRef = useRef(null)
+
+    const isStripSize = selectedSize
+        ? selectedSize.width / selectedSize.height < 0.5
+        : selectedFrame?.sizeId === 'strip'
+    const needsLandscape = Boolean(isStripSize)
+    const landscapeReady = !needsLandscape || isLandscape
+    const stripSlotAspect = getStripSlotAspect(selectedSize, selectedFrame)
+
+    const captureGuide = selectedFrame?.layout?.captureGuide
+    const guideMode = captureGuide?.mode === 'images' ? 'images' : 'overlaySlot'
+    const guideImagesFromConfig = Array.isArray(captureGuide?.images) ? captureGuide.images : []
+    const [guideSlotImages, setGuideSlotImages] = useState([])
+    const guideImages = guideMode === 'images' ? guideImagesFromConfig : guideSlotImages
+    const guideEnabled = Boolean(captureGuide?.enabled) && (
+        guideMode === 'overlaySlot'
+            ? Boolean(selectedFrame?.layout?.frameOverlayImage)
+            : guideImagesFromConfig.length > 0
+    )
+    const guideIndex = guideImages.length > 0
+        ? Math.min(capturedPhotos.length, guideImages.length - 1)
+        : 0
+    const guideSrc = guideImages[guideIndex] || null
+    const guideAlign = captureGuide?.align?.[guideIndex] || 'center'
+    const guideVertical = captureGuide?.verticalAlign || 'bottom'
+    const guideOpacity = typeof captureGuide?.opacity === 'number' ? captureGuide.opacity : 0.92
+    const guideHeightRatio = typeof captureGuide?.heightRatio === 'number'
+        ? captureGuide.heightRatio
+        : 0.42
+    const isSlotGuide = guideMode === 'overlaySlot'
 
     // 모바일 디바이스 확인
     useEffect(() => {
         setIsMobile(isMobileDevice())
     }, [])
+
+    // 세로 네컷: 가로 방향 감지
+    useEffect(() => {
+        const update = () => setIsLandscape(getIsLandscape())
+        update()
+        window.addEventListener('resize', update)
+        window.addEventListener('orientationchange', update)
+        const mq = window.matchMedia?.('(orientation: landscape)')
+        mq?.addEventListener?.('change', update)
+        return () => {
+            window.removeEventListener('resize', update)
+            window.removeEventListener('orientationchange', update)
+            mq?.removeEventListener?.('change', update)
+        }
+    }, [])
+
+    // 촬영 가이드 프리로드 (오버레이 슬롯 크롭 = 최종 프레임과 동일 위치·크기)
+    useEffect(() => {
+        let cancelled = false
+
+        const run = async () => {
+            if (!captureGuide?.enabled) {
+                setGuideReady(false)
+                setGuideSlotImages([])
+                return
+            }
+
+            if (guideMode === 'overlaySlot') {
+                setGuideReady(false)
+                const images = await buildCaptureGuideSlotImages(selectedFrame)
+                if (cancelled) return
+                const valid = images.filter(Boolean)
+                setGuideSlotImages(valid)
+                setGuideReady(valid.length > 0)
+                return
+            }
+
+            const images = Array.isArray(captureGuide?.images) ? captureGuide.images : []
+            if (images.length === 0) {
+                setGuideReady(false)
+                return
+            }
+
+            setGuideReady(false)
+            const results = await Promise.all(
+                images.map(
+                    (src) =>
+                        new Promise((resolve) => {
+                            const img = new Image()
+                            img.onload = () => resolve(true)
+                            img.onerror = () => resolve(false)
+                            img.src = src
+                        })
+                )
+            )
+            if (!cancelled) setGuideReady(results.some(Boolean))
+        }
+
+        run()
+        return () => {
+            cancelled = true
+        }
+    }, [selectedFrame, captureGuide?.enabled, guideMode])
 
     // 키오스크: 진입 시 카메라 자동 시작
     useEffect(() => {
@@ -107,12 +219,12 @@ function CameraScreen({
         console.log('비디오 요소 확인됨:', video)
 
         try {
-            // iOS Safari: 전면 카메라 + 3:4 비율 힌트 (해상도는 기기 기본값 사용)
+            // iOS Safari: 전면 카메라 + 촬영 비율 힌트 (strip=가로, card=세로)
             const constraints = (isMobileDevice() || isSafari())
                 ? {
                     video: {
                         facingMode: 'user',
-                        aspectRatio: { ideal: 0.75 },
+                        aspectRatio: { ideal: needsLandscape ? stripSlotAspect : 0.75 },
                     },
                     audio: false,
                 }
@@ -354,6 +466,11 @@ function CameraScreen({
     const startCapture = async () => {
         if (isCapturing || capturedPhotos.length >= photoCount) return
 
+        if (needsLandscape && !isLandscape) {
+            alert('세로 네컷은 화면을 가로로 돌려 주세요.')
+            return
+        }
+
         // 카메라가 활성화되지 않은 경우
         if (!streamRef.current || cameraStatus !== 'active') {
             alert('카메라를 먼저 시작해주세요.')
@@ -417,9 +534,21 @@ function CameraScreen({
 
     const remainingPhotos = photoCount - capturedPhotos.length
     const showStartCamera = !autoStart && (cameraStatus === 'idle' || cameraStatus === 'error')
+    const showRotateGate = needsLandscape && !isLandscape
+    const captureBlocked = isCapturing
+        || capturedPhotos.length >= photoCount
+        || cameraStatus !== 'active'
+        || showRotateGate
 
     return (
-        <div className={`camera-screen${kioskMode ? ' camera-screen--kiosk' : ''}`}>
+        <div
+            className={[
+                'camera-screen',
+                kioskMode ? 'camera-screen--kiosk' : '',
+                needsLandscape ? 'camera-screen--strip' : '',
+                needsLandscape && isLandscape ? 'camera-screen--strip-landscape' : '',
+            ].filter(Boolean).join(' ')}
+        >
             <div className="camera-container">
                 <div className="camera-header">
                     {onBack && (
@@ -429,16 +558,27 @@ function CameraScreen({
                     )}
                     <h2>{kioskMode ? '촬영 준비' : '사진 촬영'}</h2>
                     <p className="camera-subtitle">
-                        {capturedPhotos.length > 0 
-                            ? `${capturedPhotos.length}/${photoCount}장 촬영 완료` 
+                        {showRotateGate
+                            ? '세로 네컷 · 화면을 가로로 돌려 주세요'
+                            : capturedPhotos.length > 0
+                            ? `${capturedPhotos.length}/${photoCount}장 촬영 완료`
                             : `${photoCount}장 · ${countdownSeconds}초 카운트다운`}
+                        {selectedFrame && landscapeReady && !showRotateGate
+                            ? ` · ${selectedFrame.name}`
+                            : ''}
                     </p>
-                    {selectedFrame && (
+                    {selectedFrame && (!landscapeReady || showRotateGate) && (
                         <p className="camera-frame-badge">프레임: {selectedFrame.name}</p>
                     )}
                 </div>
 
-                <div className="camera-preview-wrapper">
+                <div
+                    className={[
+                        'camera-preview-wrapper',
+                        needsLandscape ? 'camera-preview-wrapper--strip' : '',
+                    ].filter(Boolean).join(' ')}
+                    style={needsLandscape ? { '--strip-preview-aspect': stripSlotAspect } : undefined}
+                >
                     {/* Safari: transform은 video가 아닌 wrapper에 적용해야 object-fit이 유지됨 */}
                     <div
                         className={`camera-preview-mirror${cameraStatus !== 'active' ? ' hidden' : ''}`}
@@ -451,9 +591,45 @@ function CameraScreen({
                             className="camera-preview"
                         />
                     </div>
+
+                    {/* 캐릭터 가이드: 미러 밖 — overlaySlot은 슬롯 전체(최종과 동일) */}
+                    {guideEnabled && guideReady && guideSrc && cameraStatus === 'active' && landscapeReady && (
+                        <img
+                            key={guideSrc}
+                            src={guideSrc}
+                            alt=""
+                            aria-hidden="true"
+                            className={[
+                                'camera-capture-guide',
+                                isSlotGuide
+                                    ? 'camera-capture-guide--slot'
+                                    : [
+                                        `camera-capture-guide--${guideAlign}`,
+                                        `camera-capture-guide--v-${guideVertical}`,
+                                    ].join(' '),
+                            ].filter(Boolean).join(' ')}
+                            style={{
+                                '--guide-opacity': guideOpacity,
+                                ...(isSlotGuide
+                                    ? {}
+                                    : { '--guide-height': `${guideHeightRatio * 100}%` }),
+                            }}
+                            draggable={false}
+                        />
+                    )}
+
+                    {showRotateGate && (
+                        <div className="camera-rotate-gate" role="status">
+                            <div className="camera-rotate-icon" aria-hidden="true">📱</div>
+                            <p className="camera-rotate-title">화면을 가로로 돌려 주세요</p>
+                            <p className="camera-rotate-desc">
+                                세로 네컷은 가로 화면에서 촬영합니다
+                            </p>
+                        </div>
+                    )}
                     
                     {/* 카메라가 활성화되지 않았을 때 placeholder 표시 */}
-                    {cameraStatus !== 'active' && (
+                    {cameraStatus !== 'active' && !showRotateGate && (
                         <div className="camera-placeholder">
                             {cameraStatus === 'requesting' ? (
                                 <div className="camera-loading">
@@ -479,7 +655,7 @@ function CameraScreen({
                         </div>
                     )}
                     
-                    {countdown !== null && (
+                    {countdown !== null && landscapeReady && (
                         <div className="countdown-overlay">
                             <div className="countdown-number">{countdown}</div>
                         </div>
@@ -518,9 +694,11 @@ function CameraScreen({
                     <button
                         className={`btn btn-primary btn-capture${kioskMode ? ' btn-capture--hero' : ''}`}
                         onClick={startCapture}
-                        disabled={isCapturing || capturedPhotos.length >= photoCount || cameraStatus !== 'active'}
+                        disabled={captureBlocked}
                     >
-                        {isCapturing 
+                        {showRotateGate
+                            ? '가로로 돌린 뒤 촬영'
+                            : isCapturing 
                             ? `촬영 중... ${countdown || ''}초` 
                             : capturedPhotos.length >= photoCount
                             ? '촬영 완료'

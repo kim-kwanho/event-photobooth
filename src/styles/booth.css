@@ -42,6 +42,57 @@
     overflow: hidden;
 }
 
+/* 세로 네컷 편집: 카드 폭을 strip에 맞추고 높이 채움 */
+.booth-shell:has(.photo-select-booth--strip) {
+    --booth-stage-max-w: 300px;
+}
+
+.booth-shell:has(.photo-select-booth--strip) .booth-stage-outer {
+    align-items: stretch;
+    padding: 4px 12px 12px;
+}
+
+.booth-shell:has(.photo-select-booth--strip) .booth-stage {
+    width: min(100%, var(--booth-stage-max-w));
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.booth-shell:has(.photo-select-booth--strip) .booth-stage-inner {
+    flex: 1;
+    min-height: 0;
+    max-height: calc(100dvh - 118px);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.booth-shell:has(.photo-select-booth--strip) .booth-title {
+    font-size: clamp(18px, 3.5vw, 22px);
+    margin-bottom: 2px;
+}
+
+.booth-shell:has(.photo-select-booth--strip) .booth-subtitle {
+    font-size: 12px;
+    margin-bottom: 8px;
+}
+
+.booth-shell:has(.photo-select-booth--strip) .booth-progress {
+    padding: 8px 12px 4px;
+}
+
+@media (orientation: landscape) {
+    .booth-shell:has(.photo-select-booth--strip) {
+        --booth-stage-max-w: min(920px, 96vw);
+    }
+
+    .booth-shell:has(.photo-select-booth--strip) .booth-stage-inner {
+        max-height: calc(100dvh - 88px);
+    }
+}
+
 .booth-progress {
     display: flex;
     align-items: center;

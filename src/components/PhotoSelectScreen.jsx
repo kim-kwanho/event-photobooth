@@ -35,6 +35,7 @@ function PhotoSelectScreen({
     const previewAspectStyle = { aspectRatio: `${previewWidth} / ${previewHeight}` }
     const isStripPreview = previewWidth / previewHeight < 0.5
     const frameCanvasRef = useRef(null)
+    const previewShellRef = useRef(null)
     const slotCanvasRefs = useRef([null, null, null, null])
     const dragRef = useRef(null)
     const [isComposing, setIsComposing] = useState(false)
@@ -191,9 +192,9 @@ function PhotoSelectScreen({
             ctx.clearRect(0, 0, currentCanvasWidth, currentCanvasHeight)
             ctx.scale(devicePixelRatio, devicePixelRatio)
 
-            // 슬롯 배경색 그리기 (흰색 여백 방지, 약간 크게 그려서 확실히 채우기)
-            ctx.fillStyle = frame.layout.slotColor || '#ffffff'
-            ctx.fillRect(-1, -1, currentWidth + 2, currentHeight + 2)
+            // 슬롯 배경 (틈이 보여도 흰 여백처럼 안 보이게)
+            ctx.fillStyle = '#111'
+            ctx.fillRect(-2, -2, currentWidth + 4, currentHeight + 4)
 
             ctx.save()
             ctx.beginPath()
@@ -240,14 +241,11 @@ function PhotoSelectScreen({
                 sourceY = Math.max(0, Math.min(img.height - sourceHeight, sourceY))
             }
 
-            // 이미지 그리기 (ResultScreen과 동일) - 슬롯을 완전히 채우도록, 하단 슬롯이 잘리지 않도록
-            const isBottomSlot = index >= 2
+            // cover로 슬롯을 완전히 채움 (가장자리 1px 여유)
             const drawWidth = currentWidth + 2
-            // 하단 슬롯의 경우 높이를 더 크게 그려서 슬롯을 완전히 채우기
-            const drawHeight = isBottomSlot ? currentHeight + 3 : currentHeight + 2
+            const drawHeight = currentHeight + 2
             const drawX = -1
-            // 하단 슬롯의 경우 y 위치를 약간 위로 조정하여 슬롯을 완전히 채우기
-            const drawY = isBottomSlot ? -1 : -1
+            const drawY = -1
             ctx.filter = getFilterCss(photoFilter)
             ctx.drawImage(
                 img,
@@ -385,7 +383,30 @@ function PhotoSelectScreen({
 
     const allPhotosSelected = selectedPhotos.every(photo => photo !== null)
 
-    // 슬롯 위치 스타일 계산
+    // 미리보기 크기 변경 시 슬롯·사진 재배치 (반응형)
+    useEffect(() => {
+        const el = previewShellRef.current?.querySelector('.frame-preview-background')
+            || frameCanvasRef.current?.parentElement
+        if (!el || !frame) return
+
+        const refresh = () => {
+            drawFrameBackground()
+            calculateSlotPositions()
+            selectedPhotos.forEach((photo, index) => {
+                if (photo) drawPhotoInSlot(index, photo)
+            })
+        }
+
+        const ro = typeof ResizeObserver !== 'undefined'
+            ? new ResizeObserver(() => {
+                window.requestAnimationFrame(refresh)
+            })
+            : null
+
+        ro?.observe(el)
+        return () => ro?.disconnect()
+    }, [frame, selectedPhotos, drawFrameBackground, calculateSlotPositions, drawPhotoInSlot])
+
     const getSlotStyle = (index) => {
         const position = slotPositions[index]
         if (!position) {
@@ -402,7 +423,7 @@ function PhotoSelectScreen({
     }
 
     return (
-        <div className="photo-select-booth">
+        <div className={`photo-select-booth${isStripPreview ? ' photo-select-booth--strip' : ''}`}>
             <p className="photo-select-hint">
                 {photoDrag && !allowPhotoChange
                     ? '사진을 드래그하여 위치를 조정하세요'
@@ -412,73 +433,79 @@ function PhotoSelectScreen({
             </p>
 
             <div className="photo-select-body">
-                <div
-                    className={`frame-preview-background${isStripPreview ? ' frame-preview-background--strip' : ''}`}
-                    style={previewAspectStyle}
-                >
-                    <canvas
-                        ref={frameCanvasRef}
-                        id="frameOverlayCanvas"
-                        className="frame-overlay"
-                    />
-                    <div className="photo-slots-container">
-                        {[0, 1, 2, 3].map((index) => {
-                            const slotStyle = getSlotStyle(index)
-                            return (
-                                <div
-                                    key={index}
-                                    className={`photo-slot${photoDrag && selectedPhotos[index] ? ' photo-slot--draggable' : ''}`}
-                                    data-index={index}
-                                    style={slotStyle}
-                                    onPointerDown={(e) => handleSlotPointerDown(index, e)}
-                                    onPointerMove={(e) => handleSlotPointerMove(index, e)}
-                                    onPointerUp={() => handleSlotPointerUp(index)}
-                                    onPointerCancel={() => handleSlotPointerUp(index)}
-                                >
-                                    {allowPhotoChange && (
-                                        <input
-                                            type="file"
-                                            id={`photoInput${index}`}
-                                            accept="image/*"
-                                            capture="environment"
-                                            style={{ display: 'none' }}
-                                            onChange={(e) => handleFileSelect(index, e)}
-                                        />
-                                    )}
-                                    <label
-                                        htmlFor={allowPhotoChange ? `photoInput${index}` : undefined}
-                                        className="photo-slot-label"
-                                        style={{ cursor: allowPhotoChange ? 'pointer' : 'default' }}
+                <div className="photo-select-preview-shell" ref={previewShellRef}>
+                    <div
+                        className={`frame-preview-background${isStripPreview ? ' frame-preview-background--strip' : ''}`}
+                        style={{
+                            ...previewAspectStyle,
+                            '--preview-w': previewWidth,
+                            '--preview-h': previewHeight,
+                        }}
+                    >
+                        <canvas
+                            ref={frameCanvasRef}
+                            id="frameOverlayCanvas"
+                            className="frame-overlay"
+                        />
+                        <div className="photo-slots-container">
+                            {[0, 1, 2, 3].map((index) => {
+                                const slotStyle = getSlotStyle(index)
+                                return (
+                                    <div
+                                        key={index}
+                                        className={`photo-slot${photoDrag && selectedPhotos[index] ? ' photo-slot--draggable' : ''}`}
+                                        data-index={index}
+                                        style={slotStyle}
+                                        onPointerDown={(e) => handleSlotPointerDown(index, e)}
+                                        onPointerMove={(e) => handleSlotPointerMove(index, e)}
+                                        onPointerUp={() => handleSlotPointerUp(index)}
+                                        onPointerCancel={() => handleSlotPointerUp(index)}
                                     >
-                                        {!selectedPhotos[index] ? (
-                                            allowPhotoChange ? (
-                                                <div className="slot-placeholder">
-                                                    <span className="slot-number">{index + 1}</span>
-                                                    <span className="slot-text">사진 선택</span>
-                                                </div>
-                                            ) : null
-                                        ) : (
-                                            <canvas
-                                                ref={(el) => (slotCanvasRefs.current[index] = el)}
-                                                className="slot-canvas"
+                                        {allowPhotoChange && (
+                                            <input
+                                                type="file"
+                                                id={`photoInput${index}`}
+                                                accept="image/*"
+                                                capture="environment"
+                                                style={{ display: 'none' }}
+                                                onChange={(e) => handleFileSelect(index, e)}
                                             />
                                         )}
-                                    </label>
-                                    {selectedPhotos[index] && allowPhotoChange && (
-                                        <button
-                                            type="button"
-                                            className="slot-remove"
-                                            onClick={(e) => {
-                                                e.stopPropagation()
-                                                onPhotoRemove(index)
-                                            }}
+                                        <label
+                                            htmlFor={allowPhotoChange ? `photoInput${index}` : undefined}
+                                            className="photo-slot-label"
+                                            style={{ cursor: allowPhotoChange ? 'pointer' : 'default' }}
                                         >
-                                            ✕
-                                        </button>
-                                    )}
-                                </div>
-                            )
-                        })}
+                                            {!selectedPhotos[index] ? (
+                                                allowPhotoChange ? (
+                                                    <div className="slot-placeholder">
+                                                        <span className="slot-number">{index + 1}</span>
+                                                        <span className="slot-text">사진 선택</span>
+                                                    </div>
+                                                ) : null
+                                            ) : (
+                                                <canvas
+                                                    ref={(el) => (slotCanvasRefs.current[index] = el)}
+                                                    className="slot-canvas"
+                                                />
+                                            )}
+                                        </label>
+                                        {selectedPhotos[index] && allowPhotoChange && (
+                                            <button
+                                                type="button"
+                                                className="slot-remove"
+                                                onClick={(e) => {
+                                                    e.stopPropagation()
+                                                    onPhotoRemove(index)
+                                                }}
+                                            >
+                                                ✕
+                                            </button>
+                                        )}
+                                    </div>
+                                )
+                            })}
+                        </div>
                     </div>
                 </div>
 

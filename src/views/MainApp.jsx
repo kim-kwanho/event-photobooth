@@ -352,6 +352,7 @@ function MainApp() {
                                 : undefined
                         }
                         selectedFrame={frameFirst ? selectedFrame : null}
+                        selectedSize={selectedSize}
                     />
                 </BoothShell>
             )}
