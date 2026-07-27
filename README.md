@@ -52,6 +52,8 @@ npm run dev:all
 
 **크기:** 카드형 1200×1600 (2×2) · 필름형 658×2009 (세로 네 컷) — 선택한 `sizeId`에 맞는 프레임만 표시됩니다.
 
+**세로 네컷(strip):** 슬롯이 가로 비율이므로 **화면을 가로로 돌린 뒤** 촬영합니다. 세로 방향이면 회전 안내가 뜹니다.
+
 | URL | 설명 |
 |-----|------|
 | `/` | 랜딩 |
@@ -110,7 +112,7 @@ npm run dev:all
 
 ## 테마·프레임
 
-> **overlay PNG·`figma.json`은 git에 없습니다.** Figma export → Supabase `themes` 업로드 → `frames.json`에 public URL 등록.
+> **overlay PNG·`figma.json`은 git에 없습니다** (`.gitignore`). Figma export → Supabase `themes` 업로드 → `frames.json`에 public URL 등록.
 
 ```
 public/themes/peace-attic-summer/
@@ -126,12 +128,12 @@ public/themes/peace-attic-summer/
 | `card` | 1200×1600 | 2×2 |
 | `strip` | 658×2009 | 세로 네 컷 |
 
-| ID | 이름 | sizeId |
-|----|------|--------|
-| 1–6 | Hope · Peace · Summer · Vision · Love · Rest | `card` |
-| 7–8 | HA Way · HA Vibes | `strip` |
-| 9 | hope_line | `strip` |
-| 10 | Film (`overlayKnockout: true`) | `strip` |
+| ID | 이름 | sizeId | 비고 |
+|----|------|--------|------|
+| 1–6 | Hope · Peace · Summer · Vision · Love · Rest | `card` | |
+| 7–8 | HA Way · HA Vibes | `strip` | |
+| 9 | hope_line | `strip` | `overlayKnockout: true` · PNG `11-hope-line-overlay.png` |
+| 10 | Film | `strip` | `overlayKnockout: true` · PNG `10-film-overlay.png` |
 
 ### overlay 워크플로우
 
@@ -151,10 +153,10 @@ npm run sync:film-overlay
 
 캐시 무효화: `frameOverlayImage` URL에 `?v=날짜` 쿼리 추가.
 
-| Film 참고 | |
-|-----------|--|
-| 스프로킷 구멍 | Figma에서 **흰색 Fill** (투명 구멍이면 앱 배경색이 비침) |
-| 슬롯이 불투명 export | `overlayKnockout: true` — JSON `slots`로 사진 영역만 뚫음 |
+| 참고 | |
+|------|--|
+| 스프로킷 구멍 (Film) | Figma에서 **흰색 Fill** (투명 구멍이면 앱 배경색이 비침) |
+| 슬롯이 불투명 export | `overlayKnockout: true` — JSON `slots`로 사진 영역만 뚫음 (hope_line · Film) |
 
 ### `frames.json` (overlay 모드)
 
@@ -198,7 +200,7 @@ Canvas 렌더(레거시): `christmas` · `default` 테마 · [`src/lib/canvasFra
 
 RLS: Dashboard → SQL Editor → [`supabase/storage-policies.sql`](supabase/storage-policies.sql) (Public 버킷 권장).
 
-- **Admin:** `/admin` → `VITE_ADMIN_PIN` → 갤러리 확인·삭제. 프레임 수정은 `frames.json` + overlay 업로드.
+- **Admin:** `/admin` → `VITE_ADMIN_PIN` → 갤러리 확인·삭제·(선택) 인쇄. 프레임 수정은 `frames.json` + overlay 업로드.
 - **Vercel:** push → `VITE_*` 환경 변수 → `VITE_APP_URL` = 배포 도메인. `event.json`·`frames.json` 변경은 **재배포** 필요.
 - **QR API:** `qrShare: true`면 업로드 API 필요 — 로컬 `dev:all`(:3001), 프로덕션은 별도 호스팅 또는 Serverless.
 
@@ -209,16 +211,21 @@ RLS: Dashboard → SQL Editor → [`supabase/storage-policies.sql`](supabase/sto
 ## 프로젝트 구조
 
 ```
-public/config/event.json       # 행사 설정 ★
-public/themes/*/frames.json    # 프레임 테마
-scripts/                       # Figma export · overlay 업로드
+public/config/event.json          # 행사 설정 ★
+public/themes/*/frames.json       # 프레임 테마
+public/assets/backgrounds/        # 시작 화면 배경
+scripts/                          # Figma export · overlay 업로드
 src/
-  components/                  # Camera · Size · Frame · Photo · Result
-  hooks/                       # useBoothFlow · useKioskMode
-  lib/                         # canvasFrame · api · supabase · db
-  pages/admin/                 # 관리자
-  views/                       # Start · MainApp
-server.js                      # 업로드 · QR · 인쇄 API
+  components/                     # Camera · Size · Frame · Photo · Result
+  components/booth/               # BoothShell · BoothProgress
+  components/common/              # Header · Gallery · Filter · Kiosk
+  config/                         # event.json 로드 · ConfigContext
+  hooks/                          # useBoothFlow · useKioskMode
+  lib/                            # canvasFrame · api · supabase · db
+  pages/admin/                    # 관리자 (사진 갤러리)
+  styles/                         # booth · 공통 배경
+  views/                          # Start · MainApp
+server.js                         # 업로드 · QR · 인쇄 API
 supabase/storage-policies.sql
 ```
 
@@ -247,6 +254,7 @@ supabase/storage-policies.sql
 | overlay 사진 안 보임 | placeholder 투명 export · 또는 `overlayKnockout: true` |
 | 슬롯·사진 어긋남 | PNG 재export + `slots` 좌표 |
 | 스프로킷 구멍 색 이상 | 구멍 투명 export → Figma에서 **흰색 Fill** |
+| 세로 네컷 촬영 불가 | 화면을 **가로**로 회전 |
 | 프레임 변경 안 됨 | `framesPath` · `?v=` 캐시 · hard refresh |
 | QR 404 | `VITE_APP_URL` · `photos` Public |
 | Admin / 카메라 | PIN · HTTPS 또는 localhost · 권한 |
@@ -255,4 +263,4 @@ supabase/storage-policies.sql
 
 ## 기술 스택 · 라이선스
 
-React 18 · Vite 5 · React Router 6 · Express 5 · Supabase Storage · Canvas · IndexedDB · QRCode — **MIT**
+React 18 · Vite 5 · React Router 6 · Express 5 · Supabase Storage · Canvas · IndexedDB · qr-code-styling — **MIT**
