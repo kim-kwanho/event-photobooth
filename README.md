@@ -131,9 +131,8 @@ public/themes/peace-attic-summer/
 | ID | 이름 | sizeId | 비고 |
 |----|------|--------|------|
 | 1–6 | Hope · Peace · Summer · Vision · Love · Rest | `card` | |
-| 7–8 | HA Way · HA Vibes | `strip` | |
-| 9 | hope_line | `strip` | `overlayKnockout: true` · PNG `11-hope-line-overlay.png` |
-| 10 | Film | `strip` | `overlayKnockout: true` · PNG `10-film-overlay.png` |
+| 7–10 | Heaven · Vibes · Line · Film | `strip` | Line·Film은 `overlayKnockout: true` |
+| 11–15 | Sparkle · Bloom · Willow · Sky · Glow | `strip` | Figma Frame 2–6 |
 
 ### overlay 워크플로우
 
@@ -156,7 +155,7 @@ npm run sync:film-overlay
 | 참고 | |
 |------|--|
 | 스프로킷 구멍 (Film) | Figma에서 **흰색 Fill** (투명 구멍이면 앱 배경색이 비침) |
-| 슬롯이 불투명 export | `overlayKnockout: true` — JSON `slots`로 사진 영역만 뚫음 (hope_line · Film) |
+| 슬롯이 불투명 export | `overlayKnockout: true` — JSON `slots`로 사진 영역만 뚫음 (Line · Film) |
 
 ### `frames.json` (overlay 모드)
 

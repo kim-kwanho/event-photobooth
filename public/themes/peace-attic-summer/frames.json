@@ -252,7 +252,7 @@
     },
     {
       "id": 7,
-      "name": "Way to Heaven",
+      "name": "Heaven",
       "sizeId": "strip",
       "layout": {
         "frameStyle": "overlay",
@@ -291,7 +291,7 @@
     },
     {
       "id": 8,
-      "name": "With Jesus",
+      "name": "Vibes",
       "sizeId": "strip",
       "layout": {
         "frameStyle": "overlay",
@@ -335,7 +335,7 @@
     },
     {
       "id": 9,
-      "name": "hope_line",
+      "name": "Line",
       "sizeId": "strip",
       "layout": {
         "frameStyle": "overlay",
@@ -405,6 +405,101 @@
             "width": 0.848024,
             "height": 0.189149
           }
+        ],
+        "frameWidth": 0,
+        "bottomHeight": 0,
+        "slotColor": "#FFFFFF"
+      }
+    },
+    {
+      "id": 11,
+      "name": "Sparkle",
+      "sizeId": "strip",
+      "layout": {
+        "frameStyle": "overlay",
+        "frameOverlayImage": "https://kmlgfluephsybivcasuy.supabase.co/storage/v1/object/public/themes/peace-attic-summer/12-sparkle-overlay.png?v=20260729",
+        "overlayKnockout": false,
+        "slots": [
+          { "x": 0.075988, "y": 0.02439, "width": 0.848024, "height": 0.189149 },
+          { "x": 0.075988, "y": 0.228472, "width": 0.848024, "height": 0.189149 },
+          { "x": 0.075988, "y": 0.432056, "width": 0.848024, "height": 0.189149 },
+          { "x": 0.075988, "y": 0.63564, "width": 0.848024, "height": 0.189149 }
+        ],
+        "frameWidth": 0,
+        "bottomHeight": 0,
+        "slotColor": "#FFFFFF"
+      }
+    },
+    {
+      "id": 12,
+      "name": "Bloom",
+      "sizeId": "strip",
+      "layout": {
+        "frameStyle": "overlay",
+        "frameOverlayImage": "https://kmlgfluephsybivcasuy.supabase.co/storage/v1/object/public/themes/peace-attic-summer/13-bloom-overlay.png?v=20260729",
+        "overlayKnockout": false,
+        "slots": [
+          { "x": 0.075988, "y": 0.02439, "width": 0.848024, "height": 0.189149 },
+          { "x": 0.075988, "y": 0.228472, "width": 0.848024, "height": 0.189149 },
+          { "x": 0.075988, "y": 0.432056, "width": 0.848024, "height": 0.189149 },
+          { "x": 0.075988, "y": 0.63564, "width": 0.848024, "height": 0.189149 }
+        ],
+        "frameWidth": 0,
+        "bottomHeight": 0,
+        "slotColor": "#FFFFFF"
+      }
+    },
+    {
+      "id": 13,
+      "name": "Willow",
+      "sizeId": "strip",
+      "layout": {
+        "frameStyle": "overlay",
+        "frameOverlayImage": "https://kmlgfluephsybivcasuy.supabase.co/storage/v1/object/public/themes/peace-attic-summer/14-willow-overlay.png?v=20260729",
+        "overlayKnockout": false,
+        "slots": [
+          { "x": 0.075988, "y": 0.02439, "width": 0.848024, "height": 0.189149 },
+          { "x": 0.075988, "y": 0.228472, "width": 0.848024, "height": 0.189149 },
+          { "x": 0.075988, "y": 0.432056, "width": 0.848024, "height": 0.189149 },
+          { "x": 0.075988, "y": 0.63564, "width": 0.848024, "height": 0.189149 }
+        ],
+        "frameWidth": 0,
+        "bottomHeight": 0,
+        "slotColor": "#FFFFFF"
+      }
+    },
+    {
+      "id": 14,
+      "name": "Sky",
+      "sizeId": "strip",
+      "layout": {
+        "frameStyle": "overlay",
+        "frameOverlayImage": "https://kmlgfluephsybivcasuy.supabase.co/storage/v1/object/public/themes/peace-attic-summer/15-sky-overlay.png?v=20260729",
+        "overlayKnockout": false,
+        "slots": [
+          { "x": 0.075988, "y": 0.02439, "width": 0.848024, "height": 0.189149 },
+          { "x": 0.075988, "y": 0.228472, "width": 0.848024, "height": 0.189149 },
+          { "x": 0.075988, "y": 0.432056, "width": 0.848024, "height": 0.189149 },
+          { "x": 0.075988, "y": 0.63564, "width": 0.848024, "height": 0.189149 }
+        ],
+        "frameWidth": 0,
+        "bottomHeight": 0,
+        "slotColor": "#FFFFFF"
+      }
+    },
+    {
+      "id": 15,
+      "name": "Glow",
+      "sizeId": "strip",
+      "layout": {
+        "frameStyle": "overlay",
+        "frameOverlayImage": "https://kmlgfluephsybivcasuy.supabase.co/storage/v1/object/public/themes/peace-attic-summer/16-glow-overlay.png?v=20260729",
+        "overlayKnockout": false,
+        "slots": [
+          { "x": 0.075988, "y": 0.02439, "width": 0.848024, "height": 0.189149 },
+          { "x": 0.075988, "y": 0.228472, "width": 0.848024, "height": 0.189149 },
+          { "x": 0.075988, "y": 0.432056, "width": 0.848024, "height": 0.189149 },
+          { "x": 0.075988, "y": 0.63564, "width": 0.848024, "height": 0.189149 }
         ],
         "frameWidth": 0,
         "bottomHeight": 0,

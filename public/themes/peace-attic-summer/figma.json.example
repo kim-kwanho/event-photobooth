@@ -1,6 +1,6 @@
 {
-  "fileKey": "YOUR_FIGMA_FILE_KEY",
-  "fileUrl": "https://www.figma.com/design/YOUR_FIGMA_FILE_KEY",
+  "fileKey": "4BaFuJTnezKkJKBDx15yxm",
+  "fileUrl": "https://www.figma.com/design/4BaFuJTnezKkJKBDx15yxm",
   "exportScale": 2,
   "exportFormat": "png",
   "notes": "이 파일을 figma.json 으로 복사한 뒤 fileKey·nodeId·output 을 채우세요. figma.json 과 overlay PNG 는 git 에 포함되지 않습니다.",
@@ -52,6 +52,36 @@
       "name": "HA Vibes",
       "nodeId": "51:30",
       "output": "09-ha-vibes-overlay.png"
+    },
+    {
+      "id": 11,
+      "name": "Sparkle",
+      "nodeId": "145:223",
+      "output": "12-sparkle-overlay.png"
+    },
+    {
+      "id": 12,
+      "name": "Bloom",
+      "nodeId": "145:224",
+      "output": "13-bloom-overlay.png"
+    },
+    {
+      "id": 13,
+      "name": "Willow",
+      "nodeId": "145:225",
+      "output": "14-willow-overlay.png"
+    },
+    {
+      "id": 14,
+      "name": "Sky",
+      "nodeId": "145:226",
+      "output": "15-sky-overlay.png"
+    },
+    {
+      "id": 15,
+      "name": "Glow",
+      "nodeId": "145:227",
+      "output": "16-glow-overlay.png"
     }
   ]
 }
