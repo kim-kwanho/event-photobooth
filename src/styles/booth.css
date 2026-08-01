@@ -98,9 +98,13 @@
 }
 
 @media (orientation: landscape) {
-    .booth-shell:has(.photo-select-booth--strip),
-    .booth-shell:has(.result-booth--strip) {
+    /* 편집은 가로로 넓게, 완성은 QR+스트립이 한 카드에 들어가도록 중간 폭 */
+    .booth-shell:has(.photo-select-booth--strip) {
         --booth-stage-max-w: min(920px, 96vw);
+    }
+
+    .booth-shell:has(.result-booth--strip) {
+        --booth-stage-max-w: min(720px, 94vw);
     }
 
     .booth-shell:has(.photo-select-booth) .booth-stage-inner,

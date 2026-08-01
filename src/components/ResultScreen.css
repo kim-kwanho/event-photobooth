@@ -28,6 +28,12 @@
     gap: 16px;
 }
 
+/* 필름형: 콘텐츠 높이가 아니라 가용 영역에 맞춰 stretch */
+.result-booth--strip .result-hero-grid,
+.result-booth--kiosk.result-booth--strip .result-hero-grid {
+    align-items: stretch;
+}
+
 .result-booth .result-image {
     background: transparent;
     border-radius: 12px;
@@ -41,7 +47,12 @@
     align-items: center;
     justify-content: center;
     overflow: hidden;
-    container-type: size;
+}
+
+.result-booth--strip .result-image {
+    /* basis 0: 캔버스 intrinsic(수천 px)로 영역이 커지지 않게 */
+    flex: 1 1 0;
+    align-self: stretch;
 }
 
 .result-booth .result-image canvas {
@@ -52,18 +63,18 @@
     height: auto;
     aspect-ratio: var(--result-w, 1200) / var(--result-h, 1600);
     object-fit: contain;
-    /* flex 기본 min-size(intrinsic) 때문에 긴 strip이 안 줄어드는 것 방지 */
     min-width: 0;
     min-height: 0;
 }
 
-/* 필름형: 가용 높이에 맞춰 비율 유지 (PhotoSelect strip과 동일 전략) */
+/* 필름형: 부모(가용 영역) 안에 비율 유지로 맞춤 — intrinsic 비트맵 크기 무시 */
 .result-booth--strip .result-image canvas {
-    width: min(100%, calc(100cqh * var(--result-ar, 0.327)));
+    width: auto;
     height: auto;
     max-width: 100%;
-    max-height: 100cqh;
+    max-height: 100%;
     aspect-ratio: var(--result-w, 658) / var(--result-h, 2009);
+    object-fit: contain;
 }
 
 .result-qr-hero {

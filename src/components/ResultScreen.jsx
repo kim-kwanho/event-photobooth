@@ -13,6 +13,7 @@ function ResultScreen({ frame, selectedPhotos, photoTransforms, photoFilter = 'n
     const config = useConfig()
     const qrShareEnabled = config.features?.qrShare !== false
     const canvasRef = useRef(null)
+    const imageShellRef = useRef(null)
     const qrRef = useRef(null)
     const [qrModalOpen, setQrModalOpen] = useState(false)
     const [photoHash, setPhotoHash] = useState(null)
@@ -121,13 +122,7 @@ function ResultScreen({ frame, selectedPhotos, photoTransforms, photoFilter = 'n
 
         canvas.width = renderWidth * devicePixelRatio
         canvas.height = renderHeight * devicePixelRatio
-        // 표시 크기는 CSS(max-width/max-height + aspect-ratio)가 담당 — 비트맵 intrinsic 크기로 잘리지 않게
-        canvas.style.width = 'auto'
-        canvas.style.height = 'auto'
-        canvas.style.maxWidth = '100%'
-        canvas.style.maxHeight = '100%'
-        canvas.style.aspectRatio = `${renderWidth} / ${renderHeight}`
-        canvas.style.objectFit = 'contain'
+        // 표시 크기는 fitCanvasToShell / CSS가 담당 (인라인 고정은 잘림 유발)
 
         const ctx = canvas.getContext('2d')
         ctx.scale(devicePixelRatio, devicePixelRatio)
@@ -190,6 +185,29 @@ function ResultScreen({ frame, selectedPhotos, photoTransforms, photoFilter = 'n
         })
     }, [frame, selectedPhotos, photoTransforms, photoFilter, renderWidth, renderHeight])
 
+    const fitCanvasToShell = useCallback(() => {
+        const canvas = canvasRef.current
+        const shell = imageShellRef.current
+        if (!canvas || !shell) return
+
+        const { width: availW, height: availH } = shell.getBoundingClientRect()
+        if (availW < 2 || availH < 2) return
+
+        const ar = renderWidth / renderHeight
+        let displayW = availW
+        let displayH = displayW / ar
+        if (displayH > availH) {
+            displayH = availH
+            displayW = displayH * ar
+        }
+
+        canvas.style.width = `${Math.floor(displayW)}px`
+        canvas.style.height = `${Math.floor(displayH)}px`
+        canvas.style.maxWidth = '100%'
+        canvas.style.maxHeight = '100%'
+        canvas.style.objectFit = 'contain'
+    }, [renderWidth, renderHeight])
+
     useEffect(() => {
         // composeLifecut 호출 전에 저장 플래그 리셋 (새로운 렌더링 시작)
         // 단, 이미 저장이 완료된 경우는 리셋하지 않음 (사용자가 새로 만들기를 누른 경우만)
@@ -202,6 +220,7 @@ function ResultScreen({ frame, selectedPhotos, photoTransforms, photoFilter = 'n
         }
         
         composeLifecut()
+        fitCanvasToShell()
         
         // 컴포넌트 언마운트 시 타이머 정리
         return () => {
@@ -210,7 +229,19 @@ function ResultScreen({ frame, selectedPhotos, photoTransforms, photoFilter = 'n
                 saveTimeoutRef.current = null
             }
         }
-    }, [composeLifecut])
+    }, [composeLifecut, fitCanvasToShell])
+
+    useEffect(() => {
+        const shell = imageShellRef.current
+        if (!shell || typeof ResizeObserver === 'undefined') return undefined
+
+        const observer = new ResizeObserver(() => {
+            fitCanvasToShell()
+        })
+        observer.observe(shell)
+        fitCanvasToShell()
+        return () => observer.disconnect()
+    }, [fitCanvasToShell, isStrip, kioskMode])
 
     const handleDownload = async () => {
         const canvas = canvasRef.current
@@ -309,7 +340,7 @@ function ResultScreen({ frame, selectedPhotos, photoTransforms, photoFilter = 'n
             }}
         >
             <div className="result-hero-grid">
-                <div className="result-image">
+                <div className="result-image" ref={imageShellRef}>
                     <canvas ref={canvasRef} id="resultCanvas" />
                 </div>
 
