@@ -42,25 +42,25 @@
     overflow: hidden;
 }
 
-/* 세로 네컷 편집: 카드 폭을 strip에 맞추고 높이 채움 */
-.booth-shell:has(.photo-select-booth--strip) {
-    --booth-stage-max-w: 300px;
-}
-
-.booth-shell:has(.photo-select-booth--strip) .booth-stage-outer {
+/* 편집·완성: 뷰포트 높이에 맞추고 하단 버튼이 잘리지 않게 */
+.booth-shell:has(.photo-select-booth) .booth-stage-outer,
+.booth-shell:has(.result-booth) .booth-stage-outer {
     align-items: stretch;
+    min-height: 0;
     padding: 4px 12px 12px;
 }
 
-.booth-shell:has(.photo-select-booth--strip) .booth-stage {
-    width: min(100%, var(--booth-stage-max-w));
+.booth-shell:has(.photo-select-booth) .booth-stage,
+.booth-shell:has(.result-booth) .booth-stage {
     height: 100%;
+    max-height: 100%;
     display: flex;
     flex-direction: column;
     min-height: 0;
 }
 
-.booth-shell:has(.photo-select-booth--strip) .booth-stage-inner {
+.booth-shell:has(.photo-select-booth) .booth-stage-inner,
+.booth-shell:has(.result-booth) .booth-stage-inner {
     flex: 1;
     min-height: 0;
     max-height: calc(100dvh - 118px);
@@ -69,18 +69,30 @@
     flex-direction: column;
 }
 
-.booth-shell:has(.photo-select-booth--strip) .booth-title {
+.booth-shell:has(.photo-select-booth) .booth-title,
+.booth-shell:has(.result-booth) .booth-title {
     font-size: clamp(18px, 3.5vw, 22px);
     margin-bottom: 2px;
 }
 
-.booth-shell:has(.photo-select-booth--strip) .booth-subtitle {
+.booth-shell:has(.photo-select-booth) .booth-subtitle,
+.booth-shell:has(.result-booth) .booth-subtitle {
     font-size: 12px;
     margin-bottom: 8px;
 }
 
-.booth-shell:has(.photo-select-booth--strip) .booth-progress {
+.booth-shell:has(.photo-select-booth) .booth-progress,
+.booth-shell:has(.result-booth) .booth-progress {
     padding: 8px 12px 4px;
+}
+
+/* 세로 네컷: 좁은 스테이지 폭 */
+.booth-shell:has(.photo-select-booth--strip) {
+    --booth-stage-max-w: 300px;
+}
+
+.booth-shell:has(.photo-select-booth--strip) .booth-stage {
+    width: min(100%, var(--booth-stage-max-w));
 }
 
 @media (orientation: landscape) {
@@ -88,8 +100,16 @@
         --booth-stage-max-w: min(920px, 96vw);
     }
 
-    .booth-shell:has(.photo-select-booth--strip) .booth-stage-inner {
+    .booth-shell:has(.photo-select-booth) .booth-stage-inner,
+    .booth-shell:has(.result-booth) .booth-stage-inner {
         max-height: calc(100dvh - 88px);
+    }
+}
+
+@media (max-height: 740px) {
+    .booth-shell:has(.photo-select-booth) .booth-subtitle,
+    .booth-shell:has(.result-booth) .booth-subtitle {
+        display: none;
     }
 }
 
@@ -317,7 +337,7 @@
         font-size: 11px;
     }
 
-    .booth-stage-inner {
+    .booth-stage-inner:not(:has(.photo-select-booth)):not(:has(.result-booth)) {
         max-height: calc(100dvh - 120px);
         overflow-y: auto;
     }

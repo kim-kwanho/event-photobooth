@@ -122,8 +122,12 @@ function ResultScreen({ frame, selectedPhotos, photoTransforms, photoFilter = 'n
 
         canvas.width = renderWidth * devicePixelRatio
         canvas.height = renderHeight * devicePixelRatio
+        // 레이아웃 높이는 CSS(max-height)가 담당 — 인라인 고정 높이로 버튼을 밀어내지 않음
         canvas.style.width = `${displayWidth}px`
         canvas.style.height = `${displayHeight}px`
+        canvas.style.maxWidth = '100%'
+        canvas.style.maxHeight = '100%'
+        canvas.style.objectFit = 'contain'
 
         const ctx = canvas.getContext('2d')
         ctx.scale(devicePixelRatio, devicePixelRatio)

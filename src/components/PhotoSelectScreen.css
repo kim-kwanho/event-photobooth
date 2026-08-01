@@ -17,12 +17,15 @@
 
 .photo-select-booth {
     width: 100%;
+    flex: 1;
+    height: 100%;
     padding: 12px 16px 16px;
     display: flex;
     flex-direction: column;
     gap: 10px;
     box-sizing: border-box;
     min-height: 0;
+    overflow: hidden;
 }
 
 .photo-select-hint {
@@ -50,29 +53,36 @@
     justify-content: center;
     min-height: 0;
     flex: 1 1 auto;
+    overflow: hidden;
     container-type: size;
 }
 
 .frame-preview-background {
     position: relative;
-    width: 100%;
-    max-width: 340px;
+    width: min(
+        100%,
+        340px,
+        calc(100cqh * var(--preview-w, 1200) / var(--preview-h, 1600))
+    );
+    max-width: min(340px, 100%);
+    max-height: 100cqh;
+    height: auto;
     margin: 0 auto;
     background: #f0f1f4;
     border-radius: 12px;
     padding: 12px;
     box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.06);
-    aspect-ratio: 3 / 4;
+    aspect-ratio: var(--preview-w, 1200) / var(--preview-h, 1600);
     min-height: 0;
+    overflow: hidden;
 }
 
 /* 세로 네컷: 가용 높이에 맞춰 비율 유지 + 카드에 밀착 */
 .frame-preview-background--strip {
     --strip-ar: calc(var(--preview-w, 658) / var(--preview-h, 2009));
-    --strip-avail-h: calc(100dvh - 250px);
-    width: min(100%, calc(var(--strip-avail-h) * var(--strip-ar)));
+    width: min(100%, calc(100cqh * var(--strip-ar)));
     max-width: min(240px, 100%);
-    max-height: var(--strip-avail-h);
+    max-height: 100cqh;
     height: auto;
     aspect-ratio: var(--preview-w, 658) / var(--preview-h, 2009);
     padding: 0;
@@ -223,9 +233,6 @@
 .photo-select-booth--strip {
     padding: 8px 12px 12px;
     gap: 8px;
-    height: 100%;
-    max-height: calc(100dvh - 128px);
-    overflow: hidden;
 }
 
 .photo-select-booth--strip .photo-select-hint {
@@ -295,7 +302,7 @@
     }
 
     .photo-select-booth:not(.photo-select-booth--strip) .frame-preview-background {
-        max-width: 380px;
+        max-width: min(380px, 100%);
     }
 }
 
@@ -320,13 +327,15 @@
     }
 
     .frame-preview-background:not(.frame-preview-background--strip) {
+        width: min(
+            100%,
+            320px,
+            calc(100cqh * var(--preview-w, 1200) / var(--preview-h, 1600))
+        );
         max-width: min(42vh, 320px);
-        flex-shrink: 0;
+        max-height: 100cqh;
+        flex-shrink: 1;
         padding: 10px;
-    }
-
-    .photo-select-booth--strip {
-        max-height: calc(100dvh - 96px);
     }
 
     .photo-select-booth--strip .photo-select-body {
@@ -346,6 +355,7 @@
         flex: 0 0 220px;
         justify-content: center;
         min-height: 0;
+        overflow-y: auto;
     }
 
     .photo-select-hint {
@@ -353,19 +363,46 @@
     }
 }
 
-/* 낮은 세로 화면 */
+/* 낮은 세로 화면 — 카드·필름 공통으로 컨트롤 공간 확보 */
 @media (max-height: 740px) {
-    .photo-select-booth--strip {
-        max-height: calc(100dvh - 112px);
+    .photo-select-booth {
         padding: 6px 10px 10px;
         gap: 6px;
     }
 
-    .photo-select-booth--strip .photo-select-hint {
+    .photo-select-hint {
         display: none;
     }
 
-    .photo-select-booth--strip .booth-btn {
+    .photo-select-booth .filter-selector {
+        margin: 0;
+    }
+
+    .photo-select-booth .filter-selector-label {
+        margin: 0 0 6px;
+        font-size: 12px;
+    }
+
+    .photo-select-booth .filter-selector-options {
+        gap: 6px;
+    }
+
+    .photo-select-booth .filter-option {
+        min-width: 58px;
+        min-height: 0;
+        padding: 6px 8px;
+        border-radius: 10px;
+    }
+
+    .photo-select-booth .filter-option-emoji {
+        font-size: 16px;
+    }
+
+    .photo-select-booth .filter-option-name {
+        font-size: 11px;
+    }
+
+    .photo-select-booth .booth-btn {
         min-height: 40px;
         padding: 10px 14px;
         font-size: 14px;
