@@ -12,6 +12,9 @@
     max-height: 100dvh;
     min-height: 100dvh;
     overflow: hidden;
+    /* 하단 홈 인디케이터 여백 (상단은 header--kiosk가 담당) */
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    box-sizing: border-box;
 }
 
 /* 화면 전환 */

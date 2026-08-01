@@ -47,7 +47,7 @@
 .booth-shell:has(.result-booth) .booth-stage-outer {
     align-items: stretch;
     min-height: 0;
-    padding: 4px 12px 12px;
+    padding: 4px 12px max(12px, env(safe-area-inset-bottom, 0px));
 }
 
 .booth-shell:has(.photo-select-booth) .booth-stage,
@@ -63,7 +63,9 @@
 .booth-shell:has(.result-booth) .booth-stage-inner {
     flex: 1;
     min-height: 0;
-    max-height: calc(100dvh - 118px);
+    max-height: calc(
+        100dvh - 118px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)
+    );
     overflow: hidden;
     display: flex;
     flex-direction: column;
@@ -78,12 +80,18 @@
 .booth-shell:has(.photo-select-booth) .booth-subtitle,
 .booth-shell:has(.result-booth) .booth-subtitle {
     font-size: 12px;
-    margin-bottom: 8px;
+    margin-bottom: 6px;
+}
+
+.booth-shell:has(.photo-select-booth) .booth-screen-header,
+.booth-shell:has(.result-booth) .booth-screen-header {
+    padding: 0 16px 4px;
 }
 
 .booth-shell:has(.photo-select-booth) .booth-progress,
-.booth-shell:has(.result-booth) .booth-progress {
-    padding: 8px 12px 4px;
+.booth-shell:has(.result-booth) .booth-progress,
+.booth-shell:has(.camera-screen) .booth-progress {
+    padding: 6px 12px 2px;
 }
 
 /* 세로 네컷: 좁은 스테이지 폭 (편집·완성 공통) */
@@ -125,7 +133,7 @@
     align-items: center;
     justify-content: center;
     gap: 8px;
-    padding: 12px 16px 8px;
+    padding: 8px 16px 6px;
     flex-shrink: 0;
 }
 

@@ -222,7 +222,8 @@ function PhotoSelectScreen({
                 sourceWidth = cropWidth
             } else {
                 const cropHeight = img.width / slotAspect
-                sourceY = (img.height - cropHeight) / 2
+                // 얼굴이 위로 오도록 세로 크롭을 약간 상단 편향 (ResultScreen과 동일)
+                sourceY = (img.height - cropHeight) * 0.35
                 sourceHeight = cropHeight
             }
 

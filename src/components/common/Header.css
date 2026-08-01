@@ -33,7 +33,9 @@
 .header--kiosk {
     background: transparent;
     box-shadow: none;
-    padding: 10px 20px 4px;
+    /* iPad/PWA: 상태바·노치 아래로 밀리지 않게 */
+    padding: max(10px, env(safe-area-inset-top, 0px)) 20px 4px;
+    flex-shrink: 0;
 }
 
 .header--kiosk h1 {

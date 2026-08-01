@@ -292,20 +292,25 @@
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
     min-height: 0;
     flex: 0 0 auto;
-    aspect-ratio: 3 / 4; /* 카드형 인생네컷 비율 (3:4) */
+    /* 기본·카드: 프레임 슬롯 비율 (없으면 3:4) */
+    aspect-ratio: var(--frame-preview-aspect, 0.75);
     max-width: 100%;
     align-self: center;
 }
 
+.camera-preview-wrapper--card {
+    aspect-ratio: var(--frame-preview-aspect, 0.75);
+}
+
 /* 세로 네컷(strip): 슬롯에 가까운 가로 프리뷰 */
 .camera-preview-wrapper--strip {
-    aspect-ratio: var(--strip-preview-aspect, 1.5);
-    width: min(100%, calc(62vh * var(--strip-preview-aspect, 1.5)));
+    aspect-ratio: var(--frame-preview-aspect, var(--strip-preview-aspect, 1.5));
+    width: min(100%, calc(62vh * var(--frame-preview-aspect, var(--strip-preview-aspect, 1.5))));
     max-height: 62vh;
 }
 
 .camera-screen--strip-landscape .camera-preview-wrapper--strip {
-    width: min(100%, calc(70vh * var(--strip-preview-aspect, 1.5)));
+    width: min(100%, calc(70vh * var(--frame-preview-aspect, var(--strip-preview-aspect, 1.5))));
     max-height: 70vh;
 }
 
@@ -893,7 +898,7 @@
     height: auto !important;
     min-height: 0 !important;
     overflow: visible;
-    padding: 4px 0 2px !important;
+    padding: 2px 0 0 !important;
     margin: 0 !important;
 }
 
@@ -905,7 +910,7 @@
 }
 
 .camera-screen--kiosk .camera-header h2 {
-    font-size: 22px;
+    font-size: 18px;
     font-weight: 700;
     margin-bottom: 2px;
 }
@@ -923,13 +928,21 @@
     flex: 1 1 auto !important;
     width: 100%;
     height: auto !important;
-    aspect-ratio: 3 / 4;
+    aspect-ratio: var(--frame-preview-aspect, 0.75);
     align-self: center;
     border-radius: 18px;
     overflow: hidden;
     min-height: 0;
-    max-width: min(100%, calc((100dvh - 210px) * 3 / 4));
-    max-height: calc(100dvh - 210px) !important;
+    max-width: min(
+        100%,
+        calc(
+            (100dvh - 200px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px))
+                * var(--frame-preview-aspect, 0.75)
+        )
+    );
+    max-height: calc(
+        100dvh - 200px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)
+    ) !important;
     margin: 0 auto !important;
     box-shadow:
         0 0 0 1px rgba(255, 255, 255, 0.14),
@@ -979,17 +992,19 @@
     }
 
     .camera-screen--kiosk .camera-preview-wrapper {
-        max-height: calc(100dvh - 190px) !important;
+        max-height: calc(
+            100dvh - 180px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)
+        ) !important;
         border-radius: 14px;
     }
 }
 
-/* strip 가로 프리뷰: 미디어쿼리/키오스크의 3:4 덮어쓰기 */
+/* strip 가로 프리뷰: 미디어쿼리/키오스크의 카드 비율 덮어쓰기 */
 .camera-screen--strip .camera-preview-wrapper.camera-preview-wrapper--strip,
 .camera-screen--kiosk.camera-screen--strip .camera-preview-wrapper.camera-preview-wrapper--strip {
-    aspect-ratio: var(--strip-preview-aspect, 1.5) !important;
-    width: min(100%, calc(62vh * var(--strip-preview-aspect, 1.5))) !important;
-    max-width: min(100%, calc(62vh * var(--strip-preview-aspect, 1.5))) !important;
+    aspect-ratio: var(--frame-preview-aspect, var(--strip-preview-aspect, 1.5)) !important;
+    width: min(100%, calc(62vh * var(--frame-preview-aspect, var(--strip-preview-aspect, 1.5)))) !important;
+    max-width: min(100%, calc(62vh * var(--frame-preview-aspect, var(--strip-preview-aspect, 1.5)))) !important;
     max-height: 62vh !important;
     height: auto !important;
     flex: 0 0 auto !important;
@@ -1034,8 +1049,8 @@
 
 .camera-screen--strip-landscape .camera-preview-wrapper.camera-preview-wrapper--strip,
 .camera-screen--kiosk.camera-screen--strip-landscape .camera-preview-wrapper.camera-preview-wrapper--strip {
-    width: min(96vw, calc((100dvh - 168px) * var(--strip-preview-aspect, 1.5))) !important;
-    max-width: min(96vw, calc((100dvh - 168px) * var(--strip-preview-aspect, 1.5))) !important;
+    width: min(96vw, calc((100dvh - 168px) * var(--frame-preview-aspect, var(--strip-preview-aspect, 1.5)))) !important;
+    max-width: min(96vw, calc((100dvh - 168px) * var(--frame-preview-aspect, var(--strip-preview-aspect, 1.5)))) !important;
     max-height: calc(100dvh - 168px) !important;
     margin: 0 auto !important;
     border-radius: 14px !important;
@@ -1069,8 +1084,8 @@
 
     .camera-screen--strip-landscape .camera-preview-wrapper.camera-preview-wrapper--strip,
     .camera-screen--kiosk.camera-screen--strip-landscape .camera-preview-wrapper.camera-preview-wrapper--strip {
-        width: min(98vw, calc((100dvh - 132px) * var(--strip-preview-aspect, 1.5))) !important;
-        max-width: min(98vw, calc((100dvh - 132px) * var(--strip-preview-aspect, 1.5))) !important;
+        width: min(98vw, calc((100dvh - 132px) * var(--frame-preview-aspect, var(--strip-preview-aspect, 1.5)))) !important;
+        max-width: min(98vw, calc((100dvh - 132px) * var(--frame-preview-aspect, var(--strip-preview-aspect, 1.5)))) !important;
         max-height: calc(100dvh - 132px) !important;
         border-radius: 10px !important;
     }

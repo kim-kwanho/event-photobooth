@@ -49,14 +49,17 @@ function getIsLandscape() {
     return window.innerWidth >= window.innerHeight
 }
 
-function getStripSlotAspect(selectedSize, selectedFrame) {
+function getFrameSlotAspect(selectedSize, selectedFrame) {
     const slot = selectedFrame?.layout?.slots?.[0]
     if (slot && selectedSize?.width && selectedSize?.height) {
         const w = slot.width * selectedSize.width
         const h = slot.height * selectedSize.height
         if (w > 0 && h > 0) return w / h
     }
-    return 3 / 2
+    if (selectedFrame?.sizeId === 'strip' || (selectedSize && selectedSize.width / selectedSize.height < 0.5)) {
+        return 3 / 2
+    }
+    return 0.75
 }
 
 function CameraScreen({
@@ -87,7 +90,7 @@ function CameraScreen({
         : selectedFrame?.sizeId === 'strip'
     const needsLandscape = Boolean(isStripSize)
     const landscapeReady = !needsLandscape || isLandscape
-    const stripSlotAspect = getStripSlotAspect(selectedSize, selectedFrame)
+    const frameSlotAspect = getFrameSlotAspect(selectedSize, selectedFrame)
 
     const captureGuide = selectedFrame?.layout?.captureGuide
     const guideMode = captureGuide?.mode === 'images' ? 'images' : 'overlaySlot'
@@ -224,7 +227,7 @@ function CameraScreen({
                 ? {
                     video: {
                         facingMode: 'user',
-                        aspectRatio: { ideal: needsLandscape ? stripSlotAspect : 0.75 },
+                        aspectRatio: { ideal: frameSlotAspect },
                     },
                     audio: false,
                 }
@@ -575,9 +578,9 @@ function CameraScreen({
                 <div
                     className={[
                         'camera-preview-wrapper',
-                        needsLandscape ? 'camera-preview-wrapper--strip' : '',
+                        needsLandscape ? 'camera-preview-wrapper--strip' : 'camera-preview-wrapper--card',
                     ].filter(Boolean).join(' ')}
-                    style={needsLandscape ? { '--strip-preview-aspect': stripSlotAspect } : undefined}
+                    style={{ '--frame-preview-aspect': frameSlotAspect }}
                 >
                     {/* Safari: transform은 video가 아닌 wrapper에 적용해야 object-fit이 유지됨 */}
                     <div
