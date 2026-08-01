@@ -53,6 +53,7 @@ function ResultScreen({ frame, selectedPhotos, photoTransforms, photoFilter = 'n
 
     const renderWidth = outputSize?.width ?? 1200
     const renderHeight = outputSize?.height ?? 1600
+    const isStrip = renderWidth / renderHeight < 0.5
 
     const handleAutoSave = async () => {
         const canvas = canvasRef.current
@@ -117,16 +118,15 @@ function ResultScreen({ frame, selectedPhotos, photoTransforms, photoFilter = 'n
         if (!canvas) return
 
         const devicePixelRatio = window.devicePixelRatio || 2
-        const displayWidth = 400
-        const displayHeight = Math.round(displayWidth * (renderHeight / renderWidth))
 
         canvas.width = renderWidth * devicePixelRatio
         canvas.height = renderHeight * devicePixelRatio
-        // 레이아웃 높이는 CSS(max-height)가 담당 — 인라인 고정 높이로 버튼을 밀어내지 않음
-        canvas.style.width = `${displayWidth}px`
-        canvas.style.height = `${displayHeight}px`
+        // 표시 크기는 CSS(max-width/max-height + aspect-ratio)가 담당 — 비트맵 intrinsic 크기로 잘리지 않게
+        canvas.style.width = 'auto'
+        canvas.style.height = 'auto'
         canvas.style.maxWidth = '100%'
         canvas.style.maxHeight = '100%'
+        canvas.style.aspectRatio = `${renderWidth} / ${renderHeight}`
         canvas.style.objectFit = 'contain'
 
         const ctx = canvas.getContext('2d')
@@ -300,7 +300,14 @@ function ResultScreen({ frame, selectedPhotos, photoTransforms, photoFilter = 'n
 
 
     return (
-        <div className={`result-booth${kioskMode ? ' result-booth--kiosk' : ''}`}>
+        <div
+            className={`result-booth${kioskMode ? ' result-booth--kiosk' : ''}${isStrip ? ' result-booth--strip' : ''}`}
+            style={{
+                '--result-w': renderWidth,
+                '--result-h': renderHeight,
+                '--result-ar': renderWidth / renderHeight,
+            }}
+        >
             <div className="result-hero-grid">
                 <div className="result-image">
                     <canvas ref={canvasRef} id="resultCanvas" />

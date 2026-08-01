@@ -41,14 +41,29 @@
     align-items: center;
     justify-content: center;
     overflow: hidden;
+    container-type: size;
 }
 
 .result-booth .result-image canvas {
+    display: block;
     max-width: 100%;
     max-height: 100%;
-    width: auto !important;
-    height: auto !important;
+    width: auto;
+    height: auto;
+    aspect-ratio: var(--result-w, 1200) / var(--result-h, 1600);
     object-fit: contain;
+    /* flex 기본 min-size(intrinsic) 때문에 긴 strip이 안 줄어드는 것 방지 */
+    min-width: 0;
+    min-height: 0;
+}
+
+/* 필름형: 가용 높이에 맞춰 비율 유지 (PhotoSelect strip과 동일 전략) */
+.result-booth--strip .result-image canvas {
+    width: min(100%, calc(100cqh * var(--result-ar, 0.327)));
+    height: auto;
+    max-width: 100%;
+    max-height: 100cqh;
+    aspect-ratio: var(--result-w, 658) / var(--result-h, 2009);
 }
 
 .result-qr-hero {

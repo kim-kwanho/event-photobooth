@@ -86,17 +86,20 @@
     padding: 8px 12px 4px;
 }
 
-/* 세로 네컷: 좁은 스테이지 폭 */
-.booth-shell:has(.photo-select-booth--strip) {
+/* 세로 네컷: 좁은 스테이지 폭 (편집·완성 공통) */
+.booth-shell:has(.photo-select-booth--strip),
+.booth-shell:has(.result-booth--strip) {
     --booth-stage-max-w: 300px;
 }
 
-.booth-shell:has(.photo-select-booth--strip) .booth-stage {
+.booth-shell:has(.photo-select-booth--strip) .booth-stage,
+.booth-shell:has(.result-booth--strip) .booth-stage {
     width: min(100%, var(--booth-stage-max-w));
 }
 
 @media (orientation: landscape) {
-    .booth-shell:has(.photo-select-booth--strip) {
+    .booth-shell:has(.photo-select-booth--strip),
+    .booth-shell:has(.result-booth--strip) {
         --booth-stage-max-w: min(920px, 96vw);
     }
 
