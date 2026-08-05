@@ -22,7 +22,7 @@ function ResultViewPage() {
                 const result = await getPhotoFromServer(hash)
                 setPhotoData({
                     id: result.id,
-                    data: result.data,
+                    data: result.data || result.imageUrl,
                     timestamp: result.timestamp,
                 })
             } catch (err) {
@@ -44,7 +44,21 @@ function ResultViewPage() {
         const filename = createSaveFilename(`${eventName}_${photoData.id}`)
 
         try {
-            const result = await saveImage({ dataUrl: photoData.data, filename, eventName })
+            let blob
+            if (String(photoData.data).startsWith('data:')) {
+                blob = undefined
+            } else {
+                const response = await fetch(photoData.data)
+                if (!response.ok) throw new Error('이미지 다운로드 실패')
+                blob = await response.blob()
+            }
+
+            const result = await saveImage({
+                blob,
+                dataUrl: blob ? undefined : photoData.data,
+                filename,
+                eventName,
+            })
 
             if (result === 'manual') {
                 setSaveModalOpen(true)
@@ -82,7 +96,18 @@ function ResultViewPage() {
             <div className="result-view-container">
                 <h1>{eventName}</h1>
                 <div className="result-view-image">
-                    <img src={photoData.data} alt={eventName} />
+                    <img
+                        src={photoData.data}
+                        alt={eventName}
+                        onError={(event) => {
+                            if (event.currentTarget.dataset.fallback === '1') return
+                            event.currentTarget.dataset.fallback = '1'
+                            event.currentTarget.src = String(photoData.data).replace(
+                                /photo\.jpg(\?.*)?$/,
+                                'photo.png$1'
+                            )
+                        }}
+                    />
                 </div>
                 <div className="result-view-controls">
                     <button className="btn btn-primary" onClick={handleDownload}>

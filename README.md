@@ -194,10 +194,17 @@ Canvas 렌더(레거시): `christmas` · `default` 테마 · [`src/lib/canvasFra
 
 | 버킷 | 용도 |
 |------|------|
-| `photos` | 완성 이미지 (QR) |
+| `photos` | 완성 이미지 (QR) — `{hash}/photo.jpg` · `meta.json` |
 | `themes` | overlay PNG · `{themeId}/frames.json` |
 
 RLS: Dashboard → SQL Editor → [`supabase/storage-policies.sql`](supabase/storage-policies.sql) (Public 버킷 권장).
+
+### 사진 조회 · 결과 페이지
+
+- **Public URL 우선:** `/result/:id`·Admin 갤러리는 Storage public URL로 표시합니다. base64 다운로드를 생략해 모바일에서 더 안정적입니다.
+- **폴백:** `photo.jpg` 로드 실패 시 `photo.png`로 재시도합니다.
+- **저장:** 결과 페이지 저장은 URL이면 fetch→blob, data URL이면 기존 경로를 사용합니다.
+- **Admin 목록:** 폴더 list 후 `meta.json`만 제한 동시성(6)으로 읽고, 타임스탬프는 meta 또는 해시(`_밀리초_`)에서 복원합니다. 갤러리·미리보기는 `object-fit: contain`으로 카드형·필름형 모두 잘리지 않게 표시합니다.
 
 - **Admin:** `/admin` → `VITE_ADMIN_PIN` → 갤러리 확인·삭제·(선택) 인쇄. 프레임 수정은 `frames.json` + overlay 업로드.
 - **Vercel:** push → `VITE_*` 환경 변수 → `VITE_APP_URL` = 배포 도메인. `event.json`·`frames.json` 변경은 **재배포** 필요.
@@ -255,7 +262,9 @@ supabase/storage-policies.sql
 | 스프로킷 구멍 색 이상 | 구멍 투명 export → Figma에서 **흰색 Fill** |
 | 세로 네컷 촬영 불가 | 화면을 **가로**로 회전 |
 | 프레임 변경 안 됨 | `framesPath` · `?v=` 캐시 · hard refresh |
-| QR 404 | `VITE_APP_URL` · `photos` Public |
+| QR 404 · 결과 이미지 안 보임 | `VITE_APP_URL` · `photos` Public · `{hash}/photo.jpg`(또는 `.png`) |
+| Admin 갤러리 느림·빈 목록 | Storage list 권한 · `meta.json` · 네트워크 탭에서 list/download 실패 여부 |
+| Admin에서 필름형 잘림 | 갤러리는 `contain` 표시 — hard refresh 후 확인 |
 | Admin / 카메라 | PIN · HTTPS 또는 localhost · 권한 |
 
 ---

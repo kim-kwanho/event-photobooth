@@ -50,24 +50,54 @@ const compressImage = (base64Data, maxWidth = 2000, maxHeight = 2000, quality = 
     })
 }
 
+const META_CONCURRENCY = 6
+
 function getPhotoPublicUrl(supabase, hash, imageName) {
     const { data } = supabase.storage.from(PHOTOS_BUCKET).getPublicUrl(`${hash}/${imageName}`)
     return data.publicUrl
+}
+
+async function listStoragePage(supabase, path, options) {
+    const { data, error } = await supabase.storage.from(PHOTOS_BUCKET).list(path, options)
+    if (error) throw error
+    return data || []
 }
 
 async function listPhotoFolderNames(supabase) {
     const folders = []
     let offset = 0
 
-    while (true) {
-        const { data, error } = await supabase.storage.from(PHOTOS_BUCKET).list('', {
-            limit: LIST_PAGE_SIZE,
-            offset,
-            sortBy: { column: 'created_at', order: 'desc' },
-        })
+    // 폴더는 created_at이 null이라 name 정렬이 안정적. 실패 시 정렬 없이 재시도.
+    const sortOptions = [
+        { column: 'name', order: 'asc' },
+        null,
+    ]
 
-        if (error) throw error
-        if (!data?.length) break
+    let sortBy = sortOptions[0]
+    let sortIndex = 0
+
+    while (true) {
+        let data
+        try {
+            const options = {
+                limit: LIST_PAGE_SIZE,
+                offset,
+            }
+            if (sortBy) options.sortBy = sortBy
+            data = await listStoragePage(supabase, '', options)
+        } catch (error) {
+            if (sortIndex < sortOptions.length - 1) {
+                sortIndex += 1
+                sortBy = sortOptions[sortIndex]
+                offset = 0
+                folders.length = 0
+                console.warn('Storage list 정렬 실패, 재시도:', sortBy || 'unsorted', error)
+                continue
+            }
+            throw error
+        }
+
+        if (!data.length) break
 
         for (const item of data) {
             if (item.name.startsWith('.')) continue
@@ -84,17 +114,43 @@ async function listPhotoFolderNames(supabase) {
     return folders
 }
 
-async function resolveImageFileName(supabase, hash) {
-    const { data: files, error } = await supabase.storage.from(PHOTOS_BUCKET).list(hash, {
-        limit: 20,
-    })
+async function mapWithConcurrency(items, concurrency, mapper) {
+    const results = new Array(items.length)
+    let nextIndex = 0
 
-    if (error) throw error
+    async function worker() {
+        while (nextIndex < items.length) {
+            const index = nextIndex
+            nextIndex += 1
+            results[index] = await mapper(items[index], index)
+        }
+    }
 
-    const names = (files || []).map((file) => file.name)
-    if (names.includes('photo.jpg')) return 'photo.jpg'
-    if (names.includes('photo.png')) return 'photo.png'
-    return null
+    const workers = Array.from({ length: Math.min(concurrency, items.length) }, () => worker())
+    await Promise.all(workers)
+    return results
+}
+
+async function loadPhotoMetadata(supabase, hash) {
+    const { data: metaData, error: metaError } = await supabase.storage
+        .from(PHOTOS_BUCKET)
+        .download(`${hash}/meta.json`)
+
+    if (metaError || !metaData) return {}
+
+    try {
+        return JSON.parse(await metaData.text())
+    } catch {
+        return {}
+    }
+}
+
+function timestampFromHash(hash) {
+    const match = String(hash).match(/_(\d{11,})_/)
+    if (!match) return null
+    const ms = Number(match[1])
+    if (!Number.isFinite(ms)) return null
+    return new Date(ms).toISOString()
 }
 
 // 결과물 저장 (Supabase Storage 사용)
@@ -172,68 +228,38 @@ export async function savePhotoToServer(photoData) {
     }
 }
 
-// 결과물 조회
+// 결과물 조회 — Public URL 우선 (다운로드·base64 변환은 생략해 모바일에서 안정적으로 표시)
 export async function getPhotoFromServer(hash) {
     const supabase = assertSupabase()
     try {
-        // 1. 메타데이터 다운로드
-        const { data: metaData, error: metaError } = await supabase.storage
-            .from('photos')
-            .download(`${hash}/meta.json`)
+        const metadata = await loadPhotoMetadata(supabase, hash)
+        const imageName = 'photo.jpg'
+        const imageUrl = getPhotoPublicUrl(supabase, hash, imageName)
 
-        if (metaError) throw new Error('메타데이터를 찾을 수 없습니다.')
+        const timestamp =
+            metadata.timestamp ||
+            metadata.createdAt ||
+            timestampFromHash(hash)
 
-        const metaText = await metaData.text()
-        const metadata = JSON.parse(metaText)
-
-        // 2. 이미지 Public URL 가져오기 (JPEG 또는 PNG 모두 시도)
-        const { data: publicUrlData } = supabase.storage
-            .from('photos')
-            .getPublicUrl(`${hash}/photo.jpg`)
-
-        // 3. 이미지 데이터(Base64)가 필요한 경우 다운로드해서 변환 (선택적)
-        // 여기서는 URL만 반환하거나, 기존 로직 호환성을 위해 Base64로 변환할 수도 있음
-        // 기존 컴포넌트 호환성을 위해 Base64로 변환해서 반환
-        
-        // JPEG 먼저 시도, 없으면 PNG 시도
-        let imageData, imageError, imageType = 'jpeg'
-        const jpegResult = await supabase.storage
-            .from('photos')
-            .download(`${hash}/photo.jpg`)
-        
-        if (jpegResult.error) {
-            // PNG로 재시도 (기존 파일 호환성)
-            const pngResult = await supabase.storage
-                .from('photos')
-                .download(`${hash}/photo.png`)
-            imageData = pngResult.data
-            imageError = pngResult.error
-            imageType = 'png'
-        } else {
-            imageData = jpegResult.data
-            imageError = null
-            imageType = 'jpeg'
+        if (!metadata.id && !timestamp) {
+            // meta도 없고 해시 패턴도 아니면 폴더 존재 여부를 list로 확인
+            const files = await listStoragePage(supabase, hash, { limit: 5 })
+            const names = files.map((file) => file.name)
+            if (!names.includes('photo.jpg') && !names.includes('photo.png')) {
+                throw new Error('이미지를 찾을 수 없습니다.')
+            }
         }
-            
-        if (imageError) throw new Error('이미지를 찾을 수 없습니다.')
-
-        const imageBuffer = await imageData.arrayBuffer()
-        const base64 = btoa(
-            new Uint8Array(imageBuffer)
-                .reduce((data, byte) => data + String.fromCharCode(byte), '')
-        )
-        const base64Image = `data:image/${imageType};base64,${base64}`
 
         return {
             success: true,
-            id: metadata.id,
-            hash: metadata.hash,
-            data: base64Image,
-            timestamp: metadata.timestamp,
-            createdAt: metadata.createdAt,
-            imageUrl: publicUrlData.publicUrl // 추가 필드
+            id: metadata.id || hash,
+            hash: metadata.hash || hash,
+            data: imageUrl,
+            timestamp,
+            createdAt: metadata.createdAt || timestamp,
+            imageUrl,
+            imageName,
         }
-
     } catch (error) {
         console.error('Supabase 조회 실패:', error)
         throw error
@@ -246,37 +272,31 @@ export async function getAllPhotosFromServer() {
 
     const folderNames = await listPhotoFolderNames(supabase)
 
-    const photos = await Promise.all(
-        folderNames.map(async (hash) => {
-            try {
-                const imageName = await resolveImageFileName(supabase, hash)
-                if (!imageName) return null
+    // 폴더별 list + download 동시 폭주를 피하고, meta만 제한 동시성으로 조회
+    const photos = await mapWithConcurrency(folderNames, META_CONCURRENCY, async (hash) => {
+        try {
+            const metadata = await loadPhotoMetadata(supabase, hash)
+            const imageName = 'photo.jpg'
+            const imageUrl = getPhotoPublicUrl(supabase, hash, imageName)
+            const timestamp =
+                metadata.timestamp ||
+                metadata.createdAt ||
+                timestampFromHash(hash)
 
-                let metadata = {}
-                const { data: metaData, error: metaError } = await supabase.storage
-                    .from(PHOTOS_BUCKET)
-                    .download(`${hash}/meta.json`)
-
-                if (!metaError && metaData) {
-                    const metaText = await metaData.text()
-                    metadata = JSON.parse(metaText)
-                }
-
-                return {
-                    id: metadata.id || hash,
-                    hash,
-                    data: getPhotoPublicUrl(supabase, hash, imageName),
-                    imageUrl: getPhotoPublicUrl(supabase, hash, imageName),
-                    imageName,
-                    timestamp: metadata.timestamp || metadata.createdAt,
-                    createdAt: metadata.createdAt || metadata.timestamp,
-                }
-            } catch (e) {
-                console.warn(`폴더 ${hash} 처리 실패:`, e)
-                return null
+            return {
+                id: metadata.id || hash,
+                hash,
+                data: imageUrl,
+                imageUrl,
+                imageName,
+                timestamp,
+                createdAt: metadata.createdAt || timestamp,
             }
-        })
-    )
+        } catch (e) {
+            console.warn(`폴더 ${hash} 처리 실패:`, e)
+            return null
+        }
+    })
 
     return photos
         .filter((photo) => photo !== null)
