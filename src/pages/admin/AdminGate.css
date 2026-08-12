@@ -50,10 +50,24 @@
     border-color: #667eea;
 }
 
-.admin-gate-error {
-    margin: 0;
-    color: #dc3545;
-    font-size: 13px;
+.admin-gate-input--shake {
+    animation: admin-gate-shake 0.42s ease;
+    border-color: #f04438;
+}
+
+@keyframes admin-gate-shake {
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+    20%,
+    60% {
+        transform: translateX(-6px);
+    }
+    40%,
+    80% {
+        transform: translateX(6px);
+    }
 }
 
 .admin-gate-card .btn {

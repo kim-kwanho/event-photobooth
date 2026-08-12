@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useConfig } from '../../config/ConfigContext'
+import Toast from '../../components/common/Toast'
 import './AdminGate.css'
 
 const AUTH_KEY_PREFIX = 'photobooth_admin_auth_'
@@ -12,7 +13,8 @@ function AdminGate({ children }) {
 
     const [authed, setAuthed] = useState(false)
     const [pinInput, setPinInput] = useState('')
-    const [error, setError] = useState('')
+    const [toast, setToast] = useState('')
+    const [shakeInput, setShakeInput] = useState(false)
 
     const pinRequired = Boolean(adminPin && adminPin.trim())
 
@@ -29,9 +31,12 @@ function AdminGate({ children }) {
         if (pinInput === adminPin) {
             sessionStorage.setItem(authKey, '1')
             setAuthed(true)
-            setError('')
+            setToast('')
         } else {
-            setError('비밀번호가 올바르지 않습니다.')
+            setToast('비밀번호가 올바르지 않습니다.')
+            setPinInput('')
+            setShakeInput(true)
+            window.setTimeout(() => setShakeInput(false), 450)
         }
     }
 
@@ -41,6 +46,9 @@ function AdminGate({ children }) {
 
     return (
         <div className="admin-gate-page">
+            {toast && (
+                <Toast message={toast} onClose={() => setToast('')} />
+            )}
             <div className="admin-gate-card">
                 <h1>관리자 인증</h1>
                 <p>관리 페이지에 접근하려면 비밀번호를 입력하세요.</p>
@@ -51,9 +59,10 @@ function AdminGate({ children }) {
                         placeholder="관리자 PIN"
                         value={pinInput}
                         onChange={(e) => setPinInput(e.target.value)}
+                        className={shakeInput ? 'admin-gate-input--shake' : undefined}
+                        aria-invalid={Boolean(toast)}
                         autoFocus
                     />
-                    {error && <p className="admin-gate-error">{error}</p>}
                     <button type="submit" className="btn btn-primary">
                         입장
                     </button>
