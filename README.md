@@ -80,7 +80,8 @@ npm run dev:all
 
 ## 행사 설정
 
-**`public/config/event.json`** — 행사마다 가장 자주 수정합니다.
+**`public/config/event.json`** — 행사마다 가장 자주 수정합니다.  
+로드 시 `event` · `theme` · `camera` · `output` 등 최소 스키마를 검증하며, 치명적 오류는 시작 화면에서 안내합니다.
 
 | 섹션 | 역할 |
 |------|------|

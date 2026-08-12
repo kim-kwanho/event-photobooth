@@ -1,4 +1,5 @@
 import { defaultEventConfig } from './defaults'
+import { validateEventConfig } from './validateEventConfig'
 import { loadThemeFrames } from '../lib/loadFrames'
 import { preloadFrameAssets } from '../lib/canvasFrame'
 
@@ -26,8 +27,20 @@ export async function loadEventConfig() {
         }
         const remote = await response.json()
         config = deepMerge(defaultEventConfig, remote)
+        const { warnings } = validateEventConfig(config)
+        for (const warning of warnings) {
+            console.warn(`[event.json] ${warning}`)
+        }
     } catch (error) {
+        // 스키마 오류는 기본값으로 덮어쓰지 않고 화면에 표시
+        if (error instanceof Error && error.message.startsWith('event.json 설정 오류')) {
+            throw error
+        }
         console.warn('event.json 로드 실패, 기본 설정 사용:', error)
+        const { warnings } = validateEventConfig(config)
+        for (const warning of warnings) {
+            console.warn(`[event.json] ${warning}`)
+        }
     }
 
     const { frames, sizes } = await loadThemeFrames(config.theme)
